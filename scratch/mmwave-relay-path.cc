@@ -56,6 +56,9 @@ using namespace ns3;
  *
  */
 
+/*
+ * Define a logging component "MmWaveTwoHopRelaying".
+ */
 NS_LOG_COMPONENT_DEFINE ("MmWaveTwoHopRelaying");
 
 /*
@@ -189,11 +192,14 @@ PrintGnuplottableEnbListToFile (std::string filename)
 int
 main (int argc, char *argv[])
 {
-  LogComponentEnableAll (LOG_PREFIX_TIME);
-  LogComponentEnableAll (LOG_PREFIX_FUNC);
-  LogComponentEnableAll (LOG_PREFIX_NODE);
+  /*
+   * Setup logging
+   */	
+  LogComponentEnableAll (LOG_PREFIX_TIME);    // Prefix all trace prints with simulation time.
+  LogComponentEnableAll (LOG_PREFIX_FUNC);    // Prefix all trace prints with function.
+  LogComponentEnableAll (LOG_PREFIX_NODE);    // Prefix all trace prints with simulation node.
   // LogComponentEnable("EpcEnbApplication", LOG_LEVEL_LOGIC);
-  LogComponentEnable("EpcIabApplication", LOG_LEVEL_LOGIC);
+  LogComponentEnable("EpcIabApplication", LOG_LEVEL_LOGIC);    // Enable EpcIabApplication logging component with LOG_LOGIC (control flow tracing with functions) and above.
   // LogComponentEnable("EpcSgwPgwApplication", LOG_LEVEL_LOGIC);
   // LogComponentEnable("EpcMmeApplication", LOG_LEVEL_LOGIC);
   // LogComponentEnable("EpcUeNas", LOG_LEVEL_LOGIC);
@@ -272,9 +278,10 @@ main (int argc, char *argv[])
   // parse again so you can override default values from the command line
   cmd.Parse(argc, argv);
 
+  // Get the pointer to the pgw node
   Ptr<Node> pgw = epcHelper->GetPgwNode ();
 
-   // Create a single RemoteHost
+  // Create a single RemoteHost
   NodeContainer remoteHostContainer;
   remoteHostContainer.Create (1);
   Ptr<Node> remoteHost = remoteHostContainer.Get (0);
@@ -303,7 +310,7 @@ main (int argc, char *argv[])
   double streetWidth = 10; // m
   double buildingWidthX = 50; // m
   double buildingWidthY = 50; // m
-  double buildingHeight = 10; // m
+  double buildingHeight = 30; // m
   std::vector< Ptr<Building> > buildingVector; // in case you need to access the buildings later
 
   for (int rowIndex = 0; rowIndex < numBuildingsRow; ++rowIndex)
@@ -332,26 +339,42 @@ main (int argc, char *argv[])
     }
   }
 
-
+  /*
+   *  Positioning of the nodes in the topology:
+   *  
+   *  Ue1    Iab2    Ue2
+   *
+   *  Iab1    gnb    Iab4
+   *
+   *  Ue3    Iab3    Ue4
+   *
+   *  
+   *
+   */
   double xMax = numBuildingsRow*(buildingWidthX + streetWidth) - streetWidth;
   double yMax = numBuildingsColumn*(buildingWidthY + streetWidth) - streetWidth;
   double totalArea = xMax * yMax;
 
-  double gnbHeight = buildingHeight + 5;
+  double gnbHeight = buildingHeight - 10;
 
   double xWired = numBuildingsRow*(buildingWidthX+streetWidth)/2 - streetWidth/2;
   double yWired = numBuildingsColumn*(buildingWidthY+streetWidth)/2 - streetWidth/2;
 
-  double xIab1 = numBuildingsRow*(buildingWidthX+streetWidth)/4 - streetWidth/2;
-  double xIab2 = 3*numBuildingsRow*(buildingWidthX+streetWidth)/4 - streetWidth/2;
-  double yIab1 = numBuildingsColumn*(buildingWidthY+streetWidth)/4 - streetWidth/2 ;
-  double yIab2 = 3*numBuildingsColumn*(buildingWidthY+streetWidth)/4 - streetWidth/2;
+  double xUe1 = numBuildingsRow*(buildingWidthX+streetWidth)/4 - streetWidth/2;
+  double xUe2 = 3*numBuildingsRow*(buildingWidthX+streetWidth)/4 - streetWidth/2;
+  double yUe1 = numBuildingsColumn*(buildingWidthY+streetWidth)/4 - streetWidth/2 ;
+  double yUe2 = 3*numBuildingsColumn*(buildingWidthY+streetWidth)/4 - streetWidth/2;
 
-  Vector posIab1 = Vector(xIab1, yIab1, gnbHeight);
-  Vector posIab2 = Vector(xIab1, yIab2, gnbHeight);
-  Vector posIab3 = Vector(xIab2, yIab1, gnbHeight);
-  Vector posIab4 = Vector(xIab2, yIab2, gnbHeight);
+  Vector posUe1 = Vector(xUe1, yUe1, gnbHeight);
+  Vector posUe2 = Vector(xUe1, yUe2, gnbHeight);
+  Vector posUe3 = Vector(xUe2, yUe1, gnbHeight);
+  Vector posUe4 = Vector(xUe2, yUe2, gnbHeight);
   Vector posWired = Vector(xWired, yWired, gnbHeight);
+  Vector posIab1 = vector(xWired, yUe1, gnbHeight);
+  Vector posIab2 = vector(xUe1, yWired, gnbHeight);
+  Vector posIab3 = vector(xUe2, yWired, gnbHeight);
+  Vector posIab4 = vector(xWired, yUe2, gnbHeight);
+
 
   NS_LOG_UNCOND("wired " << posWired << 
                 " iab1 " << posIab1 <<
@@ -361,13 +384,17 @@ main (int argc, char *argv[])
                 " totalArea " << totalArea
                 );
 
+  /*
+   *  Generating nodes in the topology:
+   *  1 wired gnb as source, 1 Iab as relay, 1 Ue as destination. 
+   */
   NodeContainer ueNodes;
   NodeContainer enbNodes;
   NodeContainer iabNodes;
  
   enbNodes.Create(1);
   iabNodes.Create(numRelays);
-  ueNodes.Create(40);
+  ueNodes.Create(1);
 
   // Install Mobility Model
   Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
@@ -391,21 +418,13 @@ main (int argc, char *argv[])
   }
 
   MobilityHelper uemobility;
-  Ptr<OutdoorPositionAllocator> uePosAlloc = CreateObject<OutdoorPositionAllocator>();
-  Ptr<UniformRandomVariable> xUe = CreateObject<UniformRandomVariable>();
-  xUe->SetAttribute("Min", DoubleValue(0));
-  xUe->SetAttribute("Max", DoubleValue(xMax));
-  uePosAlloc->SetX(xUe);
-  Ptr<UniformRandomVariable> yUe = CreateObject<UniformRandomVariable>();
-  yUe->SetAttribute("Min", DoubleValue(0));
-  yUe->SetAttribute("Max", DoubleValue(yMax));
-  uePosAlloc->SetY(yUe);
-  Ptr<UniformRandomVariable> zUe = CreateObject<UniformRandomVariable>();
-  zUe->SetAttribute("Min", DoubleValue(1.6));
-  zUe->SetAttribute("Max", DoubleValue(1.75));
-  uePosAlloc->SetZ(zUe);
-  uemobility.SetPositionAllocator (uePosAlloc);
+  Ptr<OutdoorPositionAllocator> uePosAlloc = CreateObject<ListPositionAllocator>();
+  uePosAlloc->Add (posUe1);
+  uePosAlloc->Add (posUe2);
+  uePosAlloc->Add (posUe3);
+  uePosAlloc->Add (posUe4);
   uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+  uemobility.SetPositionAllocator (uePosAlloc);
   uemobility.Install (ueNodes);
   
   BuildingsHelper::Install (enbNodes);
