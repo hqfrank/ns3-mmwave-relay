@@ -222,7 +222,7 @@ main (int argc, char *argv[])
   unsigned run = 0;
   bool rlcAm = false;
   uint32_t numRelays = 1;
-  uint32_t rlcBufSize = 10;
+  uint32_t rlcBufSize = 100;
   uint32_t interPacketInterval = 200;
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
@@ -370,10 +370,10 @@ main (int argc, char *argv[])
   Vector posUe3 = Vector(xUe2, yUe1, gnbHeight);
   Vector posUe4 = Vector(xUe2, yUe2, gnbHeight);
   Vector posWired = Vector(xWired, yWired, gnbHeight);
-  Vector posIab1 = vector(xWired, yUe1, gnbHeight);
-  Vector posIab2 = vector(xUe1, yWired, gnbHeight);
-  Vector posIab3 = vector(xUe2, yWired, gnbHeight);
-  Vector posIab4 = vector(xWired, yUe2, gnbHeight);
+  Vector posIab1 = Vector(xWired, yUe1, gnbHeight);
+  Vector posIab2 = Vector(xUe1, yWired, gnbHeight);
+  Vector posIab3 = Vector(xUe2, yWired, gnbHeight);
+  Vector posIab4 = Vector(xWired, yUe2, gnbHeight);
 
 
   NS_LOG_UNCOND("wired " << posWired << 
@@ -418,7 +418,7 @@ main (int argc, char *argv[])
   }
 
   MobilityHelper uemobility;
-  Ptr<OutdoorPositionAllocator> uePosAlloc = CreateObject<ListPositionAllocator>();
+  Ptr<ListPositionAllocator> uePosAlloc = CreateObject<ListPositionAllocator>();
   uePosAlloc->Add (posUe1);
   uePosAlloc->Add (posUe2);
   uePosAlloc->Add (posUe3);
@@ -444,6 +444,9 @@ main (int argc, char *argv[])
   }
   NetDeviceContainer uemmWaveDevs = mmwaveHelper->InstallUeDevice (ueNodes);
 
+  /*
+   *  Print nodes information to file.
+   */
   PrintGnuplottableBuildingListToFile("buildings.txt");// fileName.str ());
   PrintGnuplottableEnbListToFile("enbs.txt");
   PrintGnuplottableUeListToFile("ues.txt");
