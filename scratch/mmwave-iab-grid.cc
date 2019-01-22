@@ -461,6 +461,10 @@ main (int argc, char *argv[])
   config.ConfigureAttributes();*/
 
   Simulator::Destroy();
+
+  // uint32_t numPktRx = 0;
+  // DynamicCast<UdpServer>(serverApps.Get(0))
+
   return 0;
 }
 

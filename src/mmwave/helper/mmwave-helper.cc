@@ -620,7 +620,7 @@ MmWaveHelper::InstallSingleIabDevice(Ptr<Node> n)
 	Ptr<MmWaveUeMac> mac = CreateObject<MmWaveUeMac> ();
 
 	/* Antenna model */
-	// TODOIAB antenna factory for IAB?
+	// IAB antenna factory for IAB?
 	Ptr<AntennaModel> antenna = (m_ueAntennaModelFactory.Create ())->GetObject<AntennaModel> ();
 	NS_ASSERT_MSG (antenna, "error in creating the AntennaModel object");
 	dlPhy->SetAntenna (antenna);

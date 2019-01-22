@@ -220,10 +220,10 @@ main (int argc, char *argv[])
   
   CommandLine cmd;
   unsigned run = 0;
-  bool rlcAm = false;
-  uint32_t numRelays = 1;
-  uint32_t rlcBufSize = 100;
-  uint32_t interPacketInterval = 200;
+  bool rlcAm = true;                // rlc is in acknowledge mode
+  uint32_t numRelays = 1;           // # of IAB nodes
+  uint32_t rlcBufSize = 100;        // mega-bits, Mb
+  uint32_t interPacketInterval = 3; // micro-second, us
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
   cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -262,9 +262,9 @@ main (int argc, char *argv[])
 	RngSeedManager::SetSeed (1);
 	RngSeedManager::SetRun (run);
 
-  Config::SetDefault ("ns3::MmWavePhyMacCommon::SymbolsPerSubframe", UintegerValue(240));
-  Config::SetDefault ("ns3::MmWavePhyMacCommon::SubframePeriod", DoubleValue(1000));
-  Config::SetDefault ("ns3::MmWavePhyMacCommon::SymbolPeriod", DoubleValue(1000/240));
+  Config::SetDefault ("ns3::MmWavePhyMacCommon::SymbolsPerSubframe", UintegerValue(24));
+  Config::SetDefault ("ns3::MmWavePhyMacCommon::SubframePeriod", DoubleValue(100));
+  Config::SetDefault ("ns3::MmWavePhyMacCommon::SymbolPeriod", DoubleValue(100/24));
 
   Ptr<MmWaveHelper> mmwaveHelper = CreateObject<MmWaveHelper> ();
   mmwaveHelper->SetAttribute ("PathlossModel", StringValue ("ns3::MmWave3gppBuildingsPropagationLossModel"));
@@ -419,7 +419,7 @@ main (int argc, char *argv[])
 
   MobilityHelper uemobility;
   Ptr<ListPositionAllocator> uePosAlloc = CreateObject<ListPositionAllocator>();
-  uePosAlloc->Add (posUe1);
+  uePosAlloc->Add (posUe1);  // Change it to Iab1, when test the LoS single hop case without relaying.
   uePosAlloc->Add (posUe2);
   uePosAlloc->Add (posUe3);
   uePosAlloc->Add (posUe4);
@@ -506,6 +506,9 @@ main (int argc, char *argv[])
 
   /*GtkConfigStore config;
   config.ConfigureAttributes();*/
+  Ptr<UdpServer> udpServer = DynamicCast<UdpServer> (serverApps.Get(0));
+  uint64_t totalNumPkt = udpServer->GetReceived();
+  NS_LOG_UNCOND("Total number of packets received at server " << totalNumPkt );
 
   Simulator::Destroy();
   return 0;

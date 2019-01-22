@@ -250,10 +250,12 @@ LteRlcAm::GetMaxTxBufferSize()
 void
 LteRlcAm::DoTransmitPdcpPdu (Ptr<Packet> p)
 {
+  // p is a PDCP PDU, aka Packet.	
   NS_LOG_FUNCTION (this << m_rnti << (uint32_t) m_lcid << p->GetSize ());
 
   if(m_enableAqm == false)
   {
+    // If the active queue management is not enabled.	  
     if (m_txonBufferSize + p->GetSize () <= m_maxTxBufferSize)
     {
       /** Store arrival time */
@@ -275,7 +277,7 @@ LteRlcAm::DoTransmitPdcpPdu (Ptr<Packet> p)
     }
     else
     {
-      // Discard full RLC SDU
+      // Discard full RLC SDU, if the txonBuffer is full.
       NS_LOG_LOGIC ("TxBuffer is full. RLC SDU discarded");
       NS_LOG_LOGIC ("MaxTxBufferSize = " << m_maxTxBufferSize);
       NS_LOG_LOGIC ("txonBufferSize    = " << m_txonBufferSize);
@@ -1168,7 +1170,7 @@ std::map < uint32_t, Ptr<Packet> >
 LteRlcAm::GetTransmittingRlcSduBuffer()
 {
   return m_transmittingRlcSduBuffer;
-  // TODO check if it must be emptied
+  //  check if it must be emptied
 }
 uint32_t 
 LteRlcAm::GetTransmittingRlcSduBufferSize()

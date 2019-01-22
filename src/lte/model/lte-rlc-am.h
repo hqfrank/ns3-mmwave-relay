@@ -281,7 +281,9 @@ private:
   std::ofstream m_bufferSizeFile;
   EventId m_traceBufferSizeEvent;
 
-  bool m_enableAqm;
+  bool m_enableAqm;  // Indicator of enabling Active Queue Management. 
+                     // In mmWave use case, if set true, CoDel method is in use. 
+		     // In Lte use case, if set true, Drop-tail method is in use.
 
   Time m_lastRxPacketTime;
 
