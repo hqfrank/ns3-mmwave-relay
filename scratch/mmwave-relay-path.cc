@@ -221,9 +221,9 @@ main (int argc, char *argv[])
   CommandLine cmd;
   unsigned run = 0;
   bool rlcAm = true;                // rlc is in acknowledge mode
-  uint32_t numRelays = 1;           // # of IAB nodes
+  uint32_t numRelays = 2;           // # of IAB nodes
   uint32_t rlcBufSize = 100;        // mega-bits, Mb
-  uint32_t interPacketInterval = 3; // micro-second, us
+  uint32_t interPacketInterval = 12; // micro-second, us
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
   cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -268,6 +268,7 @@ main (int argc, char *argv[])
 
   Ptr<MmWaveHelper> mmwaveHelper = CreateObject<MmWaveHelper> ();
   mmwaveHelper->SetAttribute ("PathlossModel", StringValue ("ns3::MmWave3gppBuildingsPropagationLossModel"));
+  // MmWavePointToPointEpcHelper is used to create the core network
   Ptr<MmWavePointToPointEpcHelper>  epcHelper = CreateObject<MmWavePointToPointEpcHelper> ();
   mmwaveHelper->SetEpcHelper (epcHelper);
   mmwaveHelper->Initialize();
@@ -293,7 +294,7 @@ main (int argc, char *argv[])
   p2ph.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("100Gb/s")));
   p2ph.SetDeviceAttribute ("Mtu", UintegerValue (1500));
   p2ph.SetChannelAttribute ("Delay", TimeValue (Seconds (0.010)));
-  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);
+  NetDeviceContainer internetDevices = p2ph.Install (pgw, remoteHost);  // pgw and remoteHost are connected via p2p channel
   Ipv4AddressHelper ipv4h;
   ipv4h.SetBase ("1.0.0.0", "255.0.0.0");
   Ipv4InterfaceContainer internetIpIfaces = ipv4h.Assign (internetDevices);
@@ -340,16 +341,13 @@ main (int argc, char *argv[])
   }
 
   /*
-   *  Positioning of the nodes in the topology:
+   *  The original two hop (single Iab node) positioning of the nodes in the topology:
    *  
-   *  Ue1    Iab2    Ue2
+   *  Ue2    Iab4    Ue4
    *
-   *  Iab1    gnb    Iab4
+   *  Iab2    gnb    Iab3
    *
-   *  Ue3    Iab3    Ue4
-   *
-   *  
-   *
+   *  Ue1    Iab1    Ue3
    */
   double xMax = numBuildingsRow*(buildingWidthX + streetWidth) - streetWidth;
   double yMax = numBuildingsColumn*(buildingWidthY + streetWidth) - streetWidth;
@@ -375,7 +373,22 @@ main (int argc, char *argv[])
   Vector posIab3 = Vector(xUe2, yWired, gnbHeight);
   Vector posIab4 = Vector(xWired, yUe2, gnbHeight);
 
+  /*
+   *  The three hop scenario
+   *
+   *           gnb
+   *
+   *  Iab2     Iab1
+   *
+   *  Ue1     
+   */
+  if (numRelays == 2) {
+      posWired = Vector(xWired, yUe2, gnbHeight);
+      posIab1 = Vector(xWired, yWired, gnbHeight);
+      posIab4 = Vector(xWired, yUe1, gnbHeight);
 
+  
+  }
   NS_LOG_UNCOND("wired " << posWired << 
                 " iab1 " << posIab1 <<
                 " iab2 " << posIab2 <<
