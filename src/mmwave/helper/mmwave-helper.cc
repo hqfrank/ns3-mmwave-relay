@@ -2097,7 +2097,7 @@ MmWaveHelper::AttachIabToClosestEnb (Ptr<NetDevice> iabDevice, NetDeviceContaine
 	{
 	    Vector enbpos = (*i)->GetNode ()->GetObject<MobilityModel> ()->GetPosition ();
 	    double distance = CalculateDistance (iabPos, enbpos);
-	    if (distance < minDistance)
+	    if (distance < minDistance && distance > 10.0)
 	    {
 	        minDistance = distance;
 	        closestEnbDevice = *i;

@@ -222,8 +222,8 @@ main (int argc, char *argv[])
   unsigned run = 0;
   bool rlcAm = true;                // rlc is in acknowledge mode
   uint32_t numRelays = 2;           // # of IAB nodes
-  uint32_t rlcBufSize = 100;        // mega-bits, Mb
-  uint32_t interPacketInterval = 12; // micro-second, us
+  uint32_t rlcBufSize = 1000;        // mega-bits, Mb
+  uint32_t interPacketInterval = 10; // micro-second, us
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
   cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -483,7 +483,7 @@ main (int argc, char *argv[])
 
   if(numRelays > 0)
   {
-    mmwaveHelper->AttachIabToClosestWiredEnb (iabmmWaveDevs, enbmmWaveDevs);
+    mmwaveHelper->AttachIabToClosestWiredEnb (iabmmWaveDevs, possibleBaseStations);
   }
   mmwaveHelper->AttachToClosestEnbWithDelay (uemmWaveDevs, possibleBaseStations, Seconds(0.3));
 
