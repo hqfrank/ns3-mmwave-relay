@@ -221,9 +221,9 @@ main (int argc, char *argv[])
   CommandLine cmd;
   unsigned run = 0;
   bool rlcAm = true;                // rlc is in acknowledge mode
-  uint32_t numRelays = 2;           // # of IAB nodes
+  uint32_t numRelays = 3;           // # of IAB nodes
   uint32_t rlcBufSize = 1000;        // mega-bits, Mb
-  uint32_t interPacketInterval = 10; // micro-second, us
+  uint32_t interPacketInterval = 13; // micro-second, us
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
   cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -388,6 +388,14 @@ main (int argc, char *argv[])
       posIab4 = Vector(xWired, yUe1, gnbHeight);
 
   
+  }
+
+  if (numRelays == 3) {
+      posWired = Vector(xUe2, yUe2, gnbHeight);
+      posIab1 = Vector(xUe2, yWired, gnbHeight);
+      posIab2 = Vector(xWired, yWired, gnbHeight);
+      posIab3 = Vector(xWired, yUe1, gnbHeight);
+      posUe4 = Vector(xUe1, yWired, gnbHeight);
   }
   NS_LOG_UNCOND("wired " << posWired << 
                 " iab1 " << posIab1 <<
