@@ -311,7 +311,7 @@ main (int argc, char *argv[])
   double streetWidth = 10; // m
   double buildingWidthX = 50; // m
   double buildingWidthY = 50; // m
-  double buildingHeight = 30; // m
+  double buildingHeight = 10; // m
   std::vector< Ptr<Building> > buildingVector; // in case you need to access the buildings later
 
   for (int rowIndex = 0; rowIndex < numBuildingsRow; ++rowIndex)
@@ -353,7 +353,7 @@ main (int argc, char *argv[])
   double yMax = numBuildingsColumn*(buildingWidthY + streetWidth) - streetWidth;
   double totalArea = xMax * yMax;
 
-  double gnbHeight = buildingHeight - 10;
+  double gnbHeight = buildingHeight + 10;
 
   double xWired = numBuildingsRow*(buildingWidthX+streetWidth)/2 - streetWidth/2;
   double yWired = numBuildingsColumn*(buildingWidthY+streetWidth)/2 - streetWidth/2;
