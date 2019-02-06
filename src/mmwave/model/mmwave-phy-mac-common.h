@@ -147,14 +147,14 @@ struct DciInfoElementTdma
 	}
 
 	uint16_t 	m_rnti;
-	uint8_t		m_format;			// {DL assig. = 0, UL grant = 1}, only contiguous symbols supported
+	uint8_t		m_format;		// {DL assig. = 0, UL grant = 1}, only contiguous symbols supported
 	uint8_t		m_symStart;		// starting symbol index for flexible TTI scheme
-	uint8_t		m_numSym;			// number of symbols for flexible TTI scheme
+	uint8_t		m_numSym;		// number of symbols for flexible TTI scheme
 	uint8_t		m_mcs;
 	uint32_t	m_tbSize;
 	uint8_t		m_ndi;
-	uint8_t		m_rv;					// not used for UL DCI
-	uint8_t   m_harqProcess;
+	uint8_t		m_rv;			// not used for UL DCI
+	uint8_t         m_harqProcess;
 };
 
 struct TbAllocInfo
@@ -300,7 +300,7 @@ struct SfAllocInfo
 
 	SfnSf m_sfnSf;
 	uint32_t m_numSymAlloc;  // number of allocated slots
-	uint32_t m_ulSymStart;		 // start of UL region
+	uint32_t m_ulSymStart;	 // start of UL region
 	// the commented parameters are not used
 	// std::vector <SlotAllocInfo::TddMode> m_tddPattern;
 	// std::deque <SlotAllocInfo> m_dlSlotAllocInfo;
@@ -333,11 +333,11 @@ struct SfIabAllocInfo
 
 	SfnSf m_sfnSf;
 	std::vector<bool> m_symAllocationMask; // vector of bools, 
-	// uint32_t m_ulNumSymAlloc;  // number of allocated slots in the IAB uplink
-	// uint32_t m_ulSymStart;		 // start of UL IAB region
-	// uint32_t m_dlNumSymAlloc;  // number of allocated slots in the IAB downlink
-	// uint32_t m_dlSymStart;		 // start of DL IAB region
-	bool m_valid; // already used
+	// uint32_t m_ulNumSymAlloc;              // number of allocated slots in the IAB uplink
+	// uint32_t m_ulSymStart;		  // start of UL IAB region
+	// uint32_t m_dlNumSymAlloc;              // number of allocated slots in the IAB downlink
+	// uint32_t m_dlSymStart;		  // start of DL IAB region
+	bool m_valid;                          // already used
 };
 
 typedef std::vector<SlotAllocInfo::TddSlotType> TddSlotTypeList;
@@ -345,15 +345,15 @@ typedef std::vector<SlotAllocInfo::TddSlotType> TddSlotTypeList;
 
 struct DlCqiInfo
 {
-  uint16_t  m_rnti;
-  uint8_t   m_ri;
-  enum DlCqiType
-  {
-    WB,SB
-  } m_cqiType;
-	std::vector<uint8_t> m_rbCqi; // CQI for each Rsc Block, set to -1 if SINR < Threshold
-	uint8_t m_wbCqi; // Wide band CQI
-	uint8_t m_wbPmi;
+    uint16_t  m_rnti;  // Receiving UE identifier
+    uint8_t   m_ri;    // Rank indicator, UE uses RI to inform about # of layers required during layer mapping.
+    enum DlCqiType
+    {
+        WB,SB
+    } m_cqiType;
+    std::vector<uint8_t> m_rbCqi;  // CQI for each Rsc Block, set to -1 if SINR < Threshold
+    uint8_t m_wbCqi;   // Wide band CQI
+    uint8_t m_wbPmi;   // Wide band Precoding Matrix Indicator
 };
 
 

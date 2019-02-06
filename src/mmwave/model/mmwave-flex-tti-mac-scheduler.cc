@@ -267,7 +267,7 @@ MmWaveFlexTtiMacScheduler::GetTypeId (void)
 								 "Number of symbols per slot in Fixed TTI mode",
 								 UintegerValue (6),
 								 MakeUintegerAccessor (&MmWaveFlexTtiMacScheduler::m_symPerSlot),
-								 MakeUintegerChecker<uint8_t> ())
+								 MakeUintegerChecker<uint8_t> ())y
 		;
 
 	return tid;
@@ -276,13 +276,13 @@ MmWaveFlexTtiMacScheduler::GetTypeId (void)
 void
 MmWaveFlexTtiMacScheduler::SetMacSchedSapUser (MmWaveMacSchedSapUser* sap)
 {
-	m_macSchedSapUser = sap;
+	m_macSchedSapUser = sap;  // Pointer to the primitives from "Scheduler" module to "Subframe" module in MAC
 }
 
 void
 MmWaveFlexTtiMacScheduler::SetMacCschedSapUser (MmWaveMacCschedSapUser* sap)
 {
-	m_macCschedSapUser = sap;
+	m_macCschedSapUser = sap;  // Pointer to the primitives from "Scheduler" module to "Control" module in MAC
 }
 
 void
@@ -330,19 +330,25 @@ MmWaveFlexTtiMacScheduler::PrintSubframeAllocationMask(std::vector<bool> mask)
 void
 MmWaveFlexTtiMacScheduler::DoIabBackhaulSchedNotify(const struct MmWaveUeMacCschedSapProvider::IabBackhaulSchedInfo& info)
 {
-	NS_LOG_FUNCTION(this << info.m_dciInfoElementTdma.m_rnti);
+	/*
+	 * MmWaveUeMacCschedSapProvider defines all primitives from "Control" to "Scheduler". 
+	 * As in an IAB node, the Ue stack functions the backhaul role, the scheduling information of IAB backhaul is transferred
+	 * through the Sap defined in the mmWave UE MAC.
+	 */
+	NS_LOG_FUNCTION(this << info.m_dciInfoElementTdma.m_rnti);  // The DCI's m_rnti identifies which "UE" should receive this DCI.
 
-	NS_ASSERT_MSG(m_iabScheduler, "Received DCI info for backhaul on a non IAB scheduler");
+	NS_ASSERT_MSG(m_iabScheduler, "Received DCI info for backhaul on a non IAB scheduler");  // This "Scheduler" must be an IAB one. 
 
 	NS_LOG_DEBUG("MmWaveFlexTtiMacScheduler received DCIs for the backhaul link");
 
 	// signal that the resources are busy
+	// In the default setting for mmWave module, 1 frame contains 10 subframes, each of which contains 24 symbols (or slots). 
 	NS_LOG_DEBUG("Frame " << info.m_sfnSf.m_frameNum << " subframe " << (uint16_t)info.m_sfnSf.m_sfNum <<  " slot/symbol " << (uint16_t)info.m_sfnSf.m_slotNum);
 
-	uint32_t subframe = info.m_sfnSf.m_sfNum;
-	uint32_t frame = info.m_sfnSf.m_frameNum;
+	uint32_t subframe = info.m_sfnSf.m_sfNum;  // which subframe in the current frame of the received DCI
+	uint32_t frame = info.m_sfnSf.m_frameNum;  // the current frame number of the received DCI
 
-	// get the SfIabAllocInfo for this subframe
+	// Get the already stored SfIabAllocInfo for this subframe index.
 	SfIabAllocInfo currentInfo = m_iabBusySubframeAllocation.at(subframe);
 	SfIabAllocInfo newInfo(m_phyMacConfig->GetSymbolsPerSubframe ());
 
@@ -350,7 +356,7 @@ MmWaveFlexTtiMacScheduler::DoIabBackhaulSchedNotify(const struct MmWaveUeMacCsch
 
 	if(currentInfo.m_sfnSf.m_frameNum == frame)
 	{
-		// another DCI has already been registered for this subframe
+		// another DCI has already been registered for this subframe, and the "info" will be used to update the "newInfo".
 		newInfo = currentInfo;
 		NS_LOG_DEBUG("This frame/subframe had already a DCI stored with mask " << PrintSubframeAllocationMask(newInfo.m_symAllocationMask));
 			// TODOIAB plot relevant info
@@ -364,11 +370,12 @@ MmWaveFlexTtiMacScheduler::DoIabBackhaulSchedNotify(const struct MmWaveUeMacCsch
 	}
 
 	uint32_t firstAllocatedIdx = info.m_dciInfoElementTdma.m_symStart;
-	uint32_t nextFreeIdx = firstAllocatedIdx + info.m_dciInfoElementTdma.m_numSym;
+	uint32_t nextFreeIdx = firstAllocatedIdx + info.m_dciInfoElementTdma.m_numSym;  // Reflects the continuous slots/symbols allocation.
 
 	// check if it overlaps with already busy regions
 	for(uint32_t index = firstAllocatedIdx; index < nextFreeIdx; index++)
 	{
+		// A slot within a subframe cannot be allocated by more than one DCIs. Only update the allocation when a slot has not been allocated before. 
 		NS_ASSERT_MSG(newInfo.m_symAllocationMask.at(index) == 0, "DCI signals that a symbol is scheduled for IAB, but it was already scheduled");
 		newInfo.m_symAllocationMask.at(index) = 1;
 	}	
@@ -401,7 +408,7 @@ MmWaveFlexTtiMacScheduler::DoIabBackhaulSchedNotify(const struct MmWaveUeMacCsch
 	// 				<< (uint16_t)info.m_dciInfoElementTdma.m_symStart);	
 	// }
 
-	m_iabBusySubframeAllocation.at(subframe) = newInfo;
+	m_iabBusySubframeAllocation.at(subframe) = newInfo;  // Update the IAB allocation info vector.
 }
 
 void
@@ -413,7 +420,7 @@ MmWaveFlexTtiMacScheduler::ConfigureCommonParameters (Ptr<MmWavePhyMacCommon> co
 	m_numHarqProcess = m_phyMacConfig->GetNumHarqProcess ();
 	m_harqTimeout = m_phyMacConfig->GetHarqTimeout ();
 	m_numDataSymbols = m_phyMacConfig->GetSymbolsPerSubframe () -
-			m_phyMacConfig->GetDlCtrlSymbols () - m_phyMacConfig->GetUlCtrlSymbols ();
+			m_phyMacConfig->GetDlCtrlSymbols () - m_phyMacConfig->GetUlCtrlSymbols ();  // Dl ctrl, Ul ctrl, and data symbols
 	NS_ASSERT_MSG (m_phyMacConfig->GetNumRb () == 1, \
 	               "System must be configured with numRb=1 for TDMA mode");
 
@@ -431,74 +438,78 @@ MmWaveFlexTtiMacScheduler::ConfigureCommonParameters (Ptr<MmWavePhyMacCommon> co
 void
 MmWaveFlexTtiMacScheduler::DoSchedDlRlcBufferReq (const struct MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters& params)
 {
-  NS_LOG_FUNCTION (this << params.m_rnti << (uint32_t) params.m_logicalChannelIdentity);
-  // API generated by RLC for updating RLC parameters on a LC (tx and retx queues)
-  std::list<MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters>::iterator it = m_rlcBufferReq.begin ();
-  bool newLc = true;
-  while (it != m_rlcBufferReq.end ())
+    NS_LOG_FUNCTION (this << params.m_rnti << (uint32_t) params.m_logicalChannelIdentity);
+    // API generated by RLC for updating RLC parameters on a LC (tx and retx queues)
+    std::list<MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters>::iterator it = m_rlcBufferReq.begin ();
+    bool newLc = true;
+    while (it != m_rlcBufferReq.end ())
     {
-      // remove old entries of this UE-LC
-      if (((*it).m_rnti == params.m_rnti)&&((*it).m_logicalChannelIdentity == params.m_logicalChannelIdentity))
+        // remove old entries of this (UE,LC) -- UE & LC identify a piece of RLC buffer Request info
+        if (((*it).m_rnti == params.m_rnti)&&((*it).m_logicalChannelIdentity == params.m_logicalChannelIdentity))
         {
-          it = m_rlcBufferReq.erase (it);
-          newLc = false;
+            it = m_rlcBufferReq.erase (it);
+            newLc = false;  // It is not a new logical channel.
         }
-      else
+        else
         {
-          ++it;
+            ++it;
         }
     }
-  // add the new parameters
-  m_rlcBufferReq.insert (it, params);
-  NS_LOG_DEBUG ("BSR for RNTI " << params.m_rnti << " LC " << (uint16_t)params.m_logicalChannelIdentity << " RLC tx size " << params.m_rlcTransmissionQueueSize << " RLC retx size " << params.m_rlcRetransmissionQueueSize << " RLC stat size " <<  params.m_rlcStatusPduSize);
-  // initialize statistics of the flow in case of new flows
-  if (newLc == true)
-  {
-  	m_wbCqiRxed.insert ( std::pair<uint16_t, uint8_t > (params.m_rnti, 1)); // only codeword 0 at this stage (SISO)
+    // add the new parameters at the end of the list "m_rlcBufferReq"
+    m_rlcBufferReq.insert (it, params);
+    NS_LOG_DEBUG ("BSR for RNTI " << params.m_rnti << 
+		    " LC " << (uint16_t)params.m_logicalChannelIdentity << 
+		    " RLC tx size " << params.m_rlcTransmissionQueueSize << 
+		    " RLC retx size " << params.m_rlcRetransmissionQueueSize << 
+		    " RLC stat size " <<  params.m_rlcStatusPduSize);
+    // initialize statistics of the flow in case of new flows
+    if (newLc == true)
+    {
+        m_wbCqiRxed.insert ( std::pair<uint16_t, uint8_t > (params.m_rnti, 1));  // only codeword 0 at this stage (SISO)
   	// initialized to 1 (i.e., the lowest value for transmitting a signal)
-  	m_wbCqiTimers.insert ( std::pair<uint16_t, uint32_t > (params.m_rnti, m_cqiTimersThreshold));
-  }
+        m_wbCqiTimers.insert ( std::pair<uint16_t, uint32_t > (params.m_rnti, m_cqiTimersThreshold));
+    }
 }
 
 void
 MmWaveFlexTtiMacScheduler::DoSchedDlCqiInfoReq (const struct MmWaveMacSchedSapProvider::SchedDlCqiInfoReqParameters& params)
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION (this);
 
-  std::map <uint16_t,uint8_t>::iterator it;
-  for (unsigned int i = 0; i < params.m_cqiList.size (); i++)
+    std::map <uint16_t,uint8_t>::iterator it;
+    for (unsigned int i = 0; i < params.m_cqiList.size (); i++)
     {
-      if ( params.m_cqiList.at (i).m_cqiType == DlCqiInfo::WB )
+        if ( params.m_cqiList.at (i).m_cqiType == DlCqiInfo::WB )
         {
-          // wideband CQI reporting
-          std::map <uint16_t,uint8_t>::iterator it;
-          uint16_t rnti = params.m_cqiList.at (i).m_rnti;
-          it = m_wbCqiRxed.find (rnti);
-          if (it == m_wbCqiRxed.end ())
+            // wideband CQI reporting
+            std::map <uint16_t,uint8_t>::iterator it;
+            uint16_t rnti = params.m_cqiList.at (i).m_rnti;
+            it = m_wbCqiRxed.find (rnti);
+            if (it == m_wbCqiRxed.end ())
             {
-              // create the new entry
-              m_wbCqiRxed.insert ( std::pair<uint16_t, uint8_t > (rnti, params.m_cqiList.at (i).m_wbCqi) ); // only codeword 0 at this stage (SISO)
-              // generate correspondent timer
-              m_wbCqiTimers.insert ( std::pair<uint16_t, uint32_t > (rnti, m_cqiTimersThreshold));
+                // create the new entry
+                m_wbCqiRxed.insert ( std::pair<uint16_t, uint8_t > (rnti, params.m_cqiList.at (i).m_wbCqi) ); // only codeword 0 at this stage (SISO)
+                // generate correspondent timer
+                m_wbCqiTimers.insert ( std::pair<uint16_t, uint32_t > (rnti, m_cqiTimersThreshold));
             }
-          else
+            else
             {
-              // update the CQI value
-              (*it).second = params.m_cqiList.at (i).m_wbCqi;
-              // update correspondent timer
-              std::map <uint16_t,uint32_t>::iterator itTimers;
-              itTimers = m_wbCqiTimers.find (rnti);
-              (*itTimers).second = m_cqiTimersThreshold;
+                // update the CQI value
+                (*it).second = params.m_cqiList.at (i).m_wbCqi;
+                // update correspondent timer
+                std::map <uint16_t,uint32_t>::iterator itTimers;
+                itTimers = m_wbCqiTimers.find (rnti);
+                (*itTimers).second = m_cqiTimersThreshold;
             }
         }
-      else if ( params.m_cqiList.at (i).m_cqiType == DlCqiInfo::SB )
+        else if ( params.m_cqiList.at (i).m_cqiType == DlCqiInfo::SB )
         {
-          // subband CQI reporting high layer configured
-          // Not used by RR Scheduler
+            // subband CQI reporting high layer configured
+            // Not used by RR Scheduler
         }
-      else
+        else
         {
-          NS_LOG_ERROR (this << " CQI type unknown");
+            NS_LOG_ERROR (this << " CQI type unknown");
         }
     }
 }
@@ -507,24 +518,24 @@ MmWaveFlexTtiMacScheduler::DoSchedDlCqiInfoReq (const struct MmWaveMacSchedSapPr
 void
 MmWaveFlexTtiMacScheduler::DoSchedUlCqiInfoReq (const struct MmWaveMacSchedSapProvider::SchedUlCqiInfoReqParameters& params)
 {
-  NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION (this);
 
-	unsigned frameNum = params.m_sfnSf.m_frameNum;
-	unsigned subframeNum =  params.m_sfnSf.m_sfNum;
-	unsigned startSymIdx =  params.m_sfnSf.m_slotNum;
+    unsigned frameNum = params.m_sfnSf.m_frameNum;
+    unsigned subframeNum =  params.m_sfnSf.m_sfNum;
+    unsigned startSymIdx =  params.m_sfnSf.m_slotNum;
 
-	switch (params.m_ulCqi.m_type)
+    switch (params.m_ulCqi.m_type)
+    {
+        case UlCqiInfo::PUSCH:
 	{
-		case UlCqiInfo::PUSCH:
-		{
-			std::map <uint32_t, struct AllocMapElem>::iterator itMap;
-			std::map <uint16_t, struct UlCqiMapElem>::iterator itCqi;
-			itMap = m_ulAllocationMap.find (params.m_sfnSf.Encode ());
-			if (itMap == m_ulAllocationMap.end ())
-			{
-				NS_LOG_DEBUG (this << " UL CQI Does not find info on allocation, size : " << m_ulAllocationMap.size ());
-				return;
-			}
+	    std::map <uint32_t, struct AllocMapElem>::iterator itMap;
+	    std::map <uint16_t, struct UlCqiMapElem>::iterator itCqi;
+	    itMap = m_ulAllocationMap.find (params.m_sfnSf.Encode ());
+	    if (itMap == m_ulAllocationMap.end ())
+	    {
+	        NS_LOG_DEBUG (this << " UL CQI Does not find info on allocation, size : " << m_ulAllocationMap.size ());
+		return;
+	    }
 			NS_ASSERT_MSG (itMap->second.m_rntiPerChunk.size () == m_phyMacConfig->GetTotalNumChunk (), "SINR chunk map must cover full BW in TDMA mode");
 			for (unsigned i = 0; i < itMap->second.m_rntiPerChunk.size (); i++)
 			{

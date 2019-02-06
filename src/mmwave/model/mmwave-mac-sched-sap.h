@@ -64,27 +64,27 @@ public:
 		std::vector <struct DlCqiInfo> m_cqiList;
 	};
 
-  struct SchedUlMacCtrlInfoReqParameters
-  {
+        struct SchedUlMacCtrlInfoReqParameters
+        {
 		SfnSf  m_sfnSf;
-    std::vector <struct MacCeElement> m_macCeList;
-  };
+                std::vector <struct MacCeElement> m_macCeList;
+        };
 
-  struct SchedUlCqiInfoReqParameters
-  {
-  	SfnSf  m_sfnSf;
-    struct UlCqiInfo m_ulCqi;
-  };
+        struct SchedUlCqiInfoReqParameters
+        {
+  	        SfnSf  m_sfnSf;
+                struct UlCqiInfo m_ulCqi;
+        };
 
 	struct SchedTriggerReqParameters
 	{
 		SfnSf m_sfnSf;
-    std::vector <struct DlHarqInfo> m_dlHarqInfoList;
-    std::vector <struct UlHarqInfo> m_ulHarqInfoList;
+                std::vector <struct DlHarqInfo> m_dlHarqInfoList;
+                std::vector <struct UlHarqInfo> m_ulHarqInfoList;
 		std::list <uint16_t> m_ueList;
 	};
 
-  virtual void SchedDlRlcBufferReq (const struct SchedDlRlcBufferReqParameters& params) = 0;
+        virtual void SchedDlRlcBufferReq (const struct SchedDlRlcBufferReqParameters& params) = 0;
 
 	virtual void SchedDlCqiInfoReq (const SchedDlCqiInfoReqParameters& params) = 0;
 
@@ -92,11 +92,11 @@ public:
 
 	virtual void SchedTriggerReq (const struct SchedTriggerReqParameters& params) = 0;
 
-  virtual void SchedUlMacCtrlInfoReq (const struct SchedUlMacCtrlInfoReqParameters& params) = 0;
+        virtual void SchedUlMacCtrlInfoReq (const struct SchedUlMacCtrlInfoReqParameters& params) = 0;
 
-  virtual void SchedSetMcs (int mcs)
-  {
-  }
+        virtual void SchedSetMcs (int mcs)
+        {
+        }
 
 private:
 

@@ -350,7 +350,8 @@ private:
 	bool m_iabScheduler;
 	bool m_split;
 	SfIabAllocInfo m_busyResourcesSchedSubframe;
-	std::vector<SfIabAllocInfo> m_iabBusySubframeAllocation; // vector with IAB allocation info
+	std::vector<SfIabAllocInfo> m_iabBusySubframeAllocation;  // vector with IAB allocation info. By default, 10 elements
+	                                                          // are stored in the vector corresponding to 10 subframes.
 };
 
 }
