@@ -221,9 +221,9 @@ main (int argc, char *argv[])
   CommandLine cmd;
   unsigned run = 0;
   bool rlcAm = true;                // rlc is in acknowledge mode
-  uint32_t numRelays = 3;           // # of IAB nodes
+  uint32_t numRelays = 1;           // # of IAB nodes
   uint32_t rlcBufSize = 1000;        // mega-bits, Mb
-  uint32_t interPacketInterval = 13; // micro-second, us
+  uint32_t interPacketInterval = 6; // micro-second, us
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
   cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -311,7 +311,7 @@ main (int argc, char *argv[])
   double streetWidth = 10; // m
   double buildingWidthX = 50; // m
   double buildingWidthY = 50; // m
-  double buildingHeight = 10; // m
+  double buildingHeight = 30; // m
   std::vector< Ptr<Building> > buildingVector; // in case you need to access the buildings later
 
   for (int rowIndex = 0; rowIndex < numBuildingsRow; ++rowIndex)
@@ -353,7 +353,7 @@ main (int argc, char *argv[])
   double yMax = numBuildingsColumn*(buildingWidthY + streetWidth) - streetWidth;
   double totalArea = xMax * yMax;
 
-  double gnbHeight = buildingHeight + 10;
+  double gnbHeight = buildingHeight - 10;
 
   double xWired = numBuildingsRow*(buildingWidthX+streetWidth)/2 - streetWidth/2;
   double yWired = numBuildingsColumn*(buildingWidthY+streetWidth)/2 - streetWidth/2;

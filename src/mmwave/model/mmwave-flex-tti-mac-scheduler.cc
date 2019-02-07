@@ -536,61 +536,61 @@ MmWaveFlexTtiMacScheduler::DoSchedUlCqiInfoReq (const struct MmWaveMacSchedSapPr
 	        NS_LOG_DEBUG (this << " UL CQI Does not find info on allocation, size : " << m_ulAllocationMap.size ());
 		return;
 	    }
-			NS_ASSERT_MSG (itMap->second.m_rntiPerChunk.size () == m_phyMacConfig->GetTotalNumChunk (), "SINR chunk map must cover full BW in TDMA mode");
-			for (unsigned i = 0; i < itMap->second.m_rntiPerChunk.size (); i++)
+            NS_ASSERT_MSG (itMap->second.m_rntiPerChunk.size () == m_phyMacConfig->GetTotalNumChunk (), "SINR chunk map must cover full BW in TDMA mode");
+	    for (unsigned i = 0; i < itMap->second.m_rntiPerChunk.size (); i++)
+	    {
+	        // convert from fixed point notation Sxxxxxxxxxxx.xxx to double
+		// double sinr = LteFfConverter::fpS11dot3toDouble (params.m_ulCqi.m_sinr.at (i));
+		itCqi = m_ueUlCqi.find (itMap->second.m_rntiPerChunk.at (i));
+		if (itCqi == m_ueUlCqi.end ())
+		{
+		    // create a new entry
+		    std::vector <double> newCqi;
+		    for (unsigned j = 0; j < m_phyMacConfig->GetTotalNumChunk (); j++)
+		    {
+		        unsigned chunkInd = i;
+			if (chunkInd == j)
 			{
-				// convert from fixed point notation Sxxxxxxxxxxx.xxx to double
-				//double sinr = LteFfConverter::fpS11dot3toDouble (params.m_ulCqi.m_sinr.at (i));
-				itCqi = m_ueUlCqi.find (itMap->second.m_rntiPerChunk.at (i));
-				if (itCqi == m_ueUlCqi.end ())
-				{
-					// create a new entry
-					std::vector <double> newCqi;
-					for (unsigned j = 0; j < m_phyMacConfig->GetTotalNumChunk (); j++)
-					{
-						unsigned chunkInd = i;
-						if (chunkInd == j)
-						{
-							newCqi.push_back (params.m_ulCqi.m_sinr.at (i));
-							NS_LOG_INFO ("UL CQI report for RNTI " << itMap->second.m_rntiPerChunk.at (i) << " chunk " << i << " SINR " << params.m_ulCqi.m_sinr.at (i) << \
-							             " frame " << frameNum << " subframe " << subframeNum << " startSym " << startSymIdx);
-						}
-						else
-						{
-							// initialize with NO_SINR value.
-							newCqi.push_back (30.0);
-						}
-					}
-					m_ueUlCqi.insert (std::pair <uint16_t, struct UlCqiMapElem> (itMap->second.m_rntiPerChunk.at (i),
-					                                                             UlCqiMapElem (newCqi, itMap->second.m_numSym, itMap->second.m_tbSize)) );
-					// generate correspondent timer
-					m_ueCqiTimers.insert (std::pair <uint16_t, uint32_t > (itMap->second.m_rntiPerChunk.at (i), m_cqiTimersThreshold));
-				}
-				else
-				{
-					// update the value
-					(*itCqi).second.m_ueUlCqi.at (i) = params.m_ulCqi.m_sinr.at (i);
-					(*itCqi).second.m_numSym = itMap->second.m_numSym;
-					(*itCqi).second.m_tbSize = itMap->second.m_tbSize;
-					// update correspondent timer
-					std::map <uint16_t, uint32_t>::iterator itTimers;
-					itTimers = m_ueCqiTimers.find (itMap->second.m_rntiPerChunk.at (i));
-					(*itTimers).second = m_cqiTimersThreshold;
-
-					NS_LOG_INFO ("UL CQI report for RNTI " << itMap->second.m_rntiPerChunk.at (i) << " chunk " << i << " SINR " << params.m_ulCqi.m_sinr.at (i) << \
-					             " frame " << frameNum << " subframe " << subframeNum << " startSym " << startSymIdx);
-
-				}
-
+			    newCqi.push_back (params.m_ulCqi.m_sinr.at (i));
+			    NS_LOG_INFO ("UL CQI report for RNTI " << itMap->second.m_rntiPerChunk.at (i) << " chunk " << i << " SINR " << params.m_ulCqi.m_sinr.at (i) << \
+					    " frame " << frameNum << " subframe " << subframeNum << " startSym " << startSymIdx);
 			}
-			// remove obsolete info on allocation
-			m_ulAllocationMap.erase (itMap);
+			else
+			{
+			    // initialize with NO_SINR value.
+			    newCqi.push_back (30.0);
+			}
+		    }
+		    m_ueUlCqi.insert (std::pair <uint16_t, struct UlCqiMapElem> (itMap->second.m_rntiPerChunk.at (i),
+					    UlCqiMapElem (newCqi, itMap->second.m_numSym, itMap->second.m_tbSize)) );
+		    // generate correspondent timer
+		    m_ueCqiTimers.insert (std::pair <uint16_t, uint32_t > (itMap->second.m_rntiPerChunk.at (i), m_cqiTimersThreshold));
 		}
-		break;
-		default:
-			NS_FATAL_ERROR ("Unknown type of UL-CQI");
+		else
+		{
+		    // update the value
+		    (*itCqi).second.m_ueUlCqi.at (i) = params.m_ulCqi.m_sinr.at (i);
+		    (*itCqi).second.m_numSym = itMap->second.m_numSym;
+		    (*itCqi).second.m_tbSize = itMap->second.m_tbSize;
+		    // update correspondent timer
+		    std::map <uint16_t, uint32_t>::iterator itTimers;
+		    itTimers = m_ueCqiTimers.find (itMap->second.m_rntiPerChunk.at (i));
+		    (*itTimers).second = m_cqiTimersThreshold;
+
+		    NS_LOG_INFO ("UL CQI report for RNTI " << itMap->second.m_rntiPerChunk.at (i) << " chunk " << i << " SINR " << params.m_ulCqi.m_sinr.at (i) << \
+				    " frame " << frameNum << " subframe " << subframeNum << " startSym " << startSymIdx);
+
+		}
+
+	    }
+	    // remove obsolete info on allocation
+	    m_ulAllocationMap.erase (itMap);
 	}
-	return;
+	break;
+	default:
+	    NS_FATAL_ERROR ("Unknown type of UL-CQI");
+    }
+    return;
 }
 
 
@@ -818,59 +818,58 @@ MmWaveFlexTtiMacScheduler::GetNumIabRnti()
 int
 MmWaveFlexTtiMacScheduler::UpdateBusySymbolsForIab(uint8_t sfNum, uint8_t symIdx, int symAvail)
 {
-	// get the resources which are already set as busy for this subframe
-	if(m_iabScheduler && !m_split)
+    // get the resources which are already set as busy for this subframe
+    if(m_iabScheduler && !m_split)
+    {
+        SfIabAllocInfo busyResources = m_iabBusySubframeAllocation.at(sfNum);  // Get the existing subframe allocation info
+	NS_LOG_DEBUG("Before check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
+	if(busyResources.m_valid)
 	{
-		SfIabAllocInfo busyResources = m_iabBusySubframeAllocation.at(sfNum);
-		NS_LOG_DEBUG("Before check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
-		if(busyResources.m_valid)
-		{
-			busyResources.m_valid = false; // signal that this SfIabAllocInfo has been used for a prev slot
+	    busyResources.m_valid = false; // signal that this SfIabAllocInfo has been used for a prev slot
 			
-			NS_LOG_DEBUG("This subframe has a DCI stored, with " <<
-			" frame " << busyResources.m_sfnSf.m_frameNum << 
-			" subframe " << (uint16_t)busyResources.m_sfnSf.m_sfNum <<
-			PrintSubframeAllocationMask(busyResources.m_symAllocationMask));
+	    NS_LOG_DEBUG("This subframe has a DCI stored, with " <<
+			    " frame " << busyResources.m_sfnSf.m_frameNum << 
+			    " subframe " << (uint16_t)busyResources.m_sfnSf.m_sfNum <<
+			    PrintSubframeAllocationMask(busyResources.m_symAllocationMask));
 
-			// " m_dlSymStart " << busyResources.m_dlSymStart << 
-			// " m_dlNumSymAlloc " << busyResources.m_dlNumSymAlloc << 
-			// " m_ulSymStart " << busyResources.m_ulSymStart << 
-			// " m_ulSymStart " << busyResources.m_ulNumSymAlloc);	
+	    // " m_dlSymStart " << busyResources.m_dlSymStart << 
+	    // " m_dlNumSymAlloc " << busyResources.m_dlNumSymAlloc << 
+	    // " m_ulSymStart " << busyResources.m_ulSymStart << 
+	    // " m_ulSymStart " << busyResources.m_ulNumSymAlloc);	
 			
-			// NS_ASSERT_MSG(busyResources.m_sfnSf.m_sfNum == sfNum && 
-			// 		busyResources.m_sfnSf.m_frameNum == frameNum,
-			// 		"Mismatch between scheduled resource and SfIabAllocInfo");
+	    // NS_ASSERT_MSG(busyResources.m_sfnSf.m_sfNum == sfNum && 
+	    // 		busyResources.m_sfnSf.m_frameNum == frameNum,
+	    // 		"Mismatch between scheduled resource and SfIabAllocInfo");
 
-			// TODOIAB -> do smth better, since UL resources may be allocated after DL/UL
-			// resources of other users, so some previous symbols can be used
+	    // TODOIAB -> do smth better, since UL resources may be allocated after DL/UL
+	    // resources of other users, so some previous symbols can be used
 
-			// get the max between DL and UL sym (usually UL if both present)
-			// if(busyResources.m_dlSymStart > busyResources.m_ulSymStart)
-			// {
-			// 	// set the symIdx value to the first free available index
-			// 	symIdx = busyResources.m_dlSymStart + busyResources.m_dlNumSymAlloc;
-			// 	// subtract the DL and UL symbols from the available ones
-			// 	// symAvail -= (busyResources.m_dlNumSymAlloc + busyResources.m_ulNumSymAlloc);
-			// }
-			// else
-			// {
-			// 	// set the symIdx value to the first free available index
-			// 	symIdx = busyResources.m_ulSymStart + busyResources.m_ulNumSymAlloc;
-			// 	// subtract the DL and UL symbols from the available ones
-			// 	// symAvail -= (busyResources.m_dlNumSymAlloc + busyResources.m_ulNumSymAlloc);
-
-			// }
-			// symAvail = m_phyMacConfig->GetSymbolsPerSubframe () - 1 - symIdx;
-		}
-		m_iabBusySubframeAllocation.at(sfNum) = busyResources;
-
-		NS_LOG_DEBUG("After check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
+	    // get the max between DL and UL sym (usually UL if both present)
+	    // if(busyResources.m_dlSymStart > busyResources.m_ulSymStart)
+	    // {
+	    //     // set the symIdx value to the first free available index
+	    //     symIdx = busyResources.m_dlSymStart + busyResources.m_dlNumSymAlloc;
+	    // 	   // subtract the DL and UL symbols from the available ones
+	    //     // symAvail -= (busyResources.m_dlNumSymAlloc + busyResources.m_ulNumSymAlloc);
+	    // }
+	    // else
+	    // {
+	    // 	   // set the symIdx value to the first free available index
+	    //     symIdx = busyResources.m_ulSymStart + busyResources.m_ulNumSymAlloc;
+            //     // subtract the DL and UL symbols from the available ones
+            //     // symAvail -= (busyResources.m_dlNumSymAlloc + busyResources.m_ulNumSymAlloc);
+            // }
+	    // symAvail = m_phyMacConfig->GetSymbolsPerSubframe () - 1 - symIdx;
 	}
-	else if(m_iabScheduler && m_split)
-	{
-		NS_LOG_LOGIC("Before check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
-		SfIabAllocInfo busyResources = m_iabBusySubframeAllocation.at(sfNum);
-		if(busyResources.m_valid)
+	m_iabBusySubframeAllocation.at(sfNum) = busyResources;
+
+	NS_LOG_DEBUG("After check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
+    }
+    else if(m_iabScheduler && m_split)
+    {
+	NS_LOG_LOGIC("Before check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
+	SfIabAllocInfo busyResources = m_iabBusySubframeAllocation.at(sfNum);
+	if(busyResources.m_valid)
 		{
 			m_busyResourcesSchedSubframe = busyResources;
 
