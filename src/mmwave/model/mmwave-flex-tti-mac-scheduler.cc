@@ -906,9 +906,9 @@ MmWaveFlexTtiMacScheduler::UpdateBusySymbolsForIab(uint8_t sfNum, uint8_t symIdx
 void
 MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProvider::SchedTriggerReqParameters& params)
 {
-	NS_LOG_DEBUG("m_rntiIabInfoMap size " << m_rntiIabInfoMap.size());
+    NS_LOG_DEBUG("m_rntiIabInfoMap size " << m_rntiIabInfoMap.size());
 
-	MmWaveMacSchedSapUser::SchedConfigIndParameters ret;
+    MmWaveMacSchedSapUser::SchedConfigIndParameters ret;
 	SfnSf dlSfn = params.m_sfnSf;
 	SfnSf ulSfn = params.m_sfnSf;
 
