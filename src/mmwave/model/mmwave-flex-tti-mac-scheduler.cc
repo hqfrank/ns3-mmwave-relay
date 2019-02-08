@@ -597,222 +597,226 @@ MmWaveFlexTtiMacScheduler::DoSchedUlCqiInfoReq (const struct MmWaveMacSchedSapPr
 void
 MmWaveFlexTtiMacScheduler::RefreshHarqProcesses ()
 {
-	NS_LOG_FUNCTION (this);
+    NS_LOG_FUNCTION (this);
 
-	std::map <uint16_t, DlHarqProcessesTimer_t>::iterator itTimers;
-	for (itTimers = m_dlHarqProcessesTimer.begin (); itTimers != m_dlHarqProcessesTimer.end (); itTimers++)
-	{
-		for (uint16_t i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
-		{
-			if ((*itTimers).second.at (i) == m_phyMacConfig->GetHarqTimeout ())
-			{ // reset HARQ process
-				NS_LOG_INFO (this << " Reset HARQ proc " << i << " for RNTI " << (*itTimers).first);
-				std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find ((*itTimers).first);
-				if (itStat == m_dlHarqProcessesStatus.end ())
-				{
-					NS_FATAL_ERROR ("No Process Id Status found for this RNTI " << (*itTimers).first);
-				}
-				(*itStat).second.at (i) = 0;
-				(*itTimers).second.at (i) = 0;
-			}
-			else
-			{
-				(*itTimers).second.at (i)++;
-			}
-		}
-	}
+    // DL Harq processes
+    std::map <uint16_t, DlHarqProcessesTimer_t>::iterator itTimers;  // "first" is UE's RNTI, "second" is a vector of DL HARQ Processes Timers
+    for (itTimers = m_dlHarqProcessesTimer.begin (); itTimers != m_dlHarqProcessesTimer.end (); itTimers++)
+    {
+        for (uint16_t i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
+        {
+            if ((*itTimers).second.at (i) == m_phyMacConfig->GetHarqTimeout ())
+            { // Time out, reset HARQ process
+                NS_LOG_INFO (this << " Reset HARQ proc " << i << " for RNTI " << (*itTimers).first);
+                std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find ((*itTimers).first);
+                if (itStat == m_dlHarqProcessesStatus.end ())
+                {
+                    NS_FATAL_ERROR ("No Process Id Status found for this RNTI " << (*itTimers).first);
+                }
+		(*itStat).second.at (i) = 0;
+		(*itTimers).second.at (i) = 0;
+            }
+            else
+            {
+                (*itTimers).second.at (i)++;
+            }
+        }
+    }
 
-	std::map <uint16_t, UlHarqProcessesTimer_t>::iterator itTimers2;
-	for (itTimers2 = m_ulHarqProcessesTimer.begin (); itTimers2 != m_ulHarqProcessesTimer.end (); itTimers2++)
-	{
-		for (uint16_t i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
-		{
-			if ((*itTimers2).second.at (i) == m_phyMacConfig->GetHarqTimeout ())
-			{ // reset HARQ process
-				NS_LOG_INFO (this << " Reset HARQ proc " << i << " for RNTI " << (*itTimers2).first);
-				std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find ((*itTimers2).first);
-				if (itStat == m_ulHarqProcessesStatus.end ())
-				{
-					NS_FATAL_ERROR ("No Process Id Status found for this RNTI " << (*itTimers2).first);
-				}
-				(*itStat).second.at (i) = 0;
-				(*itTimers2).second.at (i) = 0;
-			}
-			else
-			{
-				(*itTimers2).second.at (i)++;
-			}
-		}
-	}
-
+    // UL Harq processes
+    std::map <uint16_t, UlHarqProcessesTimer_t>::iterator itTimers2;
+    for (itTimers2 = m_ulHarqProcessesTimer.begin (); itTimers2 != m_ulHarqProcessesTimer.end (); itTimers2++)
+    {
+        for (uint16_t i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
+        {
+            if ((*itTimers2).second.at (i) == m_phyMacConfig->GetHarqTimeout ())
+            { // Time out, reset HARQ process
+                NS_LOG_INFO (this << " Reset HARQ proc " << i << " for RNTI " << (*itTimers2).first);
+                std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find ((*itTimers2).first);
+                if (itStat == m_ulHarqProcessesStatus.end ())
+                {
+                    NS_FATAL_ERROR ("No Process Id Status found for this RNTI " << (*itTimers2).first);
+                }
+                (*itStat).second.at (i) = 0;
+                (*itTimers2).second.at (i) = 0;
+            }
+            else
+            {
+                (*itTimers2).second.at (i)++;
+            }
+        }
+    }
 }
 
 uint8_t
 MmWaveFlexTtiMacScheduler::UpdateDlHarqProcessId (uint16_t rnti)
 {
-	NS_LOG_FUNCTION (this << rnti);
+    NS_LOG_FUNCTION (this << rnti);
 
+    if (m_harqOn == false)
+    {
+        uint8_t tbUid = m_tbUid;
+        m_tbUid = (m_tbUid+1) % m_phyMacConfig->GetNumHarqProcess ();
+        return tbUid;
+    }
 
-	if (m_harqOn == false)
-	{
-		uint8_t tbUid = m_tbUid;
-		m_tbUid = (m_tbUid+1) % m_phyMacConfig->GetNumHarqProcess ();
-		return tbUid;
-	}
+//    std::map <uint16_t, uint8_t>::iterator it = m_dlHarqCurrentProcessId.find (rnti);
+//    if (it == m_dlHarqCurrentProcessId.end ())
+//    {
+//        NS_FATAL_ERROR ("No Process Id found for this RNTI " << rnti);
+//    }
+    std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find (rnti);
+    if (itStat == m_dlHarqProcessesStatus.end ())
+    {
+        NS_FATAL_ERROR ("No Process Id Statusfound for this RNTI " << rnti);
+    }
 
-//	std::map <uint16_t, uint8_t>::iterator it = m_dlHarqCurrentProcessId.find (rnti);
-//	if (it == m_dlHarqCurrentProcessId.end ())
-//	{
-//		NS_FATAL_ERROR ("No Process Id found for this RNTI " << rnti);
-//	}
-	std::map <uint16_t, DlHarqProcessesStatus_t>::iterator itStat = m_dlHarqProcessesStatus.find (rnti);
-	if (itStat == m_dlHarqProcessesStatus.end ())
-	{
-		NS_FATAL_ERROR ("No Process Id Statusfound for this RNTI " << rnti);
-	}
+    // search for available process ID, if none available return numHarqProcess
+    // The "DlHarqProcessesStatus_t" records the usage of each harq process. "0" is available, "1" is not available.
+    uint8_t harqId = m_phyMacConfig->GetNumHarqProcess ();
+    for (unsigned i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
+    {
+        if(itStat->second[i] == 0)
+        {
+            itStat->second[i] = 1;
+            harqId = i;
+            break;
+        }
+    }
+    return harqId;
 
-	// search for available process ID, if none available return numHarqProcess
-	uint8_t harqId = m_phyMacConfig->GetNumHarqProcess ();
-	for (unsigned i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
-	{
-		if(itStat->second[i] == 0)
-		{
-			itStat->second[i] = 1;
-			harqId = i;
-			break;
-		}
-	}
-	return harqId;
-
-//	uint8_t i = (*it).second;
-//	do
-//	{
-//		i = (i + 1) % m_phyMacConfig->GetNumHarqProcess ();
-//	}
-//	while ( ((*itStat).second.at (i) != 0)&&(i != (*it).second));
-//	if ((*itStat).second.at (i) == 0)
-//	{
-//		(*it).second = i;
-//		(*itStat).second.at (i) = 1;
-//	}
-//	else
-//	{
-//		return (m_phyMacConfig->GetNumHarqProcess () + 1); // return a not valid harq proc id
-//	}
+//    uint8_t i = (*it).second;
+//    do
+//    {
+//        i = (i + 1) % m_phyMacConfig->GetNumHarqProcess ();
+//    }
+//    while ( ((*itStat).second.at (i) != 0)&&(i != (*it).second));
+//    if ((*itStat).second.at (i) == 0)
+//    {
+//        (*it).second = i;
+//        (*itStat).second.at (i) = 1;
+//    }
+//    else
+//    {
+//        return (m_phyMacConfig->GetNumHarqProcess () + 1); // return a not valid harq proc id
+//    }
 //
-//	return ((*it).second);
+//    return ((*it).second);
 }
 
 uint8_t
 MmWaveFlexTtiMacScheduler::UpdateUlHarqProcessId (uint16_t rnti)
 {
-	NS_LOG_FUNCTION (this << rnti);
+    NS_LOG_FUNCTION (this << rnti);
 
-	if (m_harqOn == false)
-	{
-		uint8_t tbUid = m_tbUid;
-		m_tbUid = (m_tbUid+1) % m_phyMacConfig->GetNumHarqProcess ();
-		return tbUid;
-	}
+    if (m_harqOn == false)
+    {
+        uint8_t tbUid = m_tbUid;
+        m_tbUid = (m_tbUid+1) % m_phyMacConfig->GetNumHarqProcess ();
+        return tbUid;
+    }
 
-//	std::map <uint16_t, uint8_t>::iterator it = m_ulHarqCurrentProcessId.find (rnti);
-//	if (it == m_ulHarqCurrentProcessId.end ())
-//	{
-//		NS_FATAL_ERROR ("No Process Id found for this RNTI " << rnti);
-//	}
-	std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (rnti);
-	if (itStat == m_ulHarqProcessesStatus.end ())
-	{
-		NS_FATAL_ERROR ("No Process Id Statusfound for this RNTI " << rnti);
-	}
+//    std::map <uint16_t, uint8_t>::iterator it = m_ulHarqCurrentProcessId.find (rnti);
+//    if (it == m_ulHarqCurrentProcessId.end ())
+//    {
+//        NS_FATAL_ERROR ("No Process Id found for this RNTI " << rnti);
+//    }
+    std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (rnti);
+    if (itStat == m_ulHarqProcessesStatus.end ())
+    {
+        NS_FATAL_ERROR ("No Process Id Statusfound for this RNTI " << rnti);
+    }
 
-	// search for available process ID, if none available return numHarqProcess+1
-	uint8_t harqId = m_phyMacConfig->GetNumHarqProcess ();
-	for (unsigned i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
-	{
-		if(itStat->second[i] == 0)
-		{
-			itStat->second[i] = 1;
-			harqId = i;
-			break;
-		}
-	}
-	return harqId;
+    // search for available process ID, if none available return numHarqProcess+1
+    uint8_t harqId = m_phyMacConfig->GetNumHarqProcess ();
+    for (unsigned i = 0; i < m_phyMacConfig->GetNumHarqProcess (); i++)
+    {
+        if(itStat->second[i] == 0)
+        {
+            itStat->second[i] = 1;
+            harqId = i;
+            break;
+        }
+    }
+    return harqId;
 }
 
 unsigned MmWaveFlexTtiMacScheduler::CalcMinTbSizeNumSym (unsigned mcs, unsigned bufSize, unsigned &tbSize)
 {
-	// bisection line search to find minimum number of slots needed to encode entire buffer
-	MmWaveMacPduHeader dummyMacHeader;
-	//unsigned macHdrSize = 10; //dummyMacHeader.GetSerializedSize ();
-	int numSymLow = 0;
-	int numSymHigh = m_phyMacConfig->GetSymbolsPerSubframe();
+    // bisection line search to find minimum number of slots needed to encode entire buffer
+    // TODO: Verify the bug where bufSize equals to an integer times of symbols.
+    MmWaveMacPduHeader dummyMacHeader;
+    //unsigned macHdrSize = 10; //dummyMacHeader.GetSerializedSize ();
+    int numSymLow = 0;
+    int numSymHigh = m_phyMacConfig->GetSymbolsPerSubframe();
 
-	int diff = 0;
-	tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8); // start with max value
-	while ((unsigned)tbSize > bufSize)
-	{
-		diff = abs(numSymHigh-numSymLow)/2;
-		if (diff == 0)
-		{
-			tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8);
-			return numSymHigh;
-		}
-		tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh - diff) / 8);
-		if ((unsigned)tbSize > bufSize)
-		{
-			numSymHigh -= diff;
-		}
-		while ((unsigned)tbSize < bufSize)
-		{
-			diff = abs(numSymHigh-numSymLow)/2;
-			if (diff == 0)
-			{
-				tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8);
-				return numSymHigh;
-			}
-			//tmp2 = numSym;
-			tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymLow + diff) / 8);
-			if ((unsigned)tbSize < bufSize)
-			{
-				numSymLow += diff;
-			}
-		}
-	}
-
-	tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8);
-	return (unsigned)numSymHigh;
+    int diff = 0;
+    tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8); // start with max value, in number of bytes
+    while ((unsigned)tbSize > bufSize)
+    {
+        diff = abs(numSymHigh-numSymLow)/2;
+        if (diff == 0)
+        {
+            tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8);
+            return numSymHigh;
+        }
+	tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh - diff) / 8);
+	if ((unsigned)tbSize > bufSize)
+        {
+            numSymHigh -= diff;
+        }
+        while ((unsigned)tbSize < bufSize)
+        {
+            diff = abs(numSymHigh-numSymLow)/2;
+            if (diff == 0)
+            {
+                tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8);
+                return numSymHigh;
+            }
+            //tmp2 = numSym;
+            tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymLow + diff) / 8);
+            if ((unsigned)tbSize < bufSize)
+            {
+                numSymLow += diff;
+            }
+        }
+    }
+    tbSize = (m_amc->GetTbSizeFromMcsSymbols (mcs, numSymHigh) / 8);
+    return (unsigned)numSymHigh;
 }
 
-// IAB functionality
+/* 
+ * =====================
+ *   IAB Functionality
+ * =====================  
+ */
 uint16_t
 MmWaveFlexTtiMacScheduler::GetNumIabRnti()
 {
-	uint16_t numIabDevs = 0;
-	// cycle through the list of BSRs, and check which RNTIs are for IAB devs
-	for(auto itRlcBuf : m_rlcBufferReq)
+    uint16_t numIabDevs = 0;
+    // cycle through the list of BSRs, and check which RNTIs are for IAB devs
+    for(auto itRlcBuf : m_rlcBufferReq)
+    {
+        uint16_t rnti = itRlcBuf.m_rnti;
+        NS_LOG_INFO(this << " count rnti " << rnti);
+        // get IAB info
+	auto iabInfoIt = m_rntiIabInfoMap.find(rnti);
+	if(iabInfoIt == m_rntiIabInfoMap.end() || !iabInfoIt->second.first)
 	{
-		uint16_t rnti = itRlcBuf.m_rnti;
-		NS_LOG_INFO(this << " count rnti " << rnti);
-		// get IAB info
-		auto iabInfoIt = m_rntiIabInfoMap.find(rnti);
-		if(iabInfoIt == m_rntiIabInfoMap.end() || !iabInfoIt->second.first)
-		{
-			// do nothing
-		}
-		else
-		{
-			if(((itRlcBuf.m_rlcTransmissionQueueSize > 0)
-					|| (itRlcBuf.m_rlcRetransmissionQueueSize > 0)
-					|| (itRlcBuf.m_rlcStatusPduSize > 0)))
-			{
-				numIabDevs++;
-			}
-		}
-		NS_LOG_INFO(this << " numIabDevs " << numIabDevs);
-	}
-
-	return numIabDevs;
+			// do nothing, as iabInfoIt->second.first identifies whether this device is an IAB or not.
+        }
+        else
+        {
+            if(((itRlcBuf.m_rlcTransmissionQueueSize > 0) 
+				    || (itRlcBuf.m_rlcRetransmissionQueueSize > 0) 
+				    || (itRlcBuf.m_rlcStatusPduSize > 0)))
+            {
+                numIabDevs++;
+            }
+        }
+        NS_LOG_INFO(this << " numIabDevs " << numIabDevs);
+    }
+    return numIabDevs;
 }
 
 int
@@ -861,7 +865,7 @@ MmWaveFlexTtiMacScheduler::UpdateBusySymbolsForIab(uint8_t sfNum, uint8_t symIdx
             // }
 	    // symAvail = m_phyMacConfig->GetSymbolsPerSubframe () - 1 - symIdx;
 	}
-	m_iabBusySubframeAllocation.at(sfNum) = busyResources;
+	m_iabBusySubframeAllocation.at(sfNum) = busyResources;  // In the current implementation, nothing modified, unless m_valid is true.
 
 	NS_LOG_DEBUG("After check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
     }
@@ -870,34 +874,33 @@ MmWaveFlexTtiMacScheduler::UpdateBusySymbolsForIab(uint8_t sfNum, uint8_t symIdx
 	NS_LOG_LOGIC("Before check for IAB resources: symIdx " << (uint16_t)symIdx << " symAvail " << symAvail);
 	SfIabAllocInfo busyResources = m_iabBusySubframeAllocation.at(sfNum);
 	if(busyResources.m_valid)
-		{
-			m_busyResourcesSchedSubframe = busyResources;
+        {
+            m_busyResourcesSchedSubframe = busyResources;
 
-			// count the number of symbols which are busy
-			int numBusySymbols = 0;
-			for(auto symbolIter : m_busyResourcesSchedSubframe.m_symAllocationMask)
-			{
-				numBusySymbols += symbolIter;
-			}
+            // count the number of symbols which are busy
+            int numBusySymbols = 0;
+            for(auto symbolIter : m_busyResourcesSchedSubframe.m_symAllocationMask)
+            {
+                numBusySymbols += symbolIter;  // If a symbol/slot is busy (already allocated), it is "1"; otherwise, "0".
+            }
 
-			symAvail -= numBusySymbols;
+            symAvail -= numBusySymbols;  // The number of available free to use symbols
 
-			NS_LOG_DEBUG("This subframe has a DCI stored, with " <<
-			" frame " << busyResources.m_sfnSf.m_frameNum << 
-			" subframe " << (uint16_t)busyResources.m_sfnSf.m_sfNum << " " <<
-			PrintSubframeAllocationMask(busyResources.m_symAllocationMask) << 
-			" total number of busy symbols " << numBusySymbols <<
-			" symAvail " << symAvail);
+            NS_LOG_DEBUG("This subframe has a DCI stored, with " << 
+			    " frame " << busyResources.m_sfnSf.m_frameNum << 
+			    " subframe " << (uint16_t)busyResources.m_sfnSf.m_sfNum << " " <<
+			    PrintSubframeAllocationMask(busyResources.m_symAllocationMask) << 
+			    " total number of busy symbols " << numBusySymbols <<
+			    " symAvail " << symAvail);
 
-		}
-		else
-		{
-			m_busyResourcesSchedSubframe.m_valid = false;
-		}
-		m_iabBusySubframeAllocation.at(sfNum).m_valid = false;
+        }
+        else
+	{
+            m_busyResourcesSchedSubframe.m_valid = false;
 	}
-
-	return symAvail;
+	m_iabBusySubframeAllocation.at(sfNum).m_valid = false;
+    }
+    return symAvail;
 }
 
 void

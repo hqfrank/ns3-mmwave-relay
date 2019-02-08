@@ -182,22 +182,22 @@ MmWaveAmc::GetTbSizeFromMcs (unsigned mcs, unsigned nprb)
 int
 MmWaveAmc::GetTbSizeFromMcsSymbols (unsigned mcs, unsigned nsymb)
 {
-	NS_LOG_FUNCTION (mcs);
-	NS_ASSERT_MSG (mcs < 29, "MCS=" << mcs);
-	//unsigned itb = McsToItbs[mcs];
-	int rscElement = (m_phyMacConfig->GetNumSCperChunk ()*m_phyMacConfig->GetTotalNumChunk()
-			- m_phyMacConfig->GetNumRefScPerSym ())*nsymb;
-	double Rcode = McsEcrTable[mcs];
-	double Qm = ModulationSchemeForMcs[mcs];
+    NS_LOG_FUNCTION (mcs);
+    NS_ASSERT_MSG (mcs < 29, "MCS=" << mcs);  // The maximum MCS value is "28".
+    //unsigned itb = McsToItbs[mcs];
+    //Get the available number of "subcarriers" (SC) in total (across several symbols)
+    int rscElement = (m_phyMacConfig->GetNumSCperChunk () * m_phyMacConfig->GetTotalNumChunk() - m_phyMacConfig->GetNumRefScPerSym ()) * nsymb;
+    double Rcode = McsEcrTable[mcs];  // Effective code rate of MCS 28 is 0.92; of MCS 14 is 0.48. Because the better channel quality, the fewer FEC bits in use.
+    double Qm = ModulationSchemeForMcs[mcs];  // MCS 28 uses 64 QAM, Qm is 6; MCS 14 uses 16 QAM, Qm is 4.
 
-	int tbSize = rscElement*Qm*Rcode - m_crcLen;
-	uint16_t cbSize = 6144;  //max size of a code-block (including m_crcLen)
-	if (tbSize > cbSize)
-	{
-		int C = ceil ((double)tbSize / ((double)(6144)));
-		tbSize -= C*m_crcLen; //subtract bits of m_crcLen used in code-blocks.
-	}
-	return tbSize;
+    int tbSize = rscElement * Qm * Rcode - m_crcLen; // Each subcarrier carries Qm bits
+    uint16_t cbSize = 6144;  //max size of a code-block (including m_crcLen)
+    if (tbSize > cbSize)
+    {
+        int C = ceil ((double)tbSize / ((double)(6144)));
+	tbSize -= C * m_crcLen; //subtract bits of m_crcLen used in code-blocks. TODO: does it substract one more m_crcLen?
+    }
+    return tbSize;
 }
 
 int
