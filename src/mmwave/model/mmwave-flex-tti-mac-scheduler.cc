@@ -267,8 +267,7 @@ MmWaveFlexTtiMacScheduler::GetTypeId (void)
 								 "Number of symbols per slot in Fixed TTI mode",
 								 UintegerValue (6),
 								 MakeUintegerAccessor (&MmWaveFlexTtiMacScheduler::m_symPerSlot),
-								 MakeUintegerChecker<uint8_t> ())y
-		;
+								 MakeUintegerChecker<uint8_t> ());
 
 	return tid;
 }
