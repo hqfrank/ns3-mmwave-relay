@@ -1164,27 +1164,25 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 			while(numFreeSymbols == 0 && tmpSymIdx < m_phyMacConfig->GetSymbolsPerSubframe()-1) 
 			{
 			    numFreeSymbols = GetNumFreeSymbols(tmpSymIdx, numSymNeeded); // this is equal to numSymNeeded if there is no overlap, otherwise smaller
-			    NS_LOG_LOGIC("RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " 
-								<< numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
-							if(numFreeSymbols < numSymNeeded)
-							{
-								numFreeSymbols = 0;
-								tmpSymIdx = GetFirstFreeSymbol(tmpSymIdx, numSymNeeded); // get the next symIdx
-								if((int)(tmpSymIdx + numSymNeeded) > (int)m_phyMacConfig->GetSymbolsPerSubframe()-1)
-								{
-									NS_LOG_DEBUG("No way to fit this retx in the available resources");
-									break;
-								}
-							}
-						}
+			    NS_LOG_LOGIC("RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " << numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
+			    if(numFreeSymbols < numSymNeeded)
+			    {
+				numFreeSymbols = 0;
+				tmpSymIdx = GetFirstFreeSymbol(tmpSymIdx, numSymNeeded); // get the next symIdx
+				if((int)(tmpSymIdx + numSymNeeded) > (int)m_phyMacConfig->GetSymbolsPerSubframe()-1)
+				{
+				    NS_LOG_DEBUG("No way to fit this retx in the available resources");
+				    break;
+				}
+			    }
+			}
 
-						NS_LOG_LOGIC("RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " 
-							<< numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
-						if(numFreeSymbols >= numSymNeeded && (int)(tmpSymIdx + numSymNeeded) < (int)(m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ()))
-						{
-							NS_LOG_LOGIC("Found resources for DL HARQ RETX");
-							symAvail -= dciInfoReTx.m_numSym;
-							dciInfoReTx.m_symStart = tmpSymIdx;
+			NS_LOG_LOGIC("RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " << numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
+			if(numFreeSymbols >= numSymNeeded && (int)(tmpSymIdx + numSymNeeded) < (int)(m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ()))
+			{
+			    NS_LOG_LOGIC("Found resources for DL HARQ RETX");
+			    symAvail -= dciInfoReTx.m_numSym;
+			    dciInfoReTx.m_symStart = tmpSymIdx;
 
 							NS_LOG_LOGIC("Before updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
 
@@ -2210,30 +2208,32 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 int
 MmWaveFlexTtiMacScheduler::GetNumFreeSymbols(uint8_t symIdx, int numSymNeeded)
 {
-	NS_LOG_LOGIC("symIdx " << (uint16_t)symIdx << " numSymNeeded " << numSymNeeded);
+    NS_LOG_LOGIC("symIdx " << (uint16_t)symIdx << " numSymNeeded " << numSymNeeded);
 
-	if(!m_iabScheduler || !m_busyResourcesSchedSubframe.m_valid)
-	{
-		return numSymNeeded;
-	}
+    if(!m_iabScheduler || !m_busyResourcesSchedSubframe.m_valid)
+    {
+        // If this is not an Iab scheduler or the subframe has not been used already.
+	return numSymNeeded;
+    }
 
-	int numFreeSymbols = 0;
-	// get the possible overlapping region
-	uint32_t loopEnd = std::min(symIdx + numSymNeeded, (int)m_busyResourcesSchedSubframe.m_symAllocationMask.size());
-	NS_LOG_LOGIC("loopEnd " << loopEnd);
-	for(uint32_t index = symIdx; index < loopEnd; ++index)
+    int numFreeSymbols = 0;
+    // get the possible overlapping region
+    uint32_t loopEnd = std::min(symIdx + numSymNeeded, (int)m_busyResourcesSchedSubframe.m_symAllocationMask.size());
+    NS_LOG_LOGIC("loopEnd " << loopEnd);
+    for(uint32_t index = symIdx; index < loopEnd; ++index)
+    {
+        if(m_busyResourcesSchedSubframe.m_symAllocationMask.at(index) == 0)
 	{
-		if(m_busyResourcesSchedSubframe.m_symAllocationMask.at(index) == 0)
-		{
-			numFreeSymbols++;
-		}
-		else
-		{
-			NS_LOG_LOGIC("Symbol busy, allocated " << numFreeSymbols << " out of " << numSymNeeded);
-			break;
-		}
+	    numFreeSymbols++;
 	}
-	return numFreeSymbols;
+	else
+	{
+	    // Contiguous symbol assignment, as soon as it detects a busy symbol after free symbols, it considers the end of the search.
+	    NS_LOG_LOGIC("Symbol busy, allocated " << numFreeSymbols << " out of " << numSymNeeded);
+	    break;
+	}
+    }
+    return numFreeSymbols;
 }
 
 void
@@ -2254,23 +2254,23 @@ MmWaveFlexTtiMacScheduler::UpdateResourceMask(uint8_t start, int numSymbols)
 uint8_t
 MmWaveFlexTtiMacScheduler::GetFirstFreeSymbol(uint8_t symIdx, int numFreeSymbols)
 {
-	NS_LOG_LOGIC("symIdx " << (uint16_t)symIdx << " numFreeSymbols " << numFreeSymbols);
+    NS_LOG_LOGIC("symIdx " << (uint16_t)symIdx << " numFreeSymbols " << numFreeSymbols);
 
-	if(!m_iabScheduler || !m_busyResourcesSchedSubframe.m_valid)
-	{
-		return symIdx + numFreeSymbols;
-	}
+    if(!m_iabScheduler || !m_busyResourcesSchedSubframe.m_valid)
+    {
+        return symIdx + numFreeSymbols;  // here first free means the next first free after numFreeSymbols.
+    }
 
-	int index;
-	for(index = symIdx + numFreeSymbols; index < (int)m_busyResourcesSchedSubframe.m_symAllocationMask.size(); ++index)
+    int index;
+    for(index = symIdx + numFreeSymbols; index < (int)m_busyResourcesSchedSubframe.m_symAllocationMask.size(); ++index)
+    {
+        if(m_busyResourcesSchedSubframe.m_symAllocationMask.at(index) == 0)
 	{
-		if(m_busyResourcesSchedSubframe.m_symAllocationMask.at(index) == 0)
-		{
-			NS_LOG_LOGIC("Free symbol found at " << index);
-			break;
-		}
+	    NS_LOG_LOGIC("Free symbol found at " << index);
+	    break;
 	}
-	return static_cast<uint8_t>(index);
+    }
+    return static_cast<uint8_t>(index);
 }
 
 bool
