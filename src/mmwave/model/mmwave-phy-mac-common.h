@@ -255,9 +255,9 @@ struct SlotAllocInfo
   //std::vector<struct RlcPduInfo >  m_rlcPduList; // RLC PDU elems for MAC TB
 
 	TddMode m_tddMode;
-	bool 		m_isOmni; 					// Beamforming disabled, true if omnidirectional
+	bool m_isOmni;                         // Beamforming disabled, true if omnidirectional
 	TddSlotType m_slotType;
-	uint8_t m_numCtrlSym;				// number of DL ctrl (or ctrl+data) symbols at beginning of slot
+	uint8_t m_numCtrlSym;                  // number of DL ctrl (or ctrl+data) symbols at beginning of slot. TODO: the definition of "symbol" and "slot" are confusing.
 	uint8_t m_slotIdx;
 	CtrlTxMode m_ctrlTxMode;
 	uint16_t m_rnti;
@@ -453,14 +453,14 @@ struct RxPacketTraceParams
 
 struct DlHarqInfo
 {
-  uint16_t  m_rnti;
-  uint8_t   m_harqProcessId;
-  enum HarqStatus
-  {
-    ACK, NACK
-  };
-  enum HarqStatus m_harqStatus;
-  uint8_t	m_numRetx;
+    uint16_t  m_rnti;
+    uint8_t   m_harqProcessId;
+    enum HarqStatus
+    {
+      ACK, NACK
+    };
+    enum HarqStatus m_harqStatus;
+    uint8_t   m_numRetx;
 };
 
 struct UlHarqInfo
@@ -472,8 +472,8 @@ struct UlHarqInfo
   {
     Ok, NotOk, NotValid
   } m_receptionStatus;
-  uint8_t   m_tpc;
-  uint8_t	m_numRetx;
+  uint8_t m_tpc;
+  uint8_t m_numRetx;
 };
 
 
