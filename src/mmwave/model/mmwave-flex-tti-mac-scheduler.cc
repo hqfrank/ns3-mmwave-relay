@@ -1183,64 +1183,64 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 			    symAvail -= dciInfoReTx.m_numSym;
 			    dciInfoReTx.m_symStart = tmpSymIdx;
 
-							NS_LOG_LOGIC("Before updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
+			    NS_LOG_LOGIC("Before updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
 
-							// update resource mask
-							UpdateResourceMask(tmpSymIdx, dciInfoReTx.m_numSym);
+			    // update resource mask
+			    UpdateResourceMask(tmpSymIdx, dciInfoReTx.m_numSym);
 
-							NS_LOG_LOGIC("After updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
+    			    NS_LOG_LOGIC("After updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
 
-							// symIdx += dciInfoReTx.m_numSym;
-							NS_ASSERT (tmpSymIdx + dciInfoReTx.m_numSym < m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ());
-							dciInfoReTx.m_rv++;
-							dciInfoReTx.m_ndi = 0;
-							itHarq->second.at (harqId) = dciInfoReTx;
-							itStat->second.at (harqId) = itStat->second.at (harqId) + 1;
-							SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::DL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, itUeInfo->first);
-							NS_LOG_LOGIC("itUeInfo->first " << itUeInfo->first << " dci rnti " << dciInfoReTx.m_rnti);
-							slotInfo.m_dci = dciInfoReTx;
-							NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets DL slots " << (unsigned)dciInfoReTx.m_symStart << "-" << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) <<
-									             " tbs " << dciInfoReTx.m_tbSize << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " harqId " << (unsigned)dciInfoReTx.m_harqProcess <<
-									             " rv " << (unsigned)dciInfoReTx.m_rv << " in frame " << ret.m_sfnSf.m_frameNum << " subframe " << (unsigned)ret.m_sfnSf.m_sfNum << " RETX");
-							std::map <uint16_t, DlHarqRlcPduList_t>::iterator itRlcList =  m_dlHarqProcessesRlcPduMap.find (rnti);
-							if (itRlcList == m_dlHarqProcessesRlcPduMap.end ())
-							{
-								NS_FATAL_ERROR ("Unable to find RlcPdcList in HARQ buffer for RNTI " << rnti);
-							}
-							for (uint16_t k = 0; k < (*itRlcList).second.at(dciInfoReTx.m_harqProcess).size (); k++)
-							{
-								slotInfo.m_rlcPduInfo.push_back ((*itRlcList).second.at (dciInfoReTx.m_harqProcess).at (k));
-							}
-							ret.m_sfAllocInfo.m_slotAllocInfo.push_back (slotInfo);
-							ret.m_sfAllocInfo.m_numSymAlloc += dciInfoReTx.m_numSym;
-							if (itUeInfo == ueInfo.end())
-							{
-								itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (rnti, UeSchedInfo () )).first;
-							}
-							itUeInfo->second.m_dlSymbolsRetx = dciInfoReTx.m_numSym;
-						}
-						else
-						{
-							NS_LOG_DEBUG ("No resource for this retx (even later) -> buffer it");
-							dlInfoListUntxed.push_back (m_dlHarqInfoList.at (i));
-						}
-					}
-				}
-				else
-				{
-					NS_LOG_DEBUG ("No resource for this retx -> buffer it");
-					dlInfoListUntxed.push_back (m_dlHarqInfoList.at (i));
-				}
+			    // symIdx += dciInfoReTx.m_numSym;
+			    NS_ASSERT (tmpSymIdx + dciInfoReTx.m_numSym < m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ());
+			    dciInfoReTx.m_rv++;  // the symbols in the dci has been retransmitted one more time.
+			    dciInfoReTx.m_ndi = 0;
+			    itHarq->second.at (harqId) = dciInfoReTx;
+			    itStat->second.at (harqId) = itStat->second.at (harqId) + 1;
+			    SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::DL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, itUeInfo->first);
+			    NS_LOG_LOGIC("itUeInfo->first " << itUeInfo->first << " dci rnti " << dciInfoReTx.m_rnti);
+			    slotInfo.m_dci = dciInfoReTx;
+			    NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets DL slots " << (unsigned)dciInfoReTx.m_symStart << "-" << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) << 
+					    " tbs " << dciInfoReTx.m_tbSize << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " harqId " << (unsigned)dciInfoReTx.m_harqProcess <<
+					    " rv " << (unsigned)dciInfoReTx.m_rv << " in frame " << ret.m_sfnSf.m_frameNum << " subframe " << (unsigned)ret.m_sfnSf.m_sfNum << " RETX");
+			    std::map <uint16_t, DlHarqRlcPduList_t>::iterator itRlcList =  m_dlHarqProcessesRlcPduMap.find (rnti);
+			    if (itRlcList == m_dlHarqProcessesRlcPduMap.end ())
+			    {
+				NS_FATAL_ERROR ("Unable to find RlcPdcList in HARQ buffer for RNTI " << rnti);
+			    }
+			    for (uint16_t k = 0; k < (*itRlcList).second.at(dciInfoReTx.m_harqProcess).size (); k++)
+			    {
+				slotInfo.m_rlcPduInfo.push_back ((*itRlcList).second.at (dciInfoReTx.m_harqProcess).at (k));
+			    }
+			    ret.m_sfAllocInfo.m_slotAllocInfo.push_back (slotInfo);
+			    ret.m_sfAllocInfo.m_numSymAlloc += dciInfoReTx.m_numSym;
+			    if (itUeInfo == ueInfo.end())
+			    {
+				itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (rnti, UeSchedInfo () )).first;
+			    }
+			    itUeInfo->second.m_dlSymbolsRetx = dciInfoReTx.m_numSym;
 			}
+			else
+			{
+			    NS_LOG_DEBUG ("No resource for this retx (even later) -> buffer it");
+			    dlInfoListUntxed.push_back (m_dlHarqInfoList.at (i));
+			}
+		    }
 		}
-
-		m_dlHarqInfoList.clear ();
-		m_dlHarqInfoList = dlInfoListUntxed;
-
-		// Process UL HARQ feedback
-		for (uint16_t i = 0; i < m_ulHarqInfoList.size (); i++)
+		else
 		{
-			if (symAvail == 0)
+		    NS_LOG_DEBUG ("No resource for this retx -> buffer it");
+		    dlInfoListUntxed.push_back (m_dlHarqInfoList.at (i));
+		}
+	    }
+	}
+
+	m_dlHarqInfoList.clear ();
+	m_dlHarqInfoList = dlInfoListUntxed;
+
+	// Process UL HARQ feedback
+	for (uint16_t i = 0; i < m_ulHarqInfoList.size (); i++)
+	{
+	    if (symAvail == 0)
 			{
 				break;	// no symbols left to allocate
 			}
@@ -2238,15 +2238,15 @@ MmWaveFlexTtiMacScheduler::GetNumFreeSymbols(uint8_t symIdx, int numSymNeeded)
 void
 MmWaveFlexTtiMacScheduler::UpdateResourceMask(uint8_t start, int numSymbols)
 {
-	if(!m_iabScheduler)
-	{
-		NS_FATAL_ERROR("Try to update the mask for a non IAB scheduler");
-	}
+    if(!m_iabScheduler)
+    {
+        NS_FATAL_ERROR("Try to update the mask for a non IAB scheduler");
+    }
 
-	for(uint32_t index = start; index < (uint32_t)(start + numSymbols); ++index)
-	{
-		m_busyResourcesSchedSubframe.m_symAllocationMask.at(index) = 1;
-	}
+    for(uint32_t index = start; index < (uint32_t)(start + numSymbols); ++index)
+    {
+        m_busyResourcesSchedSubframe.m_symAllocationMask.at(index) = 1;
+    }
 		
 }
 
