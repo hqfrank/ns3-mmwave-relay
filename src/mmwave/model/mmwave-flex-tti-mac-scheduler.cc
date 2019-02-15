@@ -1241,18 +1241,18 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 	for (uint16_t i = 0; i < m_ulHarqInfoList.size (); i++)
 	{
 	    if (symAvail == 0)
-			{
-				break;	// no symbols left to allocate
-			}
-			UlHarqInfo harqInfo = m_ulHarqInfoList.at (i);
-			uint8_t harqId = harqInfo.m_harqProcessId;
-			uint16_t rnti = harqInfo.m_rnti;
-			itUeInfo = ueInfo.find (rnti);
-			std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (rnti);
-			if (itStat == m_ulHarqProcessesStatus.end ())
-			{
-				NS_LOG_ERROR ("No info found in HARQ buffer for UE (might have changed eNB) " << rnti);
-			}
+	    {
+		break;	// no symbols left to allocate
+	    }
+	    UlHarqInfo harqInfo = m_ulHarqInfoList.at (i);
+	    uint8_t harqId = harqInfo.m_harqProcessId;
+	    uint16_t rnti = harqInfo.m_rnti;
+	    itUeInfo = ueInfo.find (rnti);
+	    std::map <uint16_t, UlHarqProcessesStatus_t>::iterator itStat = m_ulHarqProcessesStatus.find (rnti);
+	    if (itStat == m_ulHarqProcessesStatus.end ())
+	    {
+		NS_LOG_ERROR ("No info found in HARQ buffer for UE (might have changed eNB) " << rnti);
+	    }
 			if (harqInfo.m_receptionStatus == UlHarqInfo::Ok || itStat->second.at (harqId) == 0)
 			{
 				//NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqInfo.m_harqProcessId << " HARQ-ACK received");
