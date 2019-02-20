@@ -1199,9 +1199,11 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 			    SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::DL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, itUeInfo->first);
 			    NS_LOG_LOGIC("itUeInfo->first " << itUeInfo->first << " dci rnti " << dciInfoReTx.m_rnti);
 			    slotInfo.m_dci = dciInfoReTx;
-			    NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets DL slots " << (unsigned)dciInfoReTx.m_symStart << "-" << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) << 
-					    " tbs " << dciInfoReTx.m_tbSize << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " harqId " << (unsigned)dciInfoReTx.m_harqProcess <<
-					    " rv " << (unsigned)dciInfoReTx.m_rv << " in frame " << ret.m_sfnSf.m_frameNum << " subframe " << (unsigned)ret.m_sfnSf.m_sfNum << " RETX");
+			    NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets DL slots " << (unsigned)dciInfoReTx.m_symStart << "-" 
+					    << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) << " tbs " << dciInfoReTx.m_tbSize 
+					    << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " harqId " << (unsigned)dciInfoReTx.m_harqProcess 
+					    << " rv " << (unsigned)dciInfoReTx.m_rv << " in frame " << ret.m_sfnSf.m_frameNum << " subframe " 
+					    << (unsigned)ret.m_sfnSf.m_sfNum << " RETX");
 			    std::map <uint16_t, DlHarqRlcPduList_t>::iterator itRlcList =  m_dlHarqProcessesRlcPduMap.find (rnti);
 			    if (itRlcList == m_dlHarqProcessesRlcPduMap.end ())
 			    {
@@ -1253,304 +1255,305 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 	    {
 		NS_LOG_ERROR ("No info found in HARQ buffer for UE (might have changed eNB) " << rnti);
 	    }
-			if (harqInfo.m_receptionStatus == UlHarqInfo::Ok || itStat->second.at (harqId) == 0)
-			{
-				//NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqInfo.m_harqProcessId << " HARQ-ACK received");
-				if (itStat != m_ulHarqProcessesStatus.end ())
-				{
-					itStat->second.at (harqId) = 0;  // release process ID
-				}
-			}
-			else if (harqInfo.m_receptionStatus == UlHarqInfo::NotOk)
-			{
-				std::map <uint16_t, UlHarqProcessesDciInfoList_t>::iterator itHarq = m_ulHarqProcessesDciInfoMap.find (rnti);
-				if (itHarq == m_ulHarqProcessesDciInfoMap.end ())
-				{
-					NS_LOG_ERROR ("No info found in UL-HARQ buffer for UE (might have changed eNB) " << rnti);
-				}
-				// retx correspondent block: retrieve the UL-DCI
-				DciInfoElementTdma dciInfoReTx = itHarq->second.at (harqId);
-				NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqId << " TX not ok, rv" << (unsigned)dciInfoReTx.m_rv);
-				//NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqInfo.m_harqProcessId << " HARQ-NACK received, rv " << (unsigned)dciInfoReTx.m_rv);
-				NS_ASSERT (harqId == dciInfoReTx.m_harqProcess);
-				NS_ASSERT(itStat->second.at (harqId) > 0);
-				NS_ASSERT(itStat->second.at (harqId)-1 == dciInfoReTx.m_rv);
-				if (dciInfoReTx.m_rv == 3)
-				{
-					NS_LOG_INFO ("Max number of retransmissions reached (UL)-> drop process");
-					itStat->second.at (harqId) = 0;
-					continue;
-				}
-
-				NS_LOG_DEBUG("Num sym needed " << dciInfoReTx.m_numSym << " symIdx " << (uint16_t)symIdx);
-				if (symAvail >= dciInfoReTx.m_numSym)
-				{
-					if(!CheckOverlapWithBusyResources(symIdx, dciInfoReTx.m_numSym)) // TODOIAB: check if it can be allocated later
-					{
-						symAvail -= dciInfoReTx.m_numSym;
-						dciInfoReTx.m_symStart = symIdx;
-						symIdx += dciInfoReTx.m_numSym;
-						NS_ASSERT (symIdx <= m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ());
-						dciInfoReTx.m_rv++;
-						dciInfoReTx.m_ndi = 0;
-						itStat->second.at (harqId) = itStat->second.at (harqId) + 1;
-						itHarq->second.at (harqId) = dciInfoReTx;
-						SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::UL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, rnti);
-						slotInfo.m_dci = dciInfoReTx;
-						NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets UL slots " << (unsigned)dciInfoReTx.m_symStart << "-" << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) <<
-												 " tbs " << dciInfoReTx.m_tbSize << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " rv " << (unsigned)dciInfoReTx.m_rv << " in frame " << ulSfn.m_frameNum << " subframe " << (unsigned)ulSfn.m_sfNum <<
-												 " RETX");
-						ret.m_sfAllocInfo.m_slotAllocInfo.push_back (slotInfo);
-						ret.m_sfAllocInfo.m_numSymAlloc += dciInfoReTx.m_numSym;
-						if (itUeInfo == ueInfo.end())
-						{
-							itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (rnti, UeSchedInfo () )).first;
-						}
-						itUeInfo->second.m_ulSymbolsRetx = dciInfoReTx.m_numSym;
-					}
-					else
-					{
-						// find if there are other resources later
-						// we cannot split RETX!
-						int numSymNeeded = dciInfoReTx.m_numSym;
-						int numFreeSymbols = 0;
-						uint8_t tmpSymIdx = symIdx;
-
-						while(numFreeSymbols == 0 && tmpSymIdx < m_phyMacConfig->GetSymbolsPerSubframe()-1) 
-						{
-							numFreeSymbols = GetNumFreeSymbols(tmpSymIdx, numSymNeeded); // this is equal to numSymNeeded if there is no overlap, otherwise smaller
-							NS_LOG_LOGIC("UL RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " 
-								<< numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
-							if(numFreeSymbols < numSymNeeded)
-							{
-								numFreeSymbols = 0;
-								tmpSymIdx = GetFirstFreeSymbol(tmpSymIdx, numSymNeeded); // get the next symIdx
-								if((int)(tmpSymIdx + numSymNeeded) >  (int)m_phyMacConfig->GetSymbolsPerSubframe()-1)
-								{	
-									NS_LOG_DEBUG("No way to fit this retx in the available resources");
-									break;
-								}
-							}
-						}
-
-						NS_LOG_LOGIC("UL RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " 
-							<< numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
-						if(numFreeSymbols >= numSymNeeded && (int)(tmpSymIdx + numSymNeeded) < (int)(m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ()))
-						{
-							symAvail -= dciInfoReTx.m_numSym;
-							dciInfoReTx.m_symStart = tmpSymIdx;
-
-							NS_LOG_LOGIC("Before updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
-
-							// update resource mask
-							UpdateResourceMask(tmpSymIdx, dciInfoReTx.m_numSym);
-
-							NS_LOG_LOGIC("After updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
-
-							// symIdx += dciInfoReTx.m_numSym;
-							NS_ASSERT (tmpSymIdx + dciInfoReTx.m_numSym <= m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ());
-							dciInfoReTx.m_rv++;
-							dciInfoReTx.m_ndi = 0;
-							itStat->second.at (harqId) = itStat->second.at (harqId) + 1;
-							itHarq->second.at (harqId) = dciInfoReTx;
-							SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::UL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, rnti);
-							slotInfo.m_dci = dciInfoReTx;
-							NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets UL slots " << (unsigned)dciInfoReTx.m_symStart << "-" << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) <<
-													 " tbs " << dciInfoReTx.m_tbSize << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " rv " << (unsigned)dciInfoReTx.m_rv << " in frame " << ulSfn.m_frameNum << " subframe " << (unsigned)ulSfn.m_sfNum <<
-													 " RETX");
-							ret.m_sfAllocInfo.m_slotAllocInfo.push_back (slotInfo);
-							ret.m_sfAllocInfo.m_numSymAlloc += dciInfoReTx.m_numSym;
-							if (itUeInfo == ueInfo.end())
-							{
-								itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (rnti, UeSchedInfo () )).first;
-							}
-							itUeInfo->second.m_ulSymbolsRetx = dciInfoReTx.m_numSym;
-						}
-						else
-						{
-							NS_LOG_DEBUG ("No resource for this UL retx (even later) -> buffer it");
-							ulInfoListUntxed.push_back (m_ulHarqInfoList.at (i));
-						}
-					}
-				}
-				else
-				{
-					NS_LOG_DEBUG ("No resource for this retx -> buffer it");
-					ulInfoListUntxed.push_back (m_ulHarqInfoList.at (i));
-				}
-			}
+	    if (harqInfo.m_receptionStatus == UlHarqInfo::Ok || itStat->second.at (harqId) == 0)
+	    {
+		//NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqInfo.m_harqProcessId << " HARQ-ACK received");
+		if (itStat != m_ulHarqProcessesStatus.end ())
+		{
+	            itStat->second.at (harqId) = 0;  // release process ID
+		}
+	    }
+	    else if (harqInfo.m_receptionStatus == UlHarqInfo::NotOk)
+	    {
+		std::map <uint16_t, UlHarqProcessesDciInfoList_t>::iterator itHarq = m_ulHarqProcessesDciInfoMap.find (rnti);
+		if (itHarq == m_ulHarqProcessesDciInfoMap.end ())
+		{
+	            NS_LOG_ERROR ("No info found in UL-HARQ buffer for UE (might have changed eNB) " << rnti);
+		}
+		// retx correspondent block: retrieve the UL-DCI
+		DciInfoElementTdma dciInfoReTx = itHarq->second.at (harqId);  // It has 8 processes in the default setting.
+		NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqId << " TX not ok, rv" << (unsigned)dciInfoReTx.m_rv);
+		//NS_LOG_DEBUG ("UE" << rnti << " UL harqId " << (unsigned)harqInfo.m_harqProcessId << " HARQ-NACK received, rv " << (unsigned)dciInfoReTx.m_rv);
+		NS_ASSERT (harqId == dciInfoReTx.m_harqProcess);
+		NS_ASSERT(itStat->second.at (harqId) > 0);  // It must be retransmitted at least once already.
+		NS_ASSERT(itStat->second.at (harqId)-1 == dciInfoReTx.m_rv);  // First attempt: status == 1, m_rv == 0.
+		if (dciInfoReTx.m_rv == 3)
+		{
+		    NS_LOG_INFO ("Max number of retransmissions reached (UL)-> drop process");
+		    itStat->second.at (harqId) = 0;
+		    continue;
 		}
 
-		m_ulHarqInfoList.clear ();
-		m_ulHarqInfoList = ulInfoListUntxed;
-	}
-
-	NS_LOG_DEBUG("After HARQ allocation symAvail " << symAvail << " mask " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
-
-	// ********************* END OF HARQ SECTION, START OF NEW DATA SCHEDULING ********************* //
-
-	// number of DL/UL flows for new transmissions (not HARQ RETX)
-	int nFlowsDl = 0;
-	int nFlowsUl = 0;
-	int nFlowsAccessDl = 0;
-	int nFlowsAccessUl = 0;
-	int nFlowsBackhaulDl = 0;
-	int nFlowsBackhaulUl = 0;
-
-	// get info on active DL flows
-	if (symAvail > 0 && !m_ulOnly)  // remaining symbols in current subframe after HARQ retx sched
-	{
-		for (itRlcBuf = m_rlcBufferReq.begin (); itRlcBuf != m_rlcBufferReq.end (); itRlcBuf++)
+		NS_LOG_DEBUG("Num sym needed " << dciInfoReTx.m_numSym << " symIdx " << (uint16_t)symIdx);
+		if (symAvail >= dciInfoReTx.m_numSym)
 		{
-			itUeInfo = ueInfo.find (itRlcBuf->m_rnti);
-			// check if it is a relay or a UE
-			bool isIab = false;
-			if(m_rntiIabInfoMap.find(itRlcBuf->m_rnti) != m_rntiIabInfoMap.end())
+		    if(!CheckOverlapWithBusyResources(symIdx, dciInfoReTx.m_numSym)) // TODOIAB: check if it can be allocated later
+		    {
+			symAvail -= dciInfoReTx.m_numSym;
+			dciInfoReTx.m_symStart = symIdx;
+			symIdx += dciInfoReTx.m_numSym;
+			NS_ASSERT (symIdx <= m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ());
+			dciInfoReTx.m_rv++;     // Another retransmission, so that m_rv is increased by 1.
+			dciInfoReTx.m_ndi = 0;  // Not new data.
+			itStat->second.at (harqId) = itStat->second.at (harqId) + 1;
+			itHarq->second.at (harqId) = dciInfoReTx;  // Update the corresponding dci info in the uplink harq buffer
+			SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::UL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, rnti);
+			slotInfo.m_dci = dciInfoReTx;
+		        NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets UL slots " << (unsigned)dciInfoReTx.m_symStart << "-" 
+					<< (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) << " tbs " << dciInfoReTx.m_tbSize 
+					<< " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " rv " << (unsigned)dciInfoReTx.m_rv 
+					<< " in frame " << ulSfn.m_frameNum << " subframe " << (unsigned)ulSfn.m_sfNum << " RETX");
+			ret.m_sfAllocInfo.m_slotAllocInfo.push_back (slotInfo);
+			ret.m_sfAllocInfo.m_numSymAlloc += dciInfoReTx.m_numSym;
+			if (itUeInfo == ueInfo.end())
 			{
-				isIab = m_rntiIabInfoMap.find(itRlcBuf->m_rnti)->second.first;
+			    itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (rnti, UeSchedInfo () )).first;
+			}
+			itUeInfo->second.m_ulSymbolsRetx = dciInfoReTx.m_numSym;  // The # of symbols used for this ul retransmission.
+		    }
+		    else  // The first available period of slots are not enough for the retransmission, try to test the next available slot period.
+		    { 
+			// find if there are other resources later
+			// we cannot split RETX!
+			int numSymNeeded = dciInfoReTx.m_numSym;
+			int numFreeSymbols = 0;
+			uint8_t tmpSymIdx = symIdx;
+
+			while(numFreeSymbols == 0 && tmpSymIdx < m_phyMacConfig->GetSymbolsPerSubframe()-1) 
+			{
+			    numFreeSymbols = GetNumFreeSymbols(tmpSymIdx, numSymNeeded); // this is equal to numSymNeeded if there is no overlap, otherwise smaller
+			    NS_LOG_LOGIC("UL RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " << numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
+			    if(numFreeSymbols < numSymNeeded)  // The # of available consecutive slots are not enough for retranmission.
+			    {
+				numFreeSymbols = 0;
+				tmpSymIdx = GetFirstFreeSymbol(tmpSymIdx, numSymNeeded); // get the next symIdx
+				if((int)(tmpSymIdx + numSymNeeded) >  (int)m_phyMacConfig->GetSymbolsPerSubframe()-1)
+				{	
+				    NS_LOG_DEBUG("No way to fit this retx in the available resources");
+				    break;
+				}
+			    }
 			}
 
-			if ( (((*itRlcBuf).m_rlcTransmissionQueueSize > 0)
-					|| ((*itRlcBuf).m_rlcRetransmissionQueueSize > 0)
-					|| ((*itRlcBuf).m_rlcStatusPduSize > 0)) )
-			{
-				NS_LOG_DEBUG (this << " User " << itRlcBuf->m_rnti << " LC " << (uint16_t)itRlcBuf->m_logicalChannelIdentity << " is active, status  " << (*itRlcBuf).m_rlcStatusPduSize << " retx " << (*itRlcBuf).m_rlcRetransmissionQueueSize << " tx " << (*itRlcBuf).m_rlcTransmissionQueueSize << " iab " << isIab);
-				std::map <uint16_t,uint8_t>::iterator itCqi = m_wbCqiRxed.find (itRlcBuf->m_rnti);
-				uint8_t cqi = 0;
-				if (itCqi != m_wbCqiRxed.end ())
-				{
-					cqi = itCqi->second;
-				}
-				else // no CQI available
-				{
-					NS_LOG_DEBUG (this << " UE " << itRlcBuf->m_rnti << " does not have DL-CQI");
-					cqi = 1; // lowest value for trying a transmission
-				}
-				if (cqi != 0 || m_fixedMcsDl) 	// CQI == 0 means "out of range" (see table 7.2.3-1 of 36.213)
-				{
-					if (itUeInfo == ueInfo.end ())
-					{
-						itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (itRlcBuf->m_rnti, UeSchedInfo () )).first;
+			NS_LOG_LOGIC("UL RETX numSymNeeded " << numSymNeeded << " numFreeSymbols " << numFreeSymbols << " tmpSymIdx " << (uint16_t)tmpSymIdx);
+			if(numFreeSymbols >= numSymNeeded 
+					&& (int)(tmpSymIdx + numSymNeeded) < (int)(m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ()))
+			{  // There are enough available consecutive slots for this retranmission.
+			    symAvail -= dciInfoReTx.m_numSym;
+			    dciInfoReTx.m_symStart = tmpSymIdx;
 
-						nFlowsDl++;  // for simplicity, all RLC LCs are considered as a single flow
-						if(!isIab)
-						{
-							nFlowsAccessDl++;
-						}
-						else
-						{
-							nFlowsBackhaulDl++;
-							itUeInfo->second.m_iab = true;
-						}
-					}
-					else if (itUeInfo->second.m_maxDlBufSize == 0)
-					{
-						nFlowsDl++;
-						if(!isIab)
-						{
-							nFlowsAccessDl++;
-						}
-						else
-						{
-							nFlowsBackhaulDl++;
-							itUeInfo->second.m_iab = true;
-						}
-					}
-					NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab);
-					if (m_fixedMcsDl)
-					{
-						itUeInfo->second.m_dlMcs = m_mcsDefaultDl;
-					}
-					else
-					{
-						itUeInfo->second.m_dlMcs = m_amc->GetMcsFromCqi (cqi);  // get MCS
-					}
+			    NS_LOG_LOGIC("Before updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
 
-					// temporarily store the TX queue size
-					if(itRlcBuf->m_rlcStatusPduSize > 0)
-					{
-						RlcPduInfo newRlcStatusPdu;
-						newRlcStatusPdu.m_lcid = itRlcBuf->m_logicalChannelIdentity;
-						newRlcStatusPdu.m_size += itRlcBuf->m_rlcStatusPduSize + m_subHdrSize;
-						itUeInfo->second.m_rlcPduInfo.push_back (newRlcStatusPdu);
-						itUeInfo->second.m_maxDlBufSize += newRlcStatusPdu.m_size;  // add to total DL buffer size
-					}
+			    // update resource mask
+			    UpdateResourceMask(tmpSymIdx, dciInfoReTx.m_numSym);
 
-					RlcPduInfo newRlcEl;
-					newRlcEl.m_lcid = itRlcBuf->m_logicalChannelIdentity;
-					if (itRlcBuf->m_rlcRetransmissionQueueSize > 0)
-					{
-						newRlcEl.m_size = itRlcBuf->m_rlcRetransmissionQueueSize;
-					}
-					else if (itRlcBuf->m_rlcTransmissionQueueSize > 0)
-					{
-						newRlcEl.m_size = itRlcBuf->m_rlcTransmissionQueueSize;
-					}
+			    NS_LOG_LOGIC("After updating " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
 
-					if (newRlcEl.m_size > 0)
-					{
-						if (newRlcEl.m_size < 8)
-						{
-							newRlcEl.m_size = 8;
-						}
-						newRlcEl.m_size += m_rlcHdrSize + m_subHdrSize + 10;
-						itUeInfo->second.m_rlcPduInfo.push_back (newRlcEl);
-						itUeInfo->second.m_maxDlBufSize += newRlcEl.m_size;  // add to total DL buffer size
-					}
-				}
-				else
-				{ // SINR out of range, don't schedule for DL
-					NS_LOG_WARN ("*** RNTI " << itRlcBuf->m_rnti << " DL-CQI out of range, skipping allocation");
-				}
+			    // symIdx += dciInfoReTx.m_numSym;
+			    NS_ASSERT (tmpSymIdx + dciInfoReTx.m_numSym <= m_phyMacConfig->GetSymbolsPerSubframe () - m_phyMacConfig->GetUlCtrlSymbols ());
+			    dciInfoReTx.m_rv++;
+			    dciInfoReTx.m_ndi = 0;
+			    itStat->second.at (harqId) = itStat->second.at (harqId) + 1;
+			    itHarq->second.at (harqId) = dciInfoReTx;
+			    SlotAllocInfo slotInfo (slotIdx++, SlotAllocInfo::UL_slotAllocInfo, SlotAllocInfo::CTRL_DATA, SlotAllocInfo::DIGITAL, rnti);
+			    slotInfo.m_dci = dciInfoReTx;
+			    NS_LOG_DEBUG ("UE" << dciInfoReTx.m_rnti << " gets UL slots " << (unsigned)dciInfoReTx.m_symStart << "-" 
+					    << (unsigned)(dciInfoReTx.m_symStart+dciInfoReTx.m_numSym-1) << " tbs " << dciInfoReTx.m_tbSize 
+					    << " harqId " << (unsigned)dciInfoReTx.m_harqProcess << " rv " << (unsigned)dciInfoReTx.m_rv 
+					    << " in frame " << ulSfn.m_frameNum << " subframe " << (unsigned)ulSfn.m_sfNum << " RETX");
+			    ret.m_sfAllocInfo.m_slotAllocInfo.push_back (slotInfo);
+			    ret.m_sfAllocInfo.m_numSymAlloc += dciInfoReTx.m_numSym;
+			    if (itUeInfo == ueInfo.end())
+			    {
+				itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (rnti, UeSchedInfo () )).first;
+			    }
+			    itUeInfo->second.m_ulSymbolsRetx = dciInfoReTx.m_numSym;
 			}
+			else
+			{
+			    NS_LOG_DEBUG ("No resource for this UL retx (even later) -> buffer it");
+			    ulInfoListUntxed.push_back (m_ulHarqInfoList.at (i));
+			}
+		    }
 		}
+		else
+		{
+		    NS_LOG_DEBUG ("No resource for this retx -> buffer it");
+		    ulInfoListUntxed.push_back (m_ulHarqInfoList.at (i));
+		}
+	    }
 	}
 
-	// get info on active UL flows
-	if (symAvail > 0 && !m_dlOnly)  // remaining symbols in future UL subframe after HARQ retx sched
+	m_ulHarqInfoList.clear ();
+	m_ulHarqInfoList = ulInfoListUntxed;
+    }
+
+    NS_LOG_DEBUG("After HARQ allocation symAvail " << symAvail << " mask " << PrintSubframeAllocationMask(m_busyResourcesSchedSubframe.m_symAllocationMask));
+
+    // ********************* END OF HARQ SECTION, START OF NEW DATA SCHEDULING ********************* //
+
+    // number of DL/UL flows for new transmissions (not HARQ RETX)
+    int nFlowsDl = 0;
+    int nFlowsUl = 0;
+    int nFlowsAccessDl = 0;
+    int nFlowsAccessUl = 0;
+    int nFlowsBackhaulDl = 0;
+    int nFlowsBackhaulUl = 0;
+
+    // get info on active DL flows
+    if (symAvail > 0 && !m_ulOnly)  // remaining symbols in current subframe after HARQ retx sched
+    {
+	for (itRlcBuf = m_rlcBufferReq.begin (); itRlcBuf != m_rlcBufferReq.end (); itRlcBuf++)
 	{
-		// std::map <uint16_t,uint32_t>::iterator ceBsrIt;
-		for(auto ceBsrIt : m_ceBsrRxed)
+	    itUeInfo = ueInfo.find (itRlcBuf->m_rnti);
+	    // check if it is a relay or a UE
+	    bool isIab = false;
+	    if(m_rntiIabInfoMap.find(itRlcBuf->m_rnti) != m_rntiIabInfoMap.end())
+	    {
+		isIab = m_rntiIabInfoMap.find(itRlcBuf->m_rnti)->second.first;
+	    }
+
+	    if ( (((*itRlcBuf).m_rlcTransmissionQueueSize > 0) || ((*itRlcBuf).m_rlcRetransmissionQueueSize > 0) || ((*itRlcBuf).m_rlcStatusPduSize > 0)) )
+	    {
+		NS_LOG_DEBUG (this << " User " << itRlcBuf->m_rnti << " LC " << (uint16_t)itRlcBuf->m_logicalChannelIdentity << " is active, status  " 
+				<< (*itRlcBuf).m_rlcStatusPduSize << " retx " << (*itRlcBuf).m_rlcRetransmissionQueueSize 
+				<< " tx " << (*itRlcBuf).m_rlcTransmissionQueueSize << " iab " << isIab);
+		std::map <uint16_t,uint8_t>::iterator itCqi = m_wbCqiRxed.find (itRlcBuf->m_rnti);
+		uint8_t cqi = 0;
+		if (itCqi != m_wbCqiRxed.end ())
 		{
+		    cqi = itCqi->second;
+		}
+		else // no CQI available
+		{
+		    NS_LOG_DEBUG (this << " UE " << itRlcBuf->m_rnti << " does not have DL-CQI");
+		    cqi = 1; // lowest value for trying a transmission
+		}
+		if (cqi != 0 || m_fixedMcsDl) 	// CQI == 0 means "out of range" (see table 7.2.3-1 of 36.213)
+		{
+		    if (itUeInfo == ueInfo.end ())
+		    {
+			itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (itRlcBuf->m_rnti, UeSchedInfo () )).first;
+
+			nFlowsDl++;  // for simplicity, all RLC LCs are considered as a single flow
+			if(!isIab)
+			{
+			    nFlowsAccessDl++;
+			}
+			else
+			{
+			    nFlowsBackhaulDl++;
+			    itUeInfo->second.m_iab = true;
+			}
+		    }
+		    else if (itUeInfo->second.m_maxDlBufSize == 0)
+		    {
+			nFlowsDl++;
+			if(!isIab)
+			{
+			    nFlowsAccessDl++;
+			}
+			else
+			{
+			    nFlowsBackhaulDl++;
+			    itUeInfo->second.m_iab = true;
+			}
+		    }
+		    NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab);
+		    if (m_fixedMcsDl)
+	            {
+		        itUeInfo->second.m_dlMcs = m_mcsDefaultDl;
+		    }
+		    else
+		    {
+			itUeInfo->second.m_dlMcs = m_amc->GetMcsFromCqi (cqi);  // get MCS
+		    }
+
+		    // temporarily store the TX queue size
+		    if(itRlcBuf->m_rlcStatusPduSize > 0)
+		    {
+			RlcPduInfo newRlcStatusPdu;
+			newRlcStatusPdu.m_lcid = itRlcBuf->m_logicalChannelIdentity;
+			newRlcStatusPdu.m_size += itRlcBuf->m_rlcStatusPduSize + m_subHdrSize;  // subframe's header should be added
+			itUeInfo->second.m_rlcPduInfo.push_back (newRlcStatusPdu);
+			itUeInfo->second.m_maxDlBufSize += newRlcStatusPdu.m_size;  // add to total DL buffer size
+		    }
+
+		    RlcPduInfo newRlcEl;
+		    newRlcEl.m_lcid = itRlcBuf->m_logicalChannelIdentity;
+		    if (itRlcBuf->m_rlcRetransmissionQueueSize > 0)
+		    {
+			newRlcEl.m_size = itRlcBuf->m_rlcRetransmissionQueueSize;
+		    }
+		    else if (itRlcBuf->m_rlcTransmissionQueueSize > 0)
+		    {
+			newRlcEl.m_size = itRlcBuf->m_rlcTransmissionQueueSize;
+		    }
+
+		    if (newRlcEl.m_size > 0)
+		    {
+			if (newRlcEl.m_size < 8)
+			{
+			    newRlcEl.m_size = 8;
+			}
+			newRlcEl.m_size += m_rlcHdrSize + m_subHdrSize + 10;
+			itUeInfo->second.m_rlcPduInfo.push_back (newRlcEl);
+			itUeInfo->second.m_maxDlBufSize += newRlcEl.m_size;  // add to total DL buffer size
+		    }
+		}
+	        else
+		{ // SINR out of range, don't schedule for DL
+		    NS_LOG_WARN ("*** RNTI " << itRlcBuf->m_rnti << " DL-CQI out of range, skipping allocation");
+		}
+	    }
+	}
+    }
+
+    // get info on active UL flows
+    if (symAvail > 0 && !m_dlOnly)  // remaining symbols in future UL subframe after HARQ retx sched
+    {
+        // std::map <uint16_t,uint32_t>::iterator ceBsrIt;
+	for(auto ceBsrIt : m_ceBsrRxed)
+	{
 		// }
 
 		// for (ceBsrIt = m_ceBsrRxed.begin (); ceBsrIt != m_ceBsrRxed.end (); ceBsrIt++)
 		// {
-			if (ceBsrIt.second > 0)  // UL buffer size > 0
-			{
-				std::map <uint16_t, struct UlCqiMapElem>::iterator itCqi = m_ueUlCqi.find (ceBsrIt.first);
-				bool isIab = false;
-				if(m_rntiIabInfoMap.find(ceBsrIt.first) != m_rntiIabInfoMap.end())
-				{
-					isIab = m_rntiIabInfoMap.find(ceBsrIt.first)->second.first;
-				}
-				NS_LOG_DEBUG(this << " ceBsrIt UE " << ceBsrIt.first << " bf size " << ceBsrIt.second << " iab " << isIab);
+	    if (ceBsrIt.second > 0)  // UL buffer size > 0
+	    {
+		std::map <uint16_t, struct UlCqiMapElem>::iterator itCqi = m_ueUlCqi.find (ceBsrIt.first);
+		bool isIab = false;
+		if(m_rntiIabInfoMap.find(ceBsrIt.first) != m_rntiIabInfoMap.end())
+		{
+		    isIab = m_rntiIabInfoMap.find(ceBsrIt.first)->second.first;
+		}
+		NS_LOG_DEBUG(this << " ceBsrIt UE " << ceBsrIt.first << " bf size " << ceBsrIt.second << " iab " << isIab);
 
-				int cqi = 0;
-				int mcs = 0;
-				if (itCqi == m_ueUlCqi.end ()) // no cqi info for this UE
-				{
-					NS_LOG_DEBUG (this << " UE " << ceBsrIt.first << " does not have UL-CQI");
-					cqi = 1;
-					mcs = 0;
-				}
-				else
-				{
-					cqi = 0;
-					SpectrumValue specVals (MmWaveSpectrumValueHelper::GetSpectrumModel (m_phyMacConfig));
-					Values::iterator specIt = specVals.ValuesBegin();
-					for (unsigned ichunk = 0; ichunk < m_phyMacConfig->GetTotalNumChunk (); ichunk++)
-					{
-						//double sinrLin = std::pow (10, itCqi->second.m_ueUlCqi.at (ichunk) / 10);
-//						double se1 = log2 ( 1 + (std::pow (10, sinrLin / 10 )  /
-//								( (-std::log (5.0 * m_berDl )) / 1.5) ));
-//						cqi += m_amc->GetCqiFromSpectralEfficiency (se1);
-						NS_ASSERT (specIt != specVals.ValuesEnd());
-						*specIt = itCqi->second.m_ueUlCqi.at (ichunk); //sinrLin;
-						specIt++;
-					}
+		int cqi = 0;
+		int mcs = 0;
+		if (itCqi == m_ueUlCqi.end ()) // no cqi info for this UE
+		{
+		    NS_LOG_DEBUG (this << " UE " << ceBsrIt.first << " does not have UL-CQI");
+		    cqi = 1;
+		    mcs = 0;
+		}
+		else
+		{
+		    cqi = 0;
+		    SpectrumValue specVals (MmWaveSpectrumValueHelper::GetSpectrumModel (m_phyMacConfig));
+		    Values::iterator specIt = specVals.ValuesBegin();
+		    for (unsigned ichunk = 0; ichunk < m_phyMacConfig->GetTotalNumChunk (); ichunk++)
+		    {
+			//double sinrLin = std::pow (10, itCqi->second.m_ueUlCqi.at (ichunk) / 10);
+//			double se1 = log2 ( 1 + (std::pow (10, sinrLin / 10 )  /
+//					( (-std::log (5.0 * m_berDl )) / 1.5) ));
+//			cqi += m_amc->GetCqiFromSpectralEfficiency (se1);
+			NS_ASSERT (specIt != specVals.ValuesEnd());
+			*specIt = itCqi->second.m_ueUlCqi.at (ichunk); //sinrLin;
+			specIt++;
+		    }
 
-					cqi = m_amc->CreateCqiFeedbackWbTdma (specVals, itCqi->second.m_numSym, itCqi->second.m_tbSize, mcs);
+		    cqi = m_amc->CreateCqiFeedbackWbTdma (specVals, itCqi->second.m_numSym, itCqi->second.m_tbSize, mcs);
 //					for (unsigned i = 0; i < chunkCqi.size(); i++)
 //					{
 //						cqi += chunkCqi[i];
@@ -1574,137 +1577,139 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
 					//				double se = log2 ( 1 + (std::pow (10, minSinr / 10 )  /
 					//						( (-std::log (5.0 * 0.00005 )) / 1.5) ));
 					//				cqi = m_amc->GetCqiFromSpectralEfficiency (se);
-					if (cqi == 0 && !m_fixedMcsUl) // out of range (SINR too low)
-					{
-						NS_LOG_DEBUG ("*** RNTI " << ceBsrIt.first << " UL-CQI out of range, skipping allocation in UL");
-						// TODOIAB use continue and not break
-						continue;  // do not allocate UE in uplink
-					}
-				}
-				itUeInfo = ueInfo.find (ceBsrIt.first);
-				if (itUeInfo == ueInfo.end ())
-				{
-					itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (ceBsrIt.first, UeSchedInfo () )).first;
+		    if (cqi == 0 && !m_fixedMcsUl) // out of range (SINR too low)
+		    {
+			NS_LOG_DEBUG ("*** RNTI " << ceBsrIt.first << " UL-CQI out of range, skipping allocation in UL");
+			// TODOIAB use continue and not break
+			continue;  // do not allocate UE in uplink
+		    }
+		}
+		itUeInfo = ueInfo.find (ceBsrIt.first);
+		if (itUeInfo == ueInfo.end ())
+		{
+		    itUeInfo = ueInfo.insert (std::pair<uint16_t, struct UeSchedInfo> (ceBsrIt.first, UeSchedInfo () )).first;
 					
-					nFlowsUl++;
-					if(!isIab)
-					{
-						nFlowsAccessUl++;
-					}
-					else
-					{
-						nFlowsBackhaulUl++;
-						itUeInfo->second.m_iab = true;
-					}
-				}
-				else if (itUeInfo->second.m_maxUlBufSize == 0)
-				{
-					nFlowsUl++;
-					if(!isIab)
-					{
-						nFlowsAccessUl++;
-					}
-					else
-					{
-						nFlowsBackhaulUl++;
-						itUeInfo->second.m_iab = true;
-					}
-				}
-				NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab);
-				if (m_fixedMcsUl)
-				{
-					itUeInfo->second.m_ulMcs = m_mcsDefaultUl;
-				}
-				else
-				{
-					itUeInfo->second.m_ulMcs = mcs;//m_amc->GetMcsFromCqi (cqi);  // get MCS
-				}
-				itUeInfo->second.m_maxUlBufSize = ceBsrIt.second + m_rlcHdrSize + m_macHdrSize + 8;
-			}
+		    nFlowsUl++;
+		    if(!isIab)
+		    {
+			nFlowsAccessUl++;
+		    }
+		    else
+		    {
+			nFlowsBackhaulUl++;
+			itUeInfo->second.m_iab = true;
+		    }
 		}
+		else if (itUeInfo->second.m_maxUlBufSize == 0)
+		{
+		    nFlowsUl++;
+		    if(!isIab)
+		    {
+			nFlowsAccessUl++;
+		    }
+		    else
+		    {
+			nFlowsBackhaulUl++;
+			itUeInfo->second.m_iab = true;
+		    }
+		}
+		NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab);
+		if (m_fixedMcsUl)
+		{
+		    itUeInfo->second.m_ulMcs = m_mcsDefaultUl;
+		}
+		else
+		{
+		    itUeInfo->second.m_ulMcs = mcs;//m_amc->GetMcsFromCqi (cqi);  // get MCS
+		}
+		itUeInfo->second.m_maxUlBufSize = ceBsrIt.second + m_rlcHdrSize + m_macHdrSize + 8;
+	    }
 	}
+    }
 
-	int nFlowsTot = nFlowsDl + nFlowsUl;
+    int nFlowsTot = nFlowsDl + nFlowsUl;
 
-	NS_LOG_DEBUG(this << " nFlowsDl " << nFlowsDl << " nFlowsUl " << nFlowsUl 
-		<< " nFlowsAccessDl " << nFlowsAccessDl << " nFlowsAccessUl " << nFlowsAccessUl
-		<< " nFlowsBackhaulDl " << nFlowsBackhaulDl << " nFlowBackhaulsUl " << nFlowsBackhaulUl);
+    NS_LOG_DEBUG(this << " nFlowsDl " << nFlowsDl << " nFlowsUl " << nFlowsUl << " nFlowsAccessDl " << nFlowsAccessDl 
+		    << " nFlowsAccessUl " << nFlowsAccessUl << " nFlowsBackhaulDl " << nFlowsBackhaulDl << " nFlowBackhaulsUl " << nFlowsBackhaulUl);
 
-	if (ueInfo.size () == 0)
-	{
-		// add slot for UL control
-		SlotAllocInfo ulCtrlSlot (0xFF, SlotAllocInfo::UL_slotAllocInfo, SlotAllocInfo::CTRL, SlotAllocInfo::DIGITAL, 0);
-		ulCtrlSlot.m_dci.m_numSym = 1;
-		ulCtrlSlot.m_dci.m_symStart = m_phyMacConfig->GetSymbolsPerSubframe()-1;
-		ret.m_sfAllocInfo.m_slotAllocInfo.push_back (ulCtrlSlot);
-		m_macSchedSapUser->SchedConfigInd (ret);
-		return;
-	}
+    if (ueInfo.size () == 0)
+    {
+	// add slot for UL control
+	SlotAllocInfo ulCtrlSlot (0xFF, SlotAllocInfo::UL_slotAllocInfo, SlotAllocInfo::CTRL, SlotAllocInfo::DIGITAL, 0);
+	ulCtrlSlot.m_dci.m_numSym = 1;
+	ulCtrlSlot.m_dci.m_symStart = m_phyMacConfig->GetSymbolsPerSubframe()-1;
+	ret.m_sfAllocInfo.m_slotAllocInfo.push_back (ulCtrlSlot);
+	m_macSchedSapUser->SchedConfigInd (ret);
+	return;
+    }
 
-	// compute requested num slots and TB size based on MCS and DL buffer size
-	// final allocated slots may be less
-	int totDlSymReq = 0;
-	int totUlSymReq = 0;
-	int totAccessDlSymReq = 0;
-	int totAccessUlSymReq = 0;
-	int totBackhaulDlSymReq = 0;
-	int totBackhaulUlSymReq = 0;
+    // compute requested num slots and TB size based on MCS and DL buffer size
+    // final allocated slots may be less
+    int totDlSymReq = 0;
+    int totUlSymReq = 0;
+    int totAccessDlSymReq = 0;
+    int totAccessUlSymReq = 0;
+    int totBackhaulDlSymReq = 0;
+    int totBackhaulUlSymReq = 0;
 	
-	for (itUeInfo = ueInfo.begin (); itUeInfo != ueInfo.end (); itUeInfo++)
+    for (itUeInfo = ueInfo.begin (); itUeInfo != ueInfo.end (); itUeInfo++)
+    {
+	unsigned dlTbSize = 0;
+	unsigned ulTbSize = 0;
+	if (itUeInfo->second.m_maxDlBufSize > 0)
 	{
-		unsigned dlTbSize = 0;
-		unsigned ulTbSize = 0;
-		if (itUeInfo->second.m_maxDlBufSize > 0)
-		{
-			itUeInfo->second.m_maxDlSymbols = CalcMinTbSizeNumSym (itUeInfo->second.m_dlMcs, itUeInfo->second.m_maxDlBufSize, dlTbSize); // dlTbSize is passed as a parameter and not as a value, it will be updated with the tbSize
-			// TODOIAB fire trace to store the m_maxDlSymbols
-			itUeInfo->second.m_maxDlBufSize = dlTbSize;
-			if (m_fixedTti)
-			{
-				itUeInfo->second.m_maxDlSymbols = ceil((double)itUeInfo->second.m_maxDlSymbols/(double)m_symPerSlot) * m_symPerSlot; // round up to nearest sym per TTI
-			}
-			totDlSymReq += itUeInfo->second.m_maxDlSymbols;
-			NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab << " " << itUeInfo->first);
-			if(itUeInfo->second.m_iab)
-			{
-				totBackhaulDlSymReq += itUeInfo->second.m_maxDlSymbols;
-			}
-			else
-			{
-				totAccessDlSymReq += itUeInfo->second.m_maxDlSymbols;
-			}
-		}
-		if (itUeInfo->second.m_maxUlBufSize > 0)
-		{
-			itUeInfo->second.m_maxUlSymbols = CalcMinTbSizeNumSym (itUeInfo->second.m_ulMcs, itUeInfo->second.m_maxUlBufSize+10, ulTbSize);
-			itUeInfo->second.m_maxUlBufSize = ulTbSize;
-			if (m_fixedTti)
-			{
-				itUeInfo->second.m_maxUlSymbols = ceil((double)itUeInfo->second.m_maxUlSymbols/(double)m_symPerSlot) * m_symPerSlot; // round up to nearest sym per TTI
-			}
-			totUlSymReq += itUeInfo->second.m_maxUlSymbols;
-			NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab << " " << itUeInfo->first);
-			if(itUeInfo->second.m_iab)
-			{
-				totBackhaulUlSymReq += itUeInfo->second.m_maxUlSymbols;
-			}
-			else
-			{
-				totAccessUlSymReq += itUeInfo->second.m_maxUlSymbols;
-			}
-		}
+	    itUeInfo->second.m_maxDlSymbols = CalcMinTbSizeNumSym (itUeInfo->second.m_dlMcs, itUeInfo->second.m_maxDlBufSize, dlTbSize); 
+	    // dlTbSize is passed as a parameter and not as a value, it will be updated with the tbSize
+	    // TODOIAB fire trace to store the m_maxDlSymbols
+	    itUeInfo->second.m_maxDlBufSize = dlTbSize;
+	    if (m_fixedTti)
+	    {
+		itUeInfo->second.m_maxDlSymbols = ceil((double)itUeInfo->second.m_maxDlSymbols/(double)m_symPerSlot) * m_symPerSlot; // round up to nearest sym per TTI
+	    }
+	    totDlSymReq += itUeInfo->second.m_maxDlSymbols;
+	    NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab << " " << itUeInfo->first);
+	    if(itUeInfo->second.m_iab)
+	    {
+		totBackhaulDlSymReq += itUeInfo->second.m_maxDlSymbols;
+	    }
+	    else
+	    {
+		totAccessDlSymReq += itUeInfo->second.m_maxDlSymbols;
+	    }
 	}
+	if (itUeInfo->second.m_maxUlBufSize > 0)
+	{
+	    itUeInfo->second.m_maxUlSymbols = CalcMinTbSizeNumSym (itUeInfo->second.m_ulMcs, itUeInfo->second.m_maxUlBufSize+10, ulTbSize);
+	    itUeInfo->second.m_maxUlBufSize = ulTbSize;
+	    if (m_fixedTti)
+	    {
+		itUeInfo->second.m_maxUlSymbols = ceil((double)itUeInfo->second.m_maxUlSymbols/(double)m_symPerSlot) * m_symPerSlot; // round up to nearest sym per TTI
+	    }
+	    totUlSymReq += itUeInfo->second.m_maxUlSymbols;
+	    NS_LOG_DEBUG("itUeInfo->second.m_iab " << itUeInfo->second.m_iab << " " << itUeInfo->first);
+	    if(itUeInfo->second.m_iab)
+	    {
+	        totBackhaulUlSymReq += itUeInfo->second.m_maxUlSymbols;
+	    }
+	    else
+	    {
+		totAccessUlSymReq += itUeInfo->second.m_maxUlSymbols;
+	    }
+	}
+    }
 
-	NS_LOG_DEBUG(this << " totDlSymReq " << totDlSymReq << " totUlSymReq " << totUlSymReq 
-		<< " totAccessDlSymReq " << totAccessDlSymReq << " totAccessUlSymReq " << totAccessUlSymReq
-		<< " totBackhaulDlSymReq " << totBackhaulDlSymReq << " totBackhaulUlSymReq " << totBackhaulUlSymReq);
+    NS_LOG_DEBUG(this << " totDlSymReq " << totDlSymReq << " totUlSymReq " << totUlSymReq << " totAccessDlSymReq " << totAccessDlSymReq 
+		    << " totAccessUlSymReq " << totAccessUlSymReq  << " totBackhaulDlSymReq " << totBackhaulDlSymReq << " totBackhaulUlSymReq " << totBackhaulUlSymReq);
 
-	// TODOIAB each IAB device cannot have more than half of the available resources
-	// TODOIAB force the sum of m_maxUlSymbols and m_maxDlSymbols to be smaller than or equal to the following quantity
-	int maxSymAvailableForIab = std::floor(symAvail/2);
-	int removedSymbolsDl = 0;
-	int removedSymbolsUl = 0;
-	for(auto itUeInfo = ueInfo.begin(); itUeInfo != ueInfo.end(); ++itUeInfo)
+    // TODOIAB each IAB device cannot have more than half of the available resources
+    // TODOIAB force the sum of m_maxUlSymbols and m_maxDlSymbols to be smaller than or equal to the following quantity
+    int maxSymAvailableForIab = std::floor(symAvail/2);  // TODO: Allow the Iab resource to be full available resource in case there is not access UE.
+    if (nFlowsAccessDl + nFlowsAccessUl == 0) {
+    	maxSymAvailableForIab = std::min(symAvail, (int) m_phyMacConfig->GetSymbolsPerSubframe()/2 - 1);
+    }
+    int removedSymbolsDl = 0;
+    int removedSymbolsUl = 0;
+    for(auto itUeInfo = ueInfo.begin(); itUeInfo != ueInfo.end(); ++itUeInfo)
 	{
 		if(itUeInfo->second.m_iab)
 		{
@@ -2515,13 +2520,19 @@ MmWaveFlexTtiMacScheduler::DoCschedCellConfigReq (const struct MmWaveMacCschedSa
   return;
 }
 
+
+/*
+ * Configure single UE.
+ * (Re-)configure MAC scheduler with single UE specific parameters.
+ * A UE can only be configured when a cell configuration has been received.
+ */
 void
 MmWaveFlexTtiMacScheduler::DoCschedUeConfigReq (const struct MmWaveMacCschedSapProvider::CschedUeConfigReqParameters& params)
 {
-  NS_LOG_FUNCTION (this << " RNTI " << params.m_rnti << " txMode " << (uint16_t)params.m_transmissionMode);
+    NS_LOG_FUNCTION (this << " RNTI " << params.m_rnti << " txMode " << (uint16_t)params.m_transmissionMode);
 
-  if (m_dlHarqProcessesStatus.find (params.m_rnti) == m_dlHarqProcessesStatus.end ())
-  {
+    if (m_dlHarqProcessesStatus.find (params.m_rnti) == m_dlHarqProcessesStatus.end ())
+    {
   	//m_dlHarqCurrentProcessId.insert (std::pair <uint16_t,uint8_t > (params.m_rnti, 0));
   	DlHarqProcessesStatus_t dlHarqPrcStatus;
   	dlHarqPrcStatus.resize (m_phyMacConfig->GetNumHarqProcess (), 0);
@@ -2535,11 +2546,11 @@ MmWaveFlexTtiMacScheduler::DoCschedUeConfigReq (const struct MmWaveMacCschedSapP
   	DlHarqRlcPduList_t dlHarqRlcPduList;
   	dlHarqRlcPduList.resize (m_phyMacConfig->GetNumHarqProcess ());
   	m_dlHarqProcessesRlcPduMap.insert (std::pair <uint16_t, DlHarqRlcPduList_t> (params.m_rnti, dlHarqRlcPduList));
-  }
+    }
 
-  if (m_ulHarqProcessesStatus.find (params.m_rnti) == m_ulHarqProcessesStatus.end ())
-  {
-  	//				m_ulHarqCurrentProcessId.insert (std::pair <uint16_t,uint8_t > (rnti, 0));
+    if (m_ulHarqProcessesStatus.find (params.m_rnti) == m_ulHarqProcessesStatus.end ())
+    {
+  	// m_ulHarqCurrentProcessId.insert (std::pair <uint16_t,uint8_t > (rnti, 0));
   	UlHarqProcessesStatus_t ulHarqPrcStatus;
   	ulHarqPrcStatus.resize (m_phyMacConfig->GetNumHarqProcess (), 0);
   	m_ulHarqProcessesStatus.insert (std::pair <uint16_t, UlHarqProcessesStatus_t> (params.m_rnti, ulHarqPrcStatus));
@@ -2549,34 +2560,34 @@ MmWaveFlexTtiMacScheduler::DoCschedUeConfigReq (const struct MmWaveMacCschedSapP
   	UlHarqProcessesDciInfoList_t ulHarqTbInfoList;
   	ulHarqTbInfoList.resize (m_phyMacConfig->GetNumHarqProcess ());
   	m_ulHarqProcessesDciInfoMap.insert (std::pair <uint16_t, UlHarqProcessesDciInfoList_t> (params.m_rnti, ulHarqTbInfoList));
-  }
+    }
 
-  // IAB configure if this rnti is an IAB dev or not!
-  if(params.m_reconfigureFlag)
-  {
+    // IAB configure if this rnti is an IAB dev or not!
+    if(params.m_reconfigureFlag)
+    {
   	uint32_t prevNumDevs = 0;
   	auto iterIab = m_rntiIabInfoMap.find(params.m_rnti);
   	if(iterIab != m_rntiIabInfoMap.end())
   	{
-  		iterIab->second.first = params.m_ueCapabilities.m_iab;
-  		prevNumDevs = iterIab->second.second;
-  		iterIab->second.second = params.m_ueCapabilities.m_numIabDevsPerRnti;
+  	    iterIab->second.first = params.m_ueCapabilities.m_iab;
+  	    prevNumDevs = iterIab->second.second;
+  	    iterIab->second.second = params.m_ueCapabilities.m_numIabDevsPerRnti;
   	}
   	else
   	{
-  		auto pair = std::make_pair(params.m_rnti, std::make_pair(params.m_ueCapabilities.m_iab, params.m_ueCapabilities.m_numIabDevsPerRnti));
-  		m_rntiIabInfoMap.insert(pair);
+  	    auto pair = std::make_pair(params.m_rnti, std::make_pair(params.m_ueCapabilities.m_iab, params.m_ueCapabilities.m_numIabDevsPerRnti));
+  	    m_rntiIabInfoMap.insert(pair);
   	}
   	NS_LOG_DEBUG(this << " Reconfiguration of UE " << params.m_rnti << " iab " << params.m_ueCapabilities.m_iab
   		<< " numDevs " << params.m_ueCapabilities.m_numIabDevsPerRnti << " prevNumDevs " << prevNumDevs);
 
   	if(params.m_ueCapabilities.m_numIabDevsPerRnti + 1 > (int)m_maxSchedulingDelay) // + 1 since we need at least 1 TTI without no downstream IAB nodes
   	{
-  		NS_LOG_WARN(this << " !!! --- !!! Updating m_maxSchedulingDelay from " 
-  			<< m_maxSchedulingDelay << " to " << params.m_ueCapabilities.m_numIabDevsPerRnti + 1);
-  		m_maxSchedulingDelay = params.m_ueCapabilities.m_numIabDevsPerRnti + 1;
+  	    NS_LOG_WARN(this << " !!! --- !!! Updating m_maxSchedulingDelay from " 
+			<< m_maxSchedulingDelay << " to " << params.m_ueCapabilities.m_numIabDevsPerRnti + 1);
+  	    m_maxSchedulingDelay = params.m_ueCapabilities.m_numIabDevsPerRnti + 1;
   	}
-  }
+    }
 }
 
 void

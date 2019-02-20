@@ -204,8 +204,8 @@ main (int argc, char *argv[])
   // LogComponentEnable("EpcMmeApplication", LOG_LEVEL_LOGIC);
   // LogComponentEnable("EpcUeNas", LOG_LEVEL_LOGIC);
 
-  LogComponentEnable("LteEnbRrc", LOG_LEVEL_INFO);
-  LogComponentEnable("LteUeRrc", LOG_LEVEL_INFO);
+  // LogComponentEnable("LteEnbRrc", LOG_LEVEL_INFO);
+  // LogComponentEnable("LteUeRrc", LOG_LEVEL_INFO);
   LogComponentEnable("MmWaveHelper", LOG_LEVEL_LOGIC);
   LogComponentEnable("MmWavePointToPointEpcHelper", LOG_LEVEL_LOGIC);
   //LogComponentEnable("EpcS1ap", LOG_LEVEL_LOGIC);
@@ -223,7 +223,7 @@ main (int argc, char *argv[])
   bool rlcAm = true;                // rlc is in acknowledge mode
   uint32_t numRelays = 2;           // # of IAB nodes
   uint32_t rlcBufSize = 1000;        // mega-bits, Mb
-  uint32_t interPacketInterval = 10; // micro-second, us
+  uint32_t interPacketInterval = 20; // micro-second, us
   cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
   cmd.AddValue("am", "RLC AM if true", rlcAm);
   cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -233,7 +233,7 @@ main (int argc, char *argv[])
 
   //   if(rlcAm)
   // {
-    LogComponentEnable("LteRlcAm", LOG_LEVEL_LOGIC); 
+  //  LogComponentEnable("LteRlcAm", LOG_LEVEL_LOGIC); 
   // }
   // else
   // {
@@ -309,9 +309,9 @@ main (int argc, char *argv[])
   int numBuildingsRow = 4;
   int numBuildingsColumn = 4;
   double streetWidth = 10; // m
-  double buildingWidthX = 50; // m
-  double buildingWidthY = 50; // m
-  double buildingHeight = 30; // m
+  double buildingWidthX = 70; // m
+  double buildingWidthY = 70; // m
+  double buildingHeight = 10; // m
   std::vector< Ptr<Building> > buildingVector; // in case you need to access the buildings later
 
   for (int rowIndex = 0; rowIndex < numBuildingsRow; ++rowIndex)
@@ -353,7 +353,7 @@ main (int argc, char *argv[])
   double yMax = numBuildingsColumn*(buildingWidthY + streetWidth) - streetWidth;
   double totalArea = xMax * yMax;
 
-  double gnbHeight = buildingHeight - 10;
+  double gnbHeight = buildingHeight + 10;
 
   double xWired = numBuildingsRow*(buildingWidthX+streetWidth)/2 - streetWidth/2;
   double yWired = numBuildingsColumn*(buildingWidthY+streetWidth)/2 - streetWidth/2;

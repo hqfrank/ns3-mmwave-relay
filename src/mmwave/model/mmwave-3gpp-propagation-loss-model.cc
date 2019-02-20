@@ -602,7 +602,7 @@ MmWave3gppPropagationLossModel::GetLoss (Ptr<MobilityModel> a, Ptr<MobilityModel
 				{
 					double PLNlos = 35.3*log10(distance3D)+22.4+21.3*log10(freqGHz)-0.3*(hUt-1.5);
 					shadowingStd = 7.82;
-					lossDb = std::max(PLNlos, lossDb);
+					lossDb = std::max(PLNlos, lossDb) + 30;
 				}
 
 				break;
