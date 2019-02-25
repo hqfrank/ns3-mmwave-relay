@@ -1707,6 +1707,10 @@ MmWaveFlexTtiMacScheduler::DoSchedTriggerReq (const struct MmWaveMacSchedSapProv
     if (nFlowsAccessDl + nFlowsAccessUl == 0) {
     	maxSymAvailableForIab = std::min(symAvail, (int) m_phyMacConfig->GetSymbolsPerSubframe()/2 - 1);
     }
+    else
+    {
+        maxSymAvailableForIab = std::min(symAvail, (int) m_phyMacConfig->GetSymbolsPerSubframe()/2 - 2);
+    }
     int removedSymbolsDl = 0;
     int removedSymbolsUl = 0;
     for(auto itUeInfo = ueInfo.begin(); itUeInfo != ueInfo.end(); ++itUeInfo)
