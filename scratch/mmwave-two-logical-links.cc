@@ -222,13 +222,15 @@ main (int argc, char *argv[])
      */
     CommandLine cmd;
     unsigned run = 0;
-    bool rlcAm = true;                // rlc is in acknowledge mode
-    uint32_t numRelays = 4;           // # of IAB nodes
+    bool rlcAm = true;                 // rlc is in acknowledge mode
+    uint32_t numRelays = 6;            // # of IAB nodes
+    uint32_t numLogicalLinks = 2;      // # of logical links in the network
     uint32_t rlcBufSize = 1000;        // mega-bits, Mb
     uint32_t interPacketInterval = 20; // micro-second, us
     cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
     cmd.AddValue("am", "RLC AM if true", rlcAm);
     cmd.AddValue("numRelay", "Number of relays", numRelays);
+    cmd.AddValue("numLogicalLinks", "Number of logical links", numLogicalLinks);
     cmd.AddValue("rlcBufSize", "RLC buffer size [MB]", rlcBufSize);
     cmd.AddValue("intPck", "interPacketInterval [us]", interPacketInterval);
     cmd.Parse(argc, argv);
@@ -343,14 +345,11 @@ main (int argc, char *argv[])
      *  -----------------
      *  (0,0)
      */
-    double xMax = numBuildingsRow * (buildingWidthX + streetWidth) - streetWidth;     // the maximum x coordinates of the furthest building
-    double yMax = numBuildingsColumn * (buildingWidthY + streetWidth) - streetWidth;  // the maximum y coordinates of the furthest building
+    double xMax = numBuildingsColumn * (buildingWidthX + streetWidth) - streetWidth;     // the maximum x coordinates of the furthest building
+    double yMax = numBuildingsRow * (buildingWidthY + streetWidth) - streetWidth;  // the maximum y coordinates of the furthest building
     double totalArea = xMax * yMax;
 
     double gnbHeight = buildingHeight - 10;  // When the height of gnb is lower than the building, there is blockage between most of the interfering signals.
-
-    double xWired = numBuildingsRow * (buildingWidthX+streetWidth)/2 - streetWidth/2;
-    double yWired = numBuildingsColumn * (buildingWidthY+streetWidth)/2 - streetWidth/2;  // The only enb with wired connection is located in the center of the area.
 
     std::vector<double> x (numBuildingsColumn + 1);
     std::vector<double> y (numBuildingsRow + 1);
@@ -361,181 +360,162 @@ main (int argc, char *argv[])
         y[i] = i * (buildingWidthY + streetWidth) - streetWidth/2; 
     }
     
-    /*
-     * double xUe1 = numBuildingsRow*(buildingWidthX+streetWidth)/4 - streetWidth/2;
-    double xUe2 = 3*numBuildingsRow*(buildingWidthX+streetWidth)/4 - streetWidth/2;
-    double yUe1 = numBuildingsColumn*(buildingWidthY+streetWidth)/4 - streetWidth/2 ;
-    double yUe2 = 3*numBuildingsColumn*(buildingWidthY+streetWidth)/4 - streetWidth/2;
-     */
-  Vector posUe1 = Vector(xUe1, yUe1, gnbHeight);
-  Vector posUe2 = Vector(xUe1, yUe2, gnbHeight);
-  Vector posUe3 = Vector(xUe2, yUe1, gnbHeight);
-  Vector posUe4 = Vector(xUe2, yUe2, gnbHeight);
-  Vector posWired = Vector(xWired, yWired, gnbHeight);
-  Vector posIab1 = Vector(xWired, yUe1, gnbHeight);
-  Vector posIab2 = Vector(xUe1, yWired, gnbHeight);
-  Vector posIab3 = Vector(xUe2, yWired, gnbHeight);
-  Vector posIab4 = Vector(xWired, yUe2, gnbHeight);
+    // Coordinations of the 6 relays, 2 logical links scenario 
+    Vector posWired = Vector(x[numBuildingsColumn/2], y[numBuildingsRow/2], gnbHeight);
+    Vector posIab1 = Vector(x[numBuildingsColumn/2], y[numBuildingsRow/2 + 1], gnbHeight);
+    Vector posIab2 = Vector(x[numBuildingsColumn/2 + 1], y[numBuildingsRow/2 + 1], gnbHeight);
+    Vector posIab3 = Vector(x[numBuildingsColumn/2 + 1], y[numBuildingsRow/2 + 2], gnbHeight);
+    Vector posUe1 = Vector(x[numBuildingsColumn/2 + 2], y[numBuildingsRow/2 + 2], gnbHeight);
+    Vector posIab4 = Vector(x[numBuildingsColumn/2 + 1], y[numBuildingsRow/2], gnbHeight);
+    Vector posIab5 = Vector(x[numBuildingsColumn/2 + 1], y[numBuildingsRow/2 - 1], gnbHeight);
+    Vector posIab6 = Vector(x[numBuildingsColumn/2 + 2], y[numBuildingsRow/2 - 1], gnbHeight);
+    Vector posUe2 = Vector(x[numBuildingsColumn/2 + 2], y[numBuildingsRow/2 - 2], gnbHeight);
+    Vector posUe3 = Vector(x[numBuildingsColumn/2 - 2], y[numBuildingsRow/2 - 2], gnbHeight);
+    Vector posUe4 = Vector(x[numBuildingsColumn/2 - 2], y[numBuildingsRow/2 + 2], gnbHeight);
 
-  /*
-   *  The three hop scenario
-   *
-   *           gnb
-   *
-   *  Iab2     Iab1
-   *
-   *  Ue1     
-   */
-  if (numRelays == 2) {
-      posWired = Vector(xWired, yUe2, gnbHeight);
-      posIab1 = Vector(xWired, yWired, gnbHeight);
-      posIab4 = Vector(xWired, yUe1, gnbHeight);
-
-  
-  }
-
-  if (numRelays == 3) {
-      posWired = Vector(xUe2, yUe2, gnbHeight);
-      posIab1 = Vector(xUe2, yWired, gnbHeight);
-      posIab2 = Vector(xWired, yWired, gnbHeight);
-      posIab3 = Vector(xWired, yUe1, gnbHeight);
-      posUe4 = Vector(xUe1, yWired, gnbHeight);
-  }
-  NS_LOG_UNCOND("wired " << posWired << 
+    NS_LOG_UNCOND("wired " << posWired <<
                 " iab1 " << posIab1 <<
                 " iab2 " << posIab2 <<
-                " iab3 " << posIab3 << 
-                " iab4 " << posIab4 << 
+                " iab3 " << posIab3 <<
+                " iab4 " << posIab4 <<
+                " iab5 " << posIab3 <<
+                " iab6 " << posIab4 <<
                 " totalArea " << totalArea
                 );
 
-  /*
-   *  Generating nodes in the topology:
-   *  1 wired gnb as source, 1 Iab as relay, 1 Ue as destination. 
-   */
-  NodeContainer ueNodes;
-  NodeContainer enbNodes;
-  NodeContainer iabNodes;
- 
-  enbNodes.Create(1);
-  iabNodes.Create(numRelays);
-  ueNodes.Create(1);
+    /*
+     *  Generating nodes in the topology 
+     */
+    NodeContainer ueNodes;   // all ue nodes, in total # of logical links
+    NodeContainer enbNodes;  // all enb nodes, only 1 in the topology
+    NodeContainer iabNodes;  // all iab nodes as relays
 
-  // Install Mobility Model
-  Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
-  enbPositionAlloc->Add (posWired);
-  MobilityHelper enbmobility;
-  enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbmobility.SetPositionAllocator(enbPositionAlloc);
-  enbmobility.Install (enbNodes);
+    enbNodes.Create(1);
+    iabNodes.Create(numRelays);
+    ueNodes.Create(numLogicalLinks);
 
-  if(numRelays > 0)
-  { 
-    Ptr<ListPositionAllocator> iabPositionAlloc = CreateObject<ListPositionAllocator> ();
-    iabPositionAlloc->Add (posIab1);
-    iabPositionAlloc->Add (posIab2);
-    iabPositionAlloc->Add (posIab3);
-    iabPositionAlloc->Add (posIab4);
-    MobilityHelper iabmobility;
-    iabmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-    iabmobility.SetPositionAllocator (iabPositionAlloc);
-    iabmobility.Install (iabNodes);
-  }
+    // Install Mobility Model
+    // enb mobility model
+    Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
+    enbPositionAlloc->Add (posWired);
+    MobilityHelper enbmobility;
+    enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    enbmobility.SetPositionAllocator(enbPositionAlloc);
+    enbmobility.Install (enbNodes);
 
-  MobilityHelper uemobility;
-  Ptr<ListPositionAllocator> uePosAlloc = CreateObject<ListPositionAllocator>();
-  uePosAlloc->Add (posUe1);  // Change it to Iab1, when test the LoS single hop case without relaying.
-  uePosAlloc->Add (posUe2);
-  uePosAlloc->Add (posUe3);
-  uePosAlloc->Add (posUe4);
-  uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  uemobility.SetPositionAllocator (uePosAlloc);
-  uemobility.Install (ueNodes);
-  
-  BuildingsHelper::Install (enbNodes);
-  if(numRelays > 0)
-  { 
-    BuildingsHelper::Install (iabNodes);
-  }
-  BuildingsHelper::Install (ueNodes);
-  BuildingsHelper::MakeMobilityModelConsistent ();
-
-  // Install mmWave Devices to the nodes
-  NetDeviceContainer enbmmWaveDevs = mmwaveHelper->InstallEnbDevice (enbNodes);
-  NetDeviceContainer iabmmWaveDevs;
-  if(numRelays > 0)
-  {
-    iabmmWaveDevs = mmwaveHelper->InstallIabDevice (iabNodes);
-  }
-  NetDeviceContainer uemmWaveDevs = mmwaveHelper->InstallUeDevice (ueNodes);
-
-  /*
-   *  Print nodes information to file.
-   */
-  PrintGnuplottableBuildingListToFile("buildings.txt");// fileName.str ());
-  PrintGnuplottableEnbListToFile("enbs.txt");
-  PrintGnuplottableUeListToFile("ues.txt");
-
-  // Install the IP stack on the UEs
-  internet.Install (ueNodes);
-  Ipv4InterfaceContainer ueIpIface;
-  ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (uemmWaveDevs));
-  // Assign IP address to UEs, and install applications
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    // iab mobility model
+    if(numRelays > 0)
     {
-      Ptr<Node> ueNode = ueNodes.Get (u);
-      // Set the default gateway for the UE
-      Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
-      ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+        Ptr<ListPositionAllocator> iabPositionAlloc = CreateObject<ListPositionAllocator> ();
+        iabPositionAlloc->Add (posIab1);
+        iabPositionAlloc->Add (posIab2);
+        iabPositionAlloc->Add (posIab3);
+        iabPositionAlloc->Add (posIab4);
+	iabPositionAlloc->Add (posIab5);
+        iabPositionAlloc->Add (posIab6);
+        MobilityHelper iabmobility;
+        iabmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+        iabmobility.SetPositionAllocator (iabPositionAlloc);
+        iabmobility.Install (iabNodes);
     }
 
-  NetDeviceContainer possibleBaseStations(enbmmWaveDevs, iabmmWaveDevs);
-  NS_LOG_UNCOND("number of IAB devs " << iabmmWaveDevs.GetN() << " num of possibleBaseStations " 
-    << possibleBaseStations.GetN());
+    // ue mobility model
+    MobilityHelper uemobility;
+    Ptr<ListPositionAllocator> uePosAlloc = CreateObject<ListPositionAllocator>();
+    uePosAlloc->Add (posUe1);  // Change it to Iab1, when test the LoS single hop case without relaying.
+    uePosAlloc->Add (posUe2);
+    uePosAlloc->Add (posUe3);
+    uePosAlloc->Add (posUe4);
+    uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    uemobility.SetPositionAllocator (uePosAlloc);
+    uemobility.Install (ueNodes);
+  
+    BuildingsHelper::Install (enbNodes);
+    if(numRelays > 0)
+    { 
+        BuildingsHelper::Install (iabNodes);
+    }
+    BuildingsHelper::Install (ueNodes);
+    BuildingsHelper::MakeMobilityModelConsistent ();
 
-  if(numRelays > 0)
-  {
-    mmwaveHelper->AttachIabToClosestWiredEnb (iabmmWaveDevs, possibleBaseStations);
-  }
-  mmwaveHelper->AttachToClosestEnbWithDelay (uemmWaveDevs, possibleBaseStations, Seconds(0.3));
+    // Install mmWave Devices to the nodes
+    NetDeviceContainer enbmmWaveDevs = mmwaveHelper->InstallEnbDevice (enbNodes);
+    NetDeviceContainer iabmmWaveDevs;
+    if(numRelays > 0)
+    {
+        iabmmWaveDevs = mmwaveHelper->InstallIabDevice (iabNodes);
+    }
+    NetDeviceContainer uemmWaveDevs = mmwaveHelper->InstallUeDevice (ueNodes);
 
-  // Install and start applications on UEs and remote host
-  uint16_t dlPort = 1234;
-  // uint16_t ulPort = 2000;
-  // uint16_t otherPort = 3000;
-  ApplicationContainer clientApps;
-  ApplicationContainer serverApps;
+    /*
+     *  Print nodes information to file.
+     */
+    PrintGnuplottableBuildingListToFile("buildings.txt");// fileName.str ());
+    PrintGnuplottableEnbListToFile("enbs.txt");
+    PrintGnuplottableUeListToFile("ues.txt");
 
-  for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
-  {
-    // DL UDP
-    UdpServerHelper dlPacketSinkHelper (dlPort);
-    serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
+    // Install the IP stack on the UEs
+    internet.Install (ueNodes);
+    Ipv4InterfaceContainer ueIpIface;
+    ueIpIface = epcHelper->AssignUeIpv4Address (NetDeviceContainer (uemmWaveDevs));
+    // Assign IP address to UEs, and install applications
+    for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+        Ptr<Node> ueNode = ueNodes.Get (u);
+        // Set the default gateway for the UE
+        Ptr<Ipv4StaticRouting> ueStaticRouting = ipv4RoutingHelper.GetStaticRouting (ueNode->GetObject<Ipv4> ());
+        ueStaticRouting->SetDefaultRoute (epcHelper->GetUeDefaultGatewayAddress (), 1);
+    }
 
-    UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
-    dlClient.SetAttribute ("Interval", TimeValue (MicroSeconds(interPacketInterval)));
-    dlClient.SetAttribute ("PacketSize", UintegerValue(1400));
-    dlClient.SetAttribute ("MaxPackets", UintegerValue(0xFFFFFFFF));
-    clientApps.Add (dlClient.Install (remoteHost));
+    NetDeviceContainer possibleBaseStations(enbmmWaveDevs, iabmmWaveDevs);
+    NS_LOG_UNCOND("number of IAB devs " << iabmmWaveDevs.GetN() << " num of possibleBaseStations " << possibleBaseStations.GetN());
 
-    dlPort++;
-  }
-  serverApps.Start (Seconds (0.49));
-  clientApps.Stop (Seconds (1.2));
-  clientApps.Start (Seconds (0.5));
+    if(numRelays > 0)
+    {
+        mmwaveHelper->AttachIabToClosestWiredEnb (iabmmWaveDevs, possibleBaseStations);
+    }
+    mmwaveHelper->AttachToClosestEnbWithDelay (uemmWaveDevs, possibleBaseStations, Seconds(0.3));
 
-  mmwaveHelper->EnableTraces ();
+    // Install and start applications on UEs and remote host
+    uint16_t dlPort = 1234;
+    // uint16_t ulPort = 2000;
+    // uint16_t otherPort = 3000;
+    ApplicationContainer clientApps;
+    ApplicationContainer serverApps;
 
-  Simulator::Stop(Seconds(1.2));
-  Simulator::Run();
+    for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+        // DL UDP
+        UdpServerHelper dlPacketSinkHelper (dlPort);
+        serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get(u)));
 
-  /*GtkConfigStore config;
-  config.ConfigureAttributes();*/
-  Ptr<UdpServer> udpServer = DynamicCast<UdpServer> (serverApps.Get(0));
-  uint64_t totalNumPkt = udpServer->GetReceived();
-  NS_LOG_UNCOND("Total number of packets received at server " << totalNumPkt );
+        UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort);
+        dlClient.SetAttribute ("Interval", TimeValue (MicroSeconds(interPacketInterval)));
+        dlClient.SetAttribute ("PacketSize", UintegerValue(1400));
+        dlClient.SetAttribute ("MaxPackets", UintegerValue(0xFFFFFFFF));
+        clientApps.Add (dlClient.Install (remoteHost));
 
-  Simulator::Destroy();
-  return 0;
+        dlPort++;
+    }
+    serverApps.Start (Seconds (0.49));
+    clientApps.Stop (Seconds (1.2));
+    clientApps.Start (Seconds (0.5));
+
+    mmwaveHelper->EnableTraces ();
+
+    Simulator::Stop(Seconds(1.2));
+    Simulator::Run();
+
+    /*GtkConfigStore config;
+    config.ConfigureAttributes();*/
+    for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
+    {
+        Ptr<UdpServer> udpServer = DynamicCast<UdpServer> (serverApps.Get(u));
+        uint64_t totalNumPkt = udpServer->GetReceived();
+        NS_LOG_UNCOND("Total number of packets received at UE " << u + 1 <<"'s server: " << totalNumPkt ); 
+    }	    
+
+    Simulator::Destroy();
+    return 0;
 }
 
