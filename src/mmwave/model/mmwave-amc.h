@@ -38,34 +38,34 @@ namespace ns3 {
 class MmWaveAmc: public Object
 {
 public:
-	static TypeId GetTypeId (void);
-	MmWaveAmc ();
-	MmWaveAmc(Ptr<MmWavePhyMacCommon> ConfigParams);
-	virtual ~MmWaveAmc();
-	enum AmcModel
-	{
-		PiroEW2010,
-		MiErrorModel // model based on 10% of BER according to LteMiErrorModel
-	};
+    static TypeId GetTypeId (void);
+    MmWaveAmc ();
+    MmWaveAmc(Ptr<MmWavePhyMacCommon> ConfigParams);
+    virtual ~MmWaveAmc();
+    enum AmcModel
+    {
+        PiroEW2010,
+	MiErrorModel // model based on 10% of BER according to LteMiErrorModel
+    };
 
-	int GetMcsFromCqi (int cqi);
-	int GetTbSizeFromMcs (unsigned mcs, unsigned nprb);
-	int GetTbSizeFromMcsSymbols (unsigned mcs, unsigned nsym);  // for TDMA
-	int GetNumSymbolsFromTbsMcs (unsigned tbSize, unsigned mcs);
-	std::vector<int> CreateCqiFeedbacks (const SpectrumValue& sinr, uint8_t rbgSize);
-	std::vector<int> CreateCqiFeedbacksTdma (const SpectrumValue& sinr, uint8_t numSym);
-	int CreateCqiFeedbackWbTdma (const SpectrumValue& sinr, uint8_t numSym, uint32_t tbs, int &mcsWb);
-	int GetCqiFromSpectralEfficiency (double s);
-	int GetMcsFromSpectralEfficiency (double s);
+    int GetMcsFromCqi (int cqi);
+    int GetTbSizeFromMcs (unsigned mcs, unsigned nprb);
+    int GetTbSizeFromMcsSymbols (unsigned mcs, unsigned nsym);  // for TDMA
+    int GetNumSymbolsFromTbsMcs (unsigned tbSize, unsigned mcs);
+    std::vector<int> CreateCqiFeedbacks (const SpectrumValue& sinr, uint8_t rbgSize);  // Not used in IAB.
+    std::vector<int> CreateCqiFeedbacksTdma (const SpectrumValue& sinr, uint8_t numSym);
+    int CreateCqiFeedbackWbTdma (const SpectrumValue& sinr, uint8_t numSym, uint32_t tbs, int &mcsWb);
+    int GetCqiFromSpectralEfficiency (double s);
+    int GetMcsFromSpectralEfficiency (double s);
 
-	static const unsigned int m_crcLen=24;
+    static const unsigned int m_crcLen=24;
 
 private:
-	  double m_ber;
-	  AmcModel m_amcModel;
-
-	  Ptr<MmWavePhyMacCommon> m_phyMacConfig;
-		Ptr<SpectrumModel> m_lteRbModel;
+    double m_ber;
+    AmcModel m_amcModel;
+    
+    Ptr<MmWavePhyMacCommon> m_phyMacConfig;
+    Ptr<SpectrumModel> m_lteRbModel;
 };
 
 } // end namespace ns3

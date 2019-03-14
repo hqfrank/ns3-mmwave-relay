@@ -58,37 +58,39 @@ public:
   virtual void TransmitPdu (TransmitPduParameters params) = 0;
 
 
-  /**
-   * Parameters for LteMacSapProvider::ReportBufferStatus
-   *
-   * \param params
-   */
-  struct ReportBufferStatusParameters
-  {
-    uint16_t rnti;  /**< the C-RNTI identifying the UE */
-    uint8_t lcid;  /**< the logical channel id corresponding to the sending RLC instance */
-    uint32_t txQueueSize;  /**< the current size of the RLC transmission queue */
-    uint16_t txQueueHolDelay;  /**< the Head Of Line delay of the transmission queue */
-    uint32_t retxQueueSize;  /**<  the current size of the RLC retransmission queue in bytes */
-    uint16_t retxQueueHolDelay;  /**<  the Head Of Line delay of the retransmission queue */
-    uint16_t statusPduSize;  /**< the current size of the pending STATUS RLC  PDU message in bytes */
+    /*
+     * ====================================================
+     * Parameters for LteMacSapProvider::ReportBufferStatus
+     *
+     * \param params
+     * ====================================================
+     */
+    struct ReportBufferStatusParameters
+    {
+        uint16_t rnti;               // the C-RNTI identifying the UE
+        uint8_t lcid;                // the logical channel id corresponding to the sending RLC instance
+        uint32_t txQueueSize;        // the current size of the RLC transmission queue in bytes
+        uint16_t txQueueHolDelay;    // the Head Of Line delay of the transmission queue
+        uint32_t retxQueueSize;      // the current size of the RLC retransmission queue in bytes
+        uint16_t retxQueueHolDelay;  // the Head Of Line delay of the retransmission queue
+        uint16_t statusPduSize;      // the current size of the pending STATUS RLC PDU message in bytes
 
-    // RDF: Added for MmWave low-latency schedulers
-		std::list<uint32_t>	txPacketSizes;
-		std::list<uint32_t>	retxPacketSizes;
-		std::list<double>	txPacketDelays;
-		std::list<double>	retxPacketDelays;
-		double arrivalRate;		// average bits per s
-  };
+        // RDF: Added for MmWave low-latency schedulers
+        std::list<uint32_t>	txPacketSizes;
+        std::list<uint32_t>	retxPacketSizes;
+        std::list<double>	txPacketDelays;
+        std::list<double>	retxPacketDelays;
+        double arrivalRate;		// average bps 
+    };
 
-  /**
-   * Report the RLC buffer status to the MAC
-   *
-   * \param params
-   */
-  virtual void ReportBufferStatus (ReportBufferStatusParameters params) = 0;
-
-
+    /*
+     * =======================================
+     * Report the RLC buffer status to the MAC
+     *
+     * \param params
+     * =======================================
+     */
+    virtual void ReportBufferStatus (ReportBufferStatusParameters params) = 0;
 };
 
 

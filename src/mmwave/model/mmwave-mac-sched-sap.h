@@ -105,20 +105,20 @@ private:
 class MmWaveMacSchedSapUser
 {
 public:
-	virtual ~MmWaveMacSchedSapUser ();
+    virtual ~MmWaveMacSchedSapUser ();
 
-	struct SchedConfigIndParameters
-	{
-		SfnSf m_sfnSf;
-//		TddSlotTypeList m_tddPattern;
-		SfAllocInfo m_sfAllocInfo;
-		SfAllocInfo m_dlSfAllocInfo;
-		SfAllocInfo m_ulSfAllocInfo;
+    struct SchedConfigIndParameters
+    {
+        SfnSf m_sfnSf;
+        //TddSlotTypeList m_tddPattern;
+	SfAllocInfo m_sfAllocInfo;
+	SfAllocInfo m_dlSfAllocInfo;
+	SfAllocInfo m_ulSfAllocInfo;
 
-		std::map<uint16_t, SchedInfo> m_schedInfoMap;
-	};
+	std::map<uint16_t, SchedInfo> m_schedInfoMap;
+    };
 
-	virtual void SchedConfigInd (const struct SchedConfigIndParameters& params) = 0;
+    virtual void SchedConfigInd (const struct SchedConfigIndParameters& params) = 0;
 private:
 };
 

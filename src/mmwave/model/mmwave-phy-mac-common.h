@@ -279,14 +279,14 @@ struct BySymIndex {
 
 struct SfAllocInfo
 {
-	SfAllocInfo () : m_sfnSf (SfnSf()),  m_numSymAlloc (0), m_ulSymStart (0), m_valid(true)
-	{
-		//m_tddPattern.resize (8);
-	}
+    SfAllocInfo () : m_sfnSf (SfnSf()),  m_numSymAlloc (0), m_ulSymStart (0), m_valid(true)
+    {
+	//m_tddPattern.resize (8);
+    }
 
-	SfAllocInfo (SfnSf sfn) : m_sfnSf (sfn), m_numSymAlloc (0), m_ulSymStart (0), m_valid(true)
-	{
-	}
+    SfAllocInfo (SfnSf sfn) : m_sfnSf (sfn), m_numSymAlloc (0), m_ulSymStart (0), m_valid(true)
+    {
+    }
 
 //	SfAllocInfo& operator= (const SfAllocInfo &src)
 //	{
@@ -298,15 +298,15 @@ struct SfAllocInfo
 //		return *this;
 //	}
 
-	SfnSf m_sfnSf;
-	uint32_t m_numSymAlloc;  // number of allocated slots
-	uint32_t m_ulSymStart;	 // start of UL region
-	// the commented parameters are not used
-	// std::vector <SlotAllocInfo::TddMode> m_tddPattern;
-	// std::deque <SlotAllocInfo> m_dlSlotAllocInfo;
-	// std::deque <SlotAllocInfo> m_ulSlotAllocInfo;
-	std::deque <SlotAllocInfo> m_slotAllocInfo;
-	bool m_valid;
+    SfnSf m_sfnSf;
+    uint32_t m_numSymAlloc;  // number of allocated slots
+    uint32_t m_ulSymStart;   // start of UL region
+    // the commented parameters are not used
+    // std::vector <SlotAllocInfo::TddMode> m_tddPattern;
+    // std::deque <SlotAllocInfo> m_dlSlotAllocInfo;
+    // std::deque <SlotAllocInfo> m_ulSlotAllocInfo;
+    std::deque <SlotAllocInfo> m_slotAllocInfo;
+    bool m_valid;
 };
 
 struct SfIabAllocInfo
@@ -857,39 +857,39 @@ public:
 	}
 
 private:
-	uint32_t m_symbolsPerSlot;
-	double   m_symbolPeriod; // in micro seconds
-	uint32_t m_symbolsPerSubframe;
-	double	 m_subframePeriod;
-	uint32_t m_ctrlSymbols;
-	uint32_t m_dlCtrlSymbols;  // num OFDM symbols for downlink control at beginning of subframe
-	uint32_t m_ulCtrlSymbols;  // num OFDM symbols for uplink control at end of subframe
-	uint32_t m_slotsPerSubframe;
-	uint32_t m_subframesPerFrame;
-	uint32_t m_numRefSymbols;
-  uint32_t m_numRbPerRbg;
+    uint32_t m_symbolsPerSlot;
+    double   m_symbolPeriod;            // in micro seconds
+    uint32_t m_symbolsPerSubframe;
+    double   m_subframePeriod;
+    uint32_t m_ctrlSymbols;
+    uint32_t m_dlCtrlSymbols;           // num OFDM symbols for downlink control at beginning of subframe
+    uint32_t m_ulCtrlSymbols;           // num OFDM symbols for uplink control at end of subframe
+    uint32_t m_slotsPerSubframe;
+    uint32_t m_subframesPerFrame;
+    uint32_t m_numRefSymbols;
+    uint32_t m_numRbPerRbg;
 
-	uint32_t m_numSubCarriersPerChunk;
-	uint32_t m_chunksPerRb;
-	uint32_t m_numRefScPerRb;
-	uint32_t m_numRefScPerSym;							 // for TDMA, number of reference subcarriers across entire bandwidth (default to 1/4th of SCs)
-	double m_chunkWidth; //enter in Hz.
-	uint32_t m_numRb;
-	uint8_t m_numHarqProcess;
-	uint8_t m_harqTimeout;
+    uint32_t m_numSubCarriersPerChunk;
+    uint32_t m_chunksPerRb;
+    uint32_t m_numRefScPerRb;
+    uint32_t m_numRefScPerSym;          // for TDMA, number of reference subcarriers across entire bandwidth (default to 1/4th of SCs)
+    double m_chunkWidth;                // in Hz.
+    uint32_t m_numRb;
+    uint8_t m_numHarqProcess;
+    uint8_t m_harqTimeout;
 
-	double m_centerFrequency;
-	double m_guardPeriod; 		// UL to DL switching time in micro seconds
+    double m_centerFrequency;
+    double m_guardPeriod; 		// UL to DL switching time in micro seconds
 
-	uint32_t m_l1L2CtrlLatency; // In no. of sub-frames
-	uint32_t m_l1L2DataLatency; // In no. of slots
-	uint32_t m_ulSchedDelay;	// delay between transmission of UL-DCI and corresponding subframe in TTIs
-	double m_wbCqiPeriodUs;	// WB CQI periodicity in microseconds
+    uint32_t m_l1L2CtrlLatency;         // In no. of sub-frames
+    uint32_t m_l1L2DataLatency;         // In no. of slots
+    uint32_t m_ulSchedDelay;	        // delay between transmission of UL-DCI and corresponding subframe in TTIs
+    double m_wbCqiPeriodUs;	        // WB CQI periodicity in microseconds
 
-	uint32_t m_tbDecodeLatencyUs;
-	uint32_t m_maxTbSizeBytes;
+    uint32_t m_tbDecodeLatencyUs;
+    uint32_t m_maxTbSizeBytes;
 
-	std::string m_staticTddPattern;
+    std::string m_staticTddPattern;
 };
 
 }

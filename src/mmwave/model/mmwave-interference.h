@@ -43,35 +43,34 @@ namespace ns3 {
 class mmWaveInterference : public Object
 {
 public:
-	mmWaveInterference ();
-	virtual ~mmWaveInterference ();
-	static TypeId GetTypeId (void);
-	virtual void DoDispose ();
-	void StartRx (Ptr<const SpectrumValue> rxPsd);
-	void EndRx ();
-	void AddSignal (Ptr<const SpectrumValue> spd, const Time duration);
-	void SetNoisePowerSpectralDensity (Ptr<const SpectrumValue> noisePsd);
-	void AddPowerChunkProcessor (Ptr<MmWaveChunkProcessor> p);
-	void AddSinrChunkProcessor (Ptr<MmWaveChunkProcessor> p);
+    mmWaveInterference ();
+    virtual ~mmWaveInterference ();
+    static TypeId GetTypeId (void);
+    virtual void DoDispose ();
+    void StartRx (Ptr<const SpectrumValue> rxPsd);
+    void EndRx ();
+    void AddSignal (Ptr<const SpectrumValue> spd, const Time duration);
+    void SetNoisePowerSpectralDensity (Ptr<const SpectrumValue> noisePsd);
+    void AddPowerChunkProcessor (Ptr<MmWaveChunkProcessor> p);
+    void AddSinrChunkProcessor (Ptr<MmWaveChunkProcessor> p);
 
 private:
-	void ConditionallyEvaluateChunk ();
-	void DoAddSignal (Ptr<const SpectrumValue> spd);
-	void DoSubtractSignal  (Ptr<const SpectrumValue> spd, uint32_t signalId);
-	std::list<Ptr<MmWaveChunkProcessor> > m_PowerChunkProcessorList;
-	std::list<Ptr<MmWaveChunkProcessor> > m_sinrChunkProcessorList;
+    void ConditionallyEvaluateChunk ();
+    void DoAddSignal (Ptr<const SpectrumValue> spd);
+    void DoSubtractSignal  (Ptr<const SpectrumValue> spd, uint32_t signalId);
+    std::list<Ptr<MmWaveChunkProcessor> > m_PowerChunkProcessorList;
+    std::list<Ptr<MmWaveChunkProcessor> > m_sinrChunkProcessorList;
+    
+    bool m_receiving;
 
+    Ptr<SpectrumValue> m_rxSignal;
+    Ptr<SpectrumValue> m_allSignals;
+    Ptr<const SpectrumValue> m_noise;
 
-	bool m_receiving;
+    Time m_lastChangeTime;
 
-	Ptr<SpectrumValue> m_rxSignal;
-	Ptr<SpectrumValue> m_allSignals;
-	Ptr<const SpectrumValue> m_noise;
-
-	Time m_lastChangeTime;
-
-	uint32_t m_lastSignalId;
-	uint32_t m_lastSignalIdBeforeReset;
+    uint32_t m_lastSignalId;
+    uint32_t m_lastSignalIdBeforeReset;
 };
 
 } // namespace ns3

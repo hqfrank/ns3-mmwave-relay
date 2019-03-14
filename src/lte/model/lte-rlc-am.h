@@ -240,8 +240,8 @@ private:
   Time    m_pollRetransmitTimerValue;
   EventId m_reorderingTimer;
   Time    m_reorderingTimerValue;
-  EventId m_statusProhibitTimer;
-  Time    m_statusProhibitTimerValue;
+  EventId m_statusProhibitTimer;       // This timer is used by the receiving side of an AM RLC entity 
+  Time    m_statusProhibitTimerValue;  // in order to prohibit transmission of a STATUS PDU, in (ms).
   EventId m_rbsTimer;
   Time    m_rbsTimerValue;
 

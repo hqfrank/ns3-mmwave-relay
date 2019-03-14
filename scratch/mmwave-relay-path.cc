@@ -244,7 +244,7 @@ main (int argc, char *argv[])
   // LogComponentEnable("MmWaveEnbMac", LOG_LEVEL_DEBUG);
   // }
 
-  Config::SetDefault("ns3::MmWavePhyMacCommon::UlSchedDelay", UintegerValue(1));
+  Config::SetDefault ("ns3::MmWavePhyMacCommon::UlSchedDelay", UintegerValue(1));
   Config::SetDefault ("ns3::LteRlcAm::MaxTxBufferSize", UintegerValue (rlcBufSize * 1024 * 1024));
   Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (rlcBufSize * 1024 * 1024));
   Config::SetDefault ("ns3::LteRlcAm::PollRetransmitTimer", TimeValue(MilliSeconds(1.0)));

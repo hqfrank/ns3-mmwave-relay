@@ -866,167 +866,168 @@ MmWave3gppChannel::DoCalcRxPowerSpectralDensity (Ptr<const SpectrumValue> txPsd,
                                                    Ptr<const MobilityModel> a,
                                                    Ptr<const MobilityModel> b) const
 {
-	NS_LOG_FUNCTION (this);
-	Ptr<SpectrumValue> rxPsd = Copy (txPsd);
+    NS_LOG_FUNCTION (this);
+    Ptr<SpectrumValue> rxPsd = Copy (txPsd);
 
-	Ptr<NetDevice> txDevice = a->GetObject<Node> ()->GetDevice (0);
-	Ptr<NetDevice> rxDevice = b->GetObject<Node> ()->GetDevice (0);
+    Ptr<NetDevice> txDevice = a->GetObject<Node> ()->GetDevice (0);
+    Ptr<NetDevice> rxDevice = b->GetObject<Node> ()->GetDevice (0);
 
-	auto returnParams = GetTxRxInfo(a, b);
+    auto returnParams = GetTxRxInfo(a, b);
 
-	/* txAntennaNum[0]-number of vertical antenna elements
-	 * txAntennaNum[1]-number of horizontal antenna elements*/
-	uint8_t txAntennaNum[2];
-	txAntennaNum[0] = std::get<0>(returnParams);
-	txAntennaNum[1] = std::get<1>(returnParams);
-	uint8_t rxAntennaNum[2];
-	rxAntennaNum[0] = std::get<2>(returnParams);
-	rxAntennaNum[1] = std::get<3>(returnParams);
-	Ptr<AntennaArrayModel> txAntennaArray, rxAntennaArray;
-	txAntennaArray = std::get<4>(returnParams);
-	rxAntennaArray = std::get<5>(returnParams);
-	Vector locUT;
-	locUT = std::get<6>(returnParams);
-	double hUT = locUT.z;
-	bool connectedPair, skipBf;
-	connectedPair = std::get<7>(returnParams);
-	skipBf = std::get<8>(returnParams);
-	double hBS = std::get<9>(returnParams);
+    /* 
+     * txAntennaNum[0]-number of vertical antenna elements
+     * txAntennaNum[1]-number of horizontal antenna elements
+     */
+    uint8_t txAntennaNum[2];
+    txAntennaNum[0] = std::get<0>(returnParams);
+    txAntennaNum[1] = std::get<1>(returnParams);
+    uint8_t rxAntennaNum[2];
+    rxAntennaNum[0] = std::get<2>(returnParams);
+    rxAntennaNum[1] = std::get<3>(returnParams);
 
-	if(skipBf)
-	{
-		NS_LOG_INFO ("enb to enb or ue to ue transmission, skip beamforming a tx " << a->GetPosition() << " b rx " << b->GetPosition());
-		return rxPsd;
-	}
+    Ptr<AntennaArrayModel> txAntennaArray, rxAntennaArray;
+    txAntennaArray = std::get<4>(returnParams);
+    rxAntennaArray = std::get<5>(returnParams);
+    Vector locUT;
+    locUT = std::get<6>(returnParams);
+    double hUT = locUT.z;
+    bool connectedPair, skipBf;
+    connectedPair = std::get<7>(returnParams);
+    skipBf = std::get<8>(returnParams);
+    double hBS = std::get<9>(returnParams);
 
-	if(txAntennaArray->IsOmniTx() || rxAntennaArray->IsOmniTx() )
-	{
-		//omi transmission, do nothing.
-		return rxPsd;
-	}
+    if(skipBf)
+    {
+        NS_LOG_INFO ("enb to enb or ue to ue transmission, skip beamforming a tx " << a->GetPosition() << " b rx " << b->GetPosition());
+	return rxPsd;
+    }
 
-	NS_ASSERT_MSG(a->GetDistanceFrom(b)!=0, "the position of tx and rx devices cannot be the same");
+    if(txAntennaArray->IsOmniTx() || rxAntennaArray->IsOmniTx() )
+    {
+        //omi transmission, do nothing.
+	return rxPsd;
+    }
 
-	Vector rxSpeed = b->GetVelocity();
-	Vector txSpeed = a->GetVelocity();
-	Vector relativeSpeed (rxSpeed.x-txSpeed.x,rxSpeed.y-txSpeed.y,rxSpeed.z-txSpeed.z);
+    NS_ASSERT_MSG(a->GetDistanceFrom(b)!=0, "the position of tx and rx devices cannot be the same");
 
-	key_t key = std::make_pair(txDevice,rxDevice);
-	key_t keyReverse = std::make_pair(rxDevice,txDevice);
+    Vector rxSpeed = b->GetVelocity();
+    Vector txSpeed = a->GetVelocity();
+    Vector relativeSpeed (rxSpeed.x-txSpeed.x,rxSpeed.y-txSpeed.y,rxSpeed.z-txSpeed.z);
 
-	std::map< key_t, Ptr<Params3gpp> >::iterator it = m_channelMap.find (key);
-	std::map< key_t, Ptr<Params3gpp> >::iterator itReverse = m_channelMap.find (keyReverse);
+    key_t key = std::make_pair(txDevice,rxDevice);
+    key_t keyReverse = std::make_pair(rxDevice,txDevice);
 
-	Ptr<Params3gpp> channelParams;
+    std::map< key_t, Ptr<Params3gpp> >::iterator it = m_channelMap.find (key);
+    std::map< key_t, Ptr<Params3gpp> >::iterator itReverse = m_channelMap.find (keyReverse);
 
-	bool reverseLink = false;
+    Ptr<Params3gpp> channelParams;
+
+    bool reverseLink = false;
+
+    //Step 2: Assign propagation condition (LOS/NLOS).
+
+    char condition;
+    if (DynamicCast<MmWave3gppPropagationLossModel> (m_3gppPathloss)!=0)
+    {
+        condition = m_3gppPathloss->GetObject<MmWave3gppPropagationLossModel> () 
+		->GetChannelCondition(a->GetObject<MobilityModel>(),b->GetObject<MobilityModel>());
+    }
+    else if (DynamicCast<MmWave3gppBuildingsPropagationLossModel> (m_3gppPathloss)!=0)
+    {
+        condition = m_3gppPathloss->GetObject<MmWave3gppBuildingsPropagationLossModel> ()
+		->GetChannelCondition(a->GetObject<MobilityModel>(),b->GetObject<MobilityModel>());
+    }
+    else
+    {
+	NS_FATAL_ERROR("unkonw pathloss model");
+    }
+    bool los = false;
+    bool o2i = false;
+    if(condition == 'l')
+    {
+        los = true;
+    }
+    else if(condition == 'i')
+    {
+        o2i = true;
+    }
+    else if(condition == 's')
+    {
+        // in this special case, we condiser los + outdoor to indoor.
+        los = true;
+        o2i = true;
+    }
+
+    // Every m_updatedPeriod, the channel matrix is deleted and a consistent channel update is triggered.
+    // When there is a LOS/NLOS switch, a new uncorrelated channel is created.
+    // Therefore, LOS/NLOS condition of updating is always consistent with the previous channel.
+
+    //I only update the fowrad channel.
+    if ((it == m_channelMap.end () && itReverse == m_channelMap.end ()) ||
+		    (it != m_channelMap.end () && it->second->m_channel.size() == 0)||
+		    (it != m_channelMap.end () && it->second->m_los != los))
+    {
+	NS_LOG_INFO("Update or create the forward channel");
+	NS_LOG_LOGIC("it == m_channelMap.end () " << (it == m_channelMap.end ()));
+	NS_LOG_LOGIC("itReverse == m_channelMap.end () " << (itReverse == m_channelMap.end ()));
+	NS_LOG_LOGIC("it->second->m_channel.size() == 0 " << (it->second->m_channel.size() == 0));
+	NS_LOG_LOGIC("it->second->m_los != los" << (it->second->m_los != los));
+		
+	//Step 1: The parameters are configured in the example code.
+	/*make sure txAngle rxAngle exist, i.e., the position of tx and rx cannot be the same*/
+	Angles txAngle (b->GetPosition (), a->GetPosition ());
+	Angles rxAngle (a->GetPosition (), b->GetPosition ());
 
 	//Step 2: Assign propagation condition (LOS/NLOS).
+	//los, o2i condition is computed above.
 
-	char condition;
-	if (DynamicCast<MmWave3gppPropagationLossModel> (m_3gppPathloss)!=0)
+	//Step 3: The propagation loss is handled in the mmWavePropagationLossModel class.
+
+	double x = a->GetPosition().x-b->GetPosition().x;
+	double y = a->GetPosition().y-b->GetPosition().y;
+	double distance2D = sqrt (x*x +y*y);
+		
+	//Draw parameters from table 7.5-6 and 7.5-7 to 7.5-10.
+	Ptr<ParamsTable> table3gpp = Get3gppTable(los, o2i, hBS, hUT, distance2D);
+
+	// Step 4-11 are performed in function GetNewChannel()
+	if((it == m_channelMap.end () && itReverse == m_channelMap.end ()) ||
+			(it != m_channelMap.end () && it->second->m_channel.size() == 0))
 	{
-		condition = m_3gppPathloss->GetObject<MmWave3gppPropagationLossModel> ()
-				->GetChannelCondition(a->GetObject<MobilityModel>(),b->GetObject<MobilityModel>());
+	    // delete the channel parameter to cause the channel to be updated again.
+	    // The m_updatePeriod can be configured to be relatively large in order to disable updates.
+	    if(m_updatePeriod.GetMilliSeconds() > 0)
+	    {
+		NS_LOG_INFO("Time " << Simulator::Now().GetSeconds() << " schedule delete for a " << a->GetPosition() << " b " << b->GetPosition());
+		Simulator::Schedule (m_updatePeriod, &MmWave3gppChannel::DeleteChannel,this,a,b);
+	    }
 	}
-	else if (DynamicCast<MmWave3gppBuildingsPropagationLossModel> (m_3gppPathloss)!=0)
+
+	double distance3D = a->GetDistanceFrom(b);
+
+	bool channelUpdate = false;
+	if(it != m_channelMap.end () && it->second->m_channel.size() == 0)
 	{
-		condition = m_3gppPathloss->GetObject<MmWave3gppBuildingsPropagationLossModel> ()
-				->GetChannelCondition(a->GetObject<MobilityModel>(),b->GetObject<MobilityModel>());
+	    //if the channel map is not empty, we only update the channel.
+	    NS_LOG_DEBUG ("Update forward channel consistently between device " << a << " " << b);
+	    it->second->m_locUT = locUT;
+	    it->second->m_los = los;
+	    it->second->m_o2i = o2i;
+	    channelParams = UpdateChannel(it->second, table3gpp, txAntennaArray, rxAntennaArray, txAntennaNum, rxAntennaNum, rxAngle, txAngle);
+	    it->second->m_dis3D = distance3D;
+	    it->second->m_dis2D = distance2D;
+            it->second->m_speed = relativeSpeed;
+            it->second->m_generatedTime = Now();
+	    it->second->m_preLocUT = locUT;
+	    channelUpdate = true;
 	}
 	else
 	{
-		NS_FATAL_ERROR("unkonw pathloss model");
+            // if the channel map is empty, we create a new channel.
+	    NS_LOG_INFO("Create new channel");
+	    channelParams = GetNewChannel(table3gpp, locUT, los, o2i, txAntennaArray, rxAntennaArray, 
+			    txAntennaNum, rxAntennaNum, rxAngle, txAngle, relativeSpeed, distance2D, distance3D);
 	}
-	bool los = false;
-	bool o2i = false;
-	if(condition == 'l')
-	{
-		los = true;
-	}
-	else if(condition == 'i')
-	{
-		o2i = true;
-	}
-	else if(condition == 's')
-	{
-		// in this special case, we condiser los + outdoor to indoor.
-		los = true;
-		o2i = true;
-	}
-
-	//Every m_updatedPeriod, the channel matrix is deleted and a consistent channel update is triggered.
-	//When there is a LOS/NLOS switch, a new uncorrelated channel is created.
-	//Therefore, LOS/NLOS condition of updating is always consistent with the previous channel.
-
-	//I only update the fowrad channel.
-	if ((it == m_channelMap.end () && itReverse == m_channelMap.end ()) ||
-			(it != m_channelMap.end () && it->second->m_channel.size() == 0)||
-			(it != m_channelMap.end () && it->second->m_los != los))
-	{
-		NS_LOG_INFO("Update or create the forward channel");
-		NS_LOG_LOGIC("it == m_channelMap.end () " << (it == m_channelMap.end ()));
-		NS_LOG_LOGIC("itReverse == m_channelMap.end () " << (itReverse == m_channelMap.end ()));
-		NS_LOG_LOGIC("it->second->m_channel.size() == 0 " << (it->second->m_channel.size() == 0));
-		NS_LOG_LOGIC("it->second->m_los != los" << (it->second->m_los != los));
-		
-		//Step 1: The parameters are configured in the example code.
-		/*make sure txAngle rxAngle exist, i.e., the position of tx and rx cannot be the same*/
-		Angles txAngle (b->GetPosition (), a->GetPosition ());
-		Angles rxAngle (a->GetPosition (), b->GetPosition ());
-
-		//Step 2: Assign propagation condition (LOS/NLOS).
-		//los, o2i condition is computed above.
-
-		//Step 3: The propagation loss is handled in the mmWavePropagationLossModel class.
-
-
-		double x = a->GetPosition().x-b->GetPosition().x;
-		double y = a->GetPosition().y-b->GetPosition().y;
-		double distance2D = sqrt (x*x +y*y);
-		
-		//Draw parameters from table 7.5-6 and 7.5-7 to 7.5-10.
-		Ptr<ParamsTable> table3gpp = Get3gppTable(los, o2i, hBS, hUT, distance2D);
-
-		// Step 4-11 are performed in function GetNewChannel()
-		if((it == m_channelMap.end () && itReverse == m_channelMap.end ()) ||
-				(it != m_channelMap.end () && it->second->m_channel.size() == 0))
-		{
-			//delete the channel parameter to cause the channel to be updated again.
-			//The m_updatePeriod can be configured to be relatively large in order to disable updates.
-			if(m_updatePeriod.GetMilliSeconds() > 0)
-			{
-				NS_LOG_INFO("Time " << Simulator::Now().GetSeconds() << " schedule delete for a " << a->GetPosition() << " b " << b->GetPosition());
-				Simulator::Schedule (m_updatePeriod, &MmWave3gppChannel::DeleteChannel,this,a,b);
-			}
-		}
-
-		double distance3D = a->GetDistanceFrom(b);
-
-		bool channelUpdate = false;
-		if(it != m_channelMap.end () && it->second->m_channel.size() == 0)
-		{
-			//if the channel map is not empty, we only update the channel.
-			NS_LOG_DEBUG ("Update forward channel consistently between device " << a << " " << b);
-			it->second->m_locUT = locUT;
-			it->second->m_los = los;
-			it->second->m_o2i = o2i;
-			channelParams = UpdateChannel(it->second, table3gpp, txAntennaArray, rxAntennaArray,
-					txAntennaNum, rxAntennaNum, rxAngle, txAngle);
-			it->second->m_dis3D = distance3D;
-			it->second->m_dis2D = distance2D;
-			it->second->m_speed = relativeSpeed;
-			it->second->m_generatedTime = Now();
-			it->second->m_preLocUT = locUT;
-			channelUpdate = true;
-		}
-		else
-		{
-			//if the channel map is empty, we create a new channel.
-			NS_LOG_INFO("Create new channel");
-			channelParams = GetNewChannel(table3gpp, locUT, los, o2i, txAntennaArray, rxAntennaArray,
-					txAntennaNum, rxAntennaNum, rxAngle, txAngle, relativeSpeed, distance2D, distance3D);
-		}
 		
 		// the connected pair is set in the GetTxRxInfo method
 
@@ -1072,25 +1073,24 @@ MmWave3gppChannel::DoCalcRxPowerSpectralDensity (Ptr<const SpectrumValue> txPsd,
 		// }
 
 		//std::map< key_t, int >::iterator it1 = m_connectedPair.find (key);
-		if(connectedPair || m_forceInitialBfComputation || channelUpdate)
-		// this is true for connected devices at each transmission,
-		// and for non-connected devices at each channel update or at the beginning of the simulation
-		{
-			NS_LOG_DEBUG("connectedPair " << connectedPair << " m_forceInitialBfComputation " << m_forceInitialBfComputation << 
-				" channelUpdate " << channelUpdate);
-			if(m_cellScan)
-			{
-				BeamSearchBeamforming (rxPsd, channelParams,txAntennaArray,rxAntennaArray, txAntennaNum, rxAntennaNum);
-			}
-			else
-			{
-				LongTermCovMatrixBeamforming (channelParams);
-			}
-			txAntennaArray->SetBeamformingVector (channelParams->m_txW, rxDevice);
-			rxAntennaArray->SetBeamformingVector (channelParams->m_rxW, txDevice);
-		}
-		else
-		{
+	if(connectedPair || m_forceInitialBfComputation || channelUpdate)
+	// this is true for connected devices at each transmission,
+	// and for non-connected devices at each channel update or at the beginning of the simulation
+	{
+	    NS_LOG_DEBUG("connectedPair " << connectedPair << " m_forceInitialBfComputation " << m_forceInitialBfComputation << " channelUpdate " << channelUpdate);
+            if(m_cellScan)
+	    {
+		BeamSearchBeamforming (rxPsd, channelParams,txAntennaArray,rxAntennaArray, txAntennaNum, rxAntennaNum);
+	    }
+	    else
+	    {
+		LongTermCovMatrixBeamforming (channelParams);
+	    }
+	    txAntennaArray->SetBeamformingVector (channelParams->m_txW, rxDevice);
+	    rxAntennaArray->SetBeamformingVector (channelParams->m_rxW, txDevice);
+	}
+	else
+	{
 			NS_LOG_INFO("Not a connected pair");
 			channelParams->m_txW = txAntennaArray->GetBeamformingVector();
 			channelParams->m_rxW = rxAntennaArray->GetBeamformingVector();

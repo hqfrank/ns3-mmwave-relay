@@ -319,10 +319,15 @@ void EnbMacMemberMmWaveMacSapProvider<C>::TransmitPdu (TransmitPduParameters par
   m_mac->DoTransmitPdu (params);
 }
 
+/*
+ * ====================================
+ * Template for reporting buffer status
+ * ====================================
+ */
 template <class C>
 void EnbMacMemberMmWaveMacSapProvider<C>::ReportBufferStatus (ReportBufferStatusParameters params)
 {
-  m_mac->DoReportBufferStatus (params);
+    m_mac->DoReportBufferStatus (params);
 }
 
 
@@ -710,12 +715,17 @@ MmWaveEnbMac::DoUlHarqFeedback (UlHarqInfo params)
   m_ulHarqInfoReceived.push_back (params);
 }
 
+/*
+ * ===========================================
+ * Complete the Downlink Harq buffer updating.
+ * ===========================================
+ */
 void
 MmWaveEnbMac::DoDlHarqFeedback (DlHarqInfo params)
 {
-  NS_LOG_FUNCTION (this);
-  // Update HARQ buffer
-  std::map <uint16_t, MmWaveDlHarqProcessesBuffer_t>::iterator it =  m_miDlHarqProcessesPackets.find (params.m_rnti);
+    NS_LOG_FUNCTION (this);
+    // Update HARQ buffer
+    std::map <uint16_t, MmWaveDlHarqProcessesBuffer_t>::iterator it =  m_miDlHarqProcessesPackets.find (params.m_rnti);
   NS_ASSERT (it!=m_miDlHarqProcessesPackets.end ());
 
   if (params.m_harqStatus == DlHarqInfo::ACK)
@@ -748,28 +758,34 @@ MmWaveEnbMac::DoDlHarqFeedback (DlHarqInfo params)
   m_dlHarqInfoReceived.push_back (params);
 }
 
+/*
+ * =====================
+ * Report buffer status.
+ * =====================
+ */
 void
 MmWaveEnbMac::DoReportBufferStatus (LteMacSapProvider::ReportBufferStatusParameters params)
 {
-  NS_LOG_FUNCTION (this);
-  MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters schedParams;
-  schedParams.m_logicalChannelIdentity = params.lcid;
-  schedParams.m_rlcRetransmissionHolDelay = params.retxQueueHolDelay;
-  schedParams.m_rlcRetransmissionQueueSize = params.retxQueueSize;
-  schedParams.m_rlcStatusPduSize = params.statusPduSize;
-  schedParams.m_rlcTransmissionQueueHolDelay = params.txQueueHolDelay;
-  schedParams.m_rlcTransmissionQueueSize = params.txQueueSize;
-  schedParams.m_rnti = params.rnti;
+    NS_LOG_FUNCTION (this);
+    MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters schedParams;  // Different type from the input "params".
+    schedParams.m_logicalChannelIdentity = params.lcid;
+    schedParams.m_rlcRetransmissionHolDelay = params.retxQueueHolDelay;
+    schedParams.m_rlcRetransmissionQueueSize = params.retxQueueSize;
+    // In LTE model, "statusPduSize" is "the current size of the pending STATUS RLC PDU message in bytes".
+    schedParams.m_rlcStatusPduSize = params.statusPduSize;  
+    schedParams.m_rlcTransmissionQueueHolDelay = params.txQueueHolDelay;
+    schedParams.m_rlcTransmissionQueueSize = params.txQueueSize;
+    schedParams.m_rnti = params.rnti;
 
-  schedParams.m_txPacketSizes = params.txPacketSizes;
-  schedParams.m_txPacketDelays = params.txPacketDelays;
-  schedParams.m_retxPacketSizes = params.retxPacketSizes;
-  schedParams.m_retxPacketDelays = params.retxPacketDelays;
-  schedParams.m_arrivalRate = params.arrivalRate;
+    schedParams.m_txPacketSizes = params.txPacketSizes;
+    schedParams.m_txPacketDelays = params.txPacketDelays;
+    schedParams.m_retxPacketSizes = params.retxPacketSizes;
+    schedParams.m_retxPacketDelays = params.retxPacketDelays;
+    schedParams.m_arrivalRate = params.arrivalRate;
 
-  NS_LOG_LOGIC("ReportBufferStatus for lcid " << (uint16_t)params.lcid << " rnti " << params.rnti << " txPacketSizes " << params.txPacketSizes.size());
+    NS_LOG_LOGIC("ReportBufferStatus for lcid " << (uint16_t)params.lcid << " rnti " << params.rnti << " txPacketSizes " << params.txPacketSizes.size());
 
-  m_macSchedSapProvider->SchedDlRlcBufferReq (schedParams);
+    m_macSchedSapProvider->SchedDlRlcBufferReq (schedParams);
 }
 
 // forwarded from LteMacSapProvider

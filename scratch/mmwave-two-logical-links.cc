@@ -226,7 +226,7 @@ main (int argc, char *argv[])
     uint32_t numRelays = 6;            // # of IAB nodes
     uint32_t numLogicalLinks = 2;      // # of logical links in the network
     uint32_t rlcBufSize = 1000;        // mega-bits, Mb
-    uint32_t interPacketInterval = 20; // micro-second, us
+    uint32_t interPacketInterval = 6; // micro-second, us
     cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
     cmd.AddValue("am", "RLC AM if true", rlcAm);
     cmd.AddValue("numRelay", "Number of relays", numRelays);
