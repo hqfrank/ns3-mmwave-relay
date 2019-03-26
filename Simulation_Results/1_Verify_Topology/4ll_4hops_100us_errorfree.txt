@@ -1,0 +1,423 @@
+---- mmh UseIdealRrc 0
+wired 155:155:20 iab1 155:235:20 iab2 235:235:20 iab3 235:315:20 iab4 235:155:20 iab5 235:75:20 iab6 315:75:20 iab7 155:75:20 iab8 75:75:20 iab9 75:-5:20 iab10 75:155:20 iab11 72:235:20 iab12 -9:235:20 totalArea 96100
+eNB 1 MmWaveSpectrumPhy 0x55f248334eb0
+eNB 2 MmWaveSpectrumPhy 0x55f248346ee0
+eNB 3 MmWaveSpectrumPhy 0x55f248357590
+eNB 4 MmWaveSpectrumPhy 0x55f248367680
+eNB 5 MmWaveSpectrumPhy 0x55f248377830
+eNB 6 MmWaveSpectrumPhy 0x55f248387ad0
+eNB 7 MmWaveSpectrumPhy 0x55f248397d90
+eNB 8 MmWaveSpectrumPhy 0x55f2483a7fa0
+eNB 9 MmWaveSpectrumPhy 0x55f2483b8350
+eNB 10 MmWaveSpectrumPhy 0x55f2483c85f0
+eNB 11 MmWaveSpectrumPhy 0x55f2483d88d0
+eNB 12 MmWaveSpectrumPhy 0x55f2483e8b70
+eNB 13 MmWaveSpectrumPhy 0x55f2483f8e10
+number of IAB devs 12 num of possibleBaseStations 13
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f24833dc40
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f248207b50
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24833dc40 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+UE register to enb 1
+UE register to enb 1
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f248207b50
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f248207b50 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+UE register to enb 2
+UE register to enb 2
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24835a310 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 3
+UE register to enb 3
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24836a4f0 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 1
+UE register to enb 1
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24837a7a0 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 5
+UE register to enb 5
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24838aa40 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 6
+UE register to enb 6
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f24839ad00
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f24839ad00 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 1
+UE register to enb 1
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f24839ad00
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f2483aaf10
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483aaf10 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 8
+UE register to enb 8
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f24839ad00
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f2483aaf10
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f2483bb2c0
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483bb2c0 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 9
+UE register to enb 9
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f24839ad00
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f2483aaf10
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f2483bb2c0
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f2483cb560
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483cb560 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+UE register to enb 1
+UE register to enb 1
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f24839ad00
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f2483aaf10
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f2483bb2c0
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f2483cb560
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f2483db840
+SetBeamformingVector between IAB 0x55f2483db840 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+UE register to enb 11
+UE register to enb 11
+SetBeamformingVector between ENB 0x55f248336920 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f24833dc40
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f248207b50
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f24835a310
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f24836a4f0
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f24837a7a0
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f24838aa40
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f24839ad00
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f2483aaf10
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f2483bb2c0
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f2483cb560
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f2483db840
+SetBeamformingVector between IAB 0x55f2483ebae0 and IAB device 0x55f2483ebae0
+UE register to enb 12
+UE register to enb 12
+SetBeamformingVector between UE 0x55f248403740 and enbDevice 0x55f248336920
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f24833dc40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f248207b50
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248403740 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and enbDevice 0x55f248336920
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f24833dc40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f248207b50
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f2484092d0 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and enbDevice 0x55f248336920
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f24833dc40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f248207b50
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248411060 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and enbDevice 0x55f248336920
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f24833dc40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f248207b50
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f24835a310
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f24836a4f0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f24837a7a0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f24838aa40
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f24839ad00
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f2483aaf10
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f2483bb2c0
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f2483cb560
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f2483db840
+UMi-StreetCanyon scenario, channel condition is fixed to be n, h_BS=20,h_UT=20
+SetBeamformingVector between UE 0x55f248418dd0 and IAB device 0x55f2483ebae0
+UMi-StreetCanyon scenario, channel condition is fixed to be l, h_BS=20,h_UT=20
+m_lteOutputFilename LteSwitchStats.txt
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/2/DataRadioBearerCreated
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/2/StateTransition
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/3/DataRadioBearerCreated
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/3/StateTransition
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/4/DataRadioBearerCreated
+num matches 0 path /NodeList/3/DeviceList/0/LteEnbRrc/UeMap/4/StateTransition
+num matches 0 path /NodeList/4/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/4/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/5/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/5/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/7/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/7/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/8/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/8/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/10/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/10/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/11/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/11/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/13/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/13/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/14/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/14/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+UE register to enb 4
+UE register to enb 4
+UE register to enb 7
+UE register to enb 7
+UE register to enb 10
+UE register to enb 10
+UE register to enb 13
+UE register to enb 13
+num matches 0 path /NodeList/6/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/6/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/9/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/9/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/12/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/12/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+num matches 0 path /NodeList/15/DeviceList/0/AccessRrc/UeMap/1/DataRadioBearerCreated
+num matches 0 path /NodeList/15/DeviceList/0/AccessRrc/UeMap/1/StateTransition
+Total number of packets received at UE 1's server: 6864
+Total number of packets received at UE 2's server: 6864
+Total number of packets received at UE 3's server: 6864
+Total number of packets received at UE 4's server: 6864
