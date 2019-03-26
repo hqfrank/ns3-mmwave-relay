@@ -29,145 +29,136 @@
 
 namespace ns3 {
 
+    /// Container for element values
+    typedef std::vector<double> Values;
 
-/// Container for element values
-typedef std::vector<double> Values;
+    /**
+     * \ingroup spectrum
+     *
+     * \brief Set of values corresponding to a given SpectrumModel
+     *
+     * This class implements a Function Space which can represent any
+     * function \f$ g: F \in {\sf
+     * R\hspace*{-0.9ex}\rule{0.15ex}{1.5ex}\hspace*{0.9ex}}^N \rightarrow {\sf R\hspace*{-0.9ex}\rule{0.15ex}{1.5ex}\hspace*{0.9ex}}  \f$
+     * g: F \in R^N -> R
+     * Every instance of this class represent a particular function \f$ g(F) \f$.
+     * The domain of the function space, i.e., \f$ F \f$, is implemented by Bands.
+     * The codomain of the function space is implemented by Values.
+     *
+     * To every possible value of \f$ F\f$ corresponds a different Function
+     * Space.
+     * Mathematical operations are defined in this Function Space; these
+     * operations are implemented by means of operator overloading.
+     *
+     * The intended use of this class is to represent frequency-dependent
+     * things, such as power spectral densities, frequency-dependent
+     * propagation losses, spectral masks, etc.
+     */
+    class SpectrumValue : public SimpleRefCount<SpectrumValue>
+    {
+    public:
+        /**
+         * @brief SpectrumValue constructor
+         *
+         * @param sm pointer to the SpectrumModel which implements the set of frequencies to which the values
+         * will be referring.
+         *
+         * @warning the intended use if that sm points to a static object
+         * which will be there for the whole simulation. This is reasonable
+         * since the set of frequencies which are to be used in the
+         * simulation is normally known before the simulation starts. Make
+         * sure that the SpectrumModel instance which sm points to has already been
+         * initialized by the time this method is invoked. The main reason is
+         * that if you initialize the SpectrumModel instance afterwards, and
+         * the memory for the underlying std::vector gets reallocated, then
+         * sm will not be a valid reference anymore. Another reason is that
+         * m_values could end up having the wrong size.
+         */
+        SpectrumValue (Ptr<const SpectrumModel> sm);
 
-/**
- * \ingroup spectrum
- *
- * \brief Set of values corresponding to a given SpectrumModel
- *
- * This class implements a Function Space which can represent any
- * function \f$ g: F \in {\sf
- * R\hspace*{-0.9ex}\rule{0.15ex}{1.5ex}\hspace*{0.9ex}}^N \rightarrow {\sf R\hspace*{-0.9ex}\rule{0.15ex}{1.5ex}\hspace*{0.9ex}}  \f$
- *
- * Every instance of this class represent a particular function \f$ g(F) \f$.
- * The domain of the function space, i.e., \f$ F \f$, is implemented by Bands.
- * The codomain of the function space is implemented by Values.
- *
- * To every possible value of \f$ F\f$ corresponds a different Function
- * Space.
- * Mathematical operations are defined in this Function Space; these
- * operations are implemented by means of operator overloading.
- *
- * The intended use of this class is to represent frequency-dependent
- * things, such as power spectral densities, frequency-dependent
- * propagation losses, spectral masks, etc.
- */
-class SpectrumValue : public SimpleRefCount<SpectrumValue>
-{
-public:
-  /**
-   * @brief SpectrumValue constructor
-   *
-   * @param sm pointer to the SpectrumModel which implements the set of frequencies to which the values
-   * will be referring.
-   *
-   * @warning the intended use if that sm points to a static object
-   * which will be there for the whole simulation. This is reasonable
-   * since the set of frequencies which are to be used in the
-   * simulation is normally known before the simulation starts. Make
-   * sure that the SpectrumModel instance which sm points to has already been
-   * initialized by the time this method is invoked. The main reason is
-   * that if you initialize the SpectrumModel instance afterwards, and
-   * the memory for the underlying std::vector gets reallocated, then
-   * sm will not be a valid reference anymore. Another reason is that
-   * m_values could end up having the wrong size.
-   */
-  SpectrumValue (Ptr<const SpectrumModel> sm);
+        SpectrumValue ();
 
+        /**
+         * Access value at given frequency index
+         *
+         * @param index the given frequency index
+         *
+         * @return reference to the value
+         */
+        double& operator[] (size_t index);
 
-  SpectrumValue ();
+        /**
+         * Access value at given frequency index
+         *
+         * @param index the given frequency index
+         *
+         * @return const reference to the value
+         */
+        const double& operator[] (size_t index) const;
 
+        /**
+         *
+         * @return the uid of the embedded SpectrumModel
+         */
+        SpectrumModelUid_t GetSpectrumModelUid () const;
 
-  /**
-   * Access value at given frequency index
-   *
-   * @param index the given frequency index
-   *
-   * @return reference to the value
-   */
-  double& operator[] (size_t index);
+        /**
+         *
+         * @return the  embedded SpectrumModel
+         */
+        Ptr<const SpectrumModel> GetSpectrumModel () const;
 
-  /**
-   * Access value at given frequency index
-   *
-   * @param index the given frequency index
-   *
-   * @return const reference to the value
-   */
-  const double& operator[] (size_t index) const;
+        /**
+         *
+         *
+         * @return a const iterator pointing to the beginning of the embedded Bands
+         */
+        Bands::const_iterator ConstBandsBegin () const;
 
+        /**
+         *
+         *
+         * @return a const iterator pointing to the end of the embedded Bands
+         */
+        Bands::const_iterator ConstBandsEnd () const;
 
-  /**
-   *
-   * @return the uid of the embedded SpectrumModel
-   */
-  SpectrumModelUid_t GetSpectrumModelUid () const;
+        /**
+         *
+         *
+         * @return a const iterator pointing to the beginning of the embedded Values
+         */
+        Values::const_iterator ConstValuesBegin () const;
 
+        /**
+         *
+         *
+         * @return a const iterator pointing to the end of the embedded Values
+         */
+        Values::const_iterator ConstValuesEnd () const;
 
-  /**
-   *
-   * @return the  embedded SpectrumModel
-   */
-  Ptr<const SpectrumModel> GetSpectrumModel () const;
+        /**
+         *
+         *
+         * @return an iterator pointing to the beginning of the embedded Values
+         */
+        Values::iterator ValuesBegin ();
 
+        /**
+         *
+         *
+         * @return an iterator pointing to the end of the embedded Values
+         */
+        Values::iterator ValuesEnd ();
 
-  /**
-   *
-   *
-   * @return a const iterator pointing to the beginning of the embedded Bands
-   */
-  Bands::const_iterator ConstBandsBegin () const;
-
-  /**
-   *
-   *
-   * @return a const iterator pointing to the end of the embedded Bands
-   */
-  Bands::const_iterator ConstBandsEnd () const;
-
-
-  /**
-   *
-   *
-   * @return a const iterator pointing to the beginning of the embedded Values
-   */
-  Values::const_iterator ConstValuesBegin () const;
-
-  /**
-   *
-   *
-   * @return a const iterator pointing to the end of the embedded Values
-   */
-  Values::const_iterator ConstValuesEnd () const;
-
-  /**
-   *
-   *
-   * @return an iterator pointing to the beginning of the embedded Values
-   */
-  Values::iterator ValuesBegin ();
-
-  /**
-   *
-   *
-   * @return an iterator pointing to the end of the embedded Values
-   */
-  Values::iterator ValuesEnd ();
-
-
-
-  /**
-   *  addition operator
-   *
-   * @param lhs Left Hand Side of the operator
-   * @param rhs Right Hand Side of the operator
-   *
-   * @return the value of lhs + rhs
-   */
-  friend SpectrumValue operator+ (const SpectrumValue& lhs, const SpectrumValue& rhs);
+        /**
+         *  addition operator
+         *
+         * @param lhs Left Hand Side of the operator
+         * @param rhs Right Hand Side of the operator
+         *
+         * @return the value of lhs + rhs
+         */
+        friend SpectrumValue operator+ (const SpectrumValue& lhs, const SpectrumValue& rhs);
 
 
   /**
@@ -503,123 +494,134 @@ public:
    */
   Ptr<SpectrumValue> Copy () const;
 
-  /**
-   *  TracedCallback signature for SpectrumValue.
-   *
-   * \param [in] value Value of the traced variable.
-   * \deprecated The non-const \c Ptr<SpectrumPhy> argument
-   * is deprecated and will be changed to \c Ptr<const SpectrumPhy>
-   * in a future release.
-   */
-  typedef void (* TracedCallback)(Ptr<SpectrumValue> value);
+        /**
+         *  TracedCallback signature for SpectrumValue.
+         *
+         * \param [in] value Value of the traced variable.
+         * \deprecated The non-const \c Ptr<SpectrumPhy> argument
+         * is deprecated and will be changed to \c Ptr<const SpectrumPhy>
+         * in a future release.
+         */
+        typedef void (* TracedCallback)(Ptr<SpectrumValue> value);
 
 
-private:
-  /**
-   * Add a SpectrumValue (element to element addition)
-   * \param x SpectrumValue
-   */
-  void Add (const SpectrumValue& x);
-  /**
-   * Add a flat value to all the current elements
-   * \param s flat value
-   */
-  void Add (double s);
-  /**
-   * Subtracts a SpectrumValue (element by element subtraction)
-   * \param x SpectrumValue
-   */
-  void Subtract (const SpectrumValue& x);
-  /**
-   * Subtracts a flat value to all the current elements
-   * \param s flat value
-   */
-  void Subtract (double s);
-  /**
-   * Multiplies for a SpectrumValue (element to element multiplication)
-   * \param x SpectrumValue
-   */
-  void Multiply (const SpectrumValue& x);
-  /**
-   * Multiplies for a flat value to all the current elements
-   * \param s flat value
-   */
-  void Multiply (double s);
-  /**
-   * Divides by a SpectrumValue (element to element division)
-   * \param x SpectrumValue
-   */
-  void Divide (const SpectrumValue& x);
-  /**
-   * Divides by a flat value to all the current elements
-   * \param s flat value
-   */
-  void Divide (double s);
-  /**
-   * Change the values sign
-   */
-  void ChangeSign ();
-  /**
-   * Shift the values to the left
-   */
-  void ShiftLeft (int n);
-  /**
-   * Shift the values to the right
-   */
-  void ShiftRight (int n);
-  /**
-   * Modifies each element so that it each element is raised to the exponent
-   *
-   * \param exp the exponent
-   */
-  void Pow (double exp);
-  /**
-   * Modifies each element so that it is
-   * the base raised to each element value
-   *
-   * \param base the base
-   */
-  void Exp (double base);
-  /**
-   * Applies a Log10 to each the elements
-   */
-  void Log10 ();
-  /**
-   * Applies a Log2 to each the elements
-   */
-  void Log2 ();
-  /**
-   * Applies a Log to each the elements
-   */
-  void Log ();
+    private:
+        /**
+         * Add a SpectrumValue (element to element addition)
+         * \param x SpectrumValue
+         */
+        void Add (const SpectrumValue& x);
+        
+	/**
+         * Add a flat value to all the current elements
+         * \param s flat value
+         */
+        void Add (double s);
+  
+	/**
+         * Subtracts a SpectrumValue (element by element subtraction)
+         * \param x SpectrumValue
+         */
+	void Subtract (const SpectrumValue& x);
+  
+	/**
+         * Subtracts a flat value to all the current elements
+         * \param s flat value
+         */
+        void Subtract (double s);
+  
+	/**
+         * Multiplies for a SpectrumValue (element to element multiplication)
+         * \param x SpectrumValue
+         */
+        void Multiply (const SpectrumValue& x);
+  
+	/**
+         * Multiplies for a flat value to all the current elements
+         * \param s flat value
+         */
+        void Multiply (double s);
+  
+	/**
+         * Divides by a SpectrumValue (element to element division)
+         * \param x SpectrumValue
+         */
+        void Divide (const SpectrumValue& x);
+  
+	/**
+         * Divides by a flat value to all the current elements
+         * \param s flat value
+         */
+        void Divide (double s);
+        
+	/**
+         * Change the values sign
+         */
+        void ChangeSign ();
+  
+	/**
+         * Shift the values to the left
+         */
+        void ShiftLeft (int n);
+  
+	/**
+         * Shift the values to the right
+         */
+        void ShiftRight (int n);
+  
+	/**
+         * Modifies each element so that it each element is raised to the exponent
+         *
+         * \param exp the exponent
+         */
+        void Pow (double exp);
+        
+	/**
+         * Modifies each element so that it is
+         * the base raised to each element value
+         *
+         * \param base the base
+	 */
+	void Exp (double base);
+  
+	/**
+         * Applies a Log10 to each the elements
+         */
+        void Log10 ();
+  
+	/**
+	 * Applies a Log2 to each the elements
+         */
+        void Log2 ();
+  
+	/**
+         * Applies a Log to each the elements
+         */
+        void Log ();
 
-  Ptr<const SpectrumModel> m_spectrumModel; //!< The spectrum model
+        Ptr<const SpectrumModel> m_spectrumModel; //!< The spectrum model
 
+        /**
+         * Set of values which implement the codomain of the functions in
+         * the Function Space defined by SpectrumValue. There is no restriction
+         * on what these values represent (a transmission power density, a
+         * propagation loss, etc.).
+         *
+         */
+        Values m_values;
+    };
 
-  /**
-   * Set of values which implement the codomain of the functions in
-   * the Function Space defined by SpectrumValue. There is no restriction
-   * on what these values represent (a transmission power density, a
-   * propagation loss, etc.).
-   *
-   */
-  Values m_values;
+    std::ostream& operator << (std::ostream& os, const SpectrumValue& pvf);
 
-
-};
-
-std::ostream& operator << (std::ostream& os, const SpectrumValue& pvf);
-
-double Norm (const SpectrumValue& x);
-double Sum (const SpectrumValue& x);
-double Prod (const SpectrumValue& x);
-SpectrumValue Pow (const SpectrumValue& lhs, double rhs);
-SpectrumValue Pow (double lhs, const SpectrumValue& rhs);
-SpectrumValue Log10 (const SpectrumValue& arg);
-SpectrumValue Log2 (const SpectrumValue& arg);
-SpectrumValue Log (const SpectrumValue& arg);
-double Integral (const SpectrumValue& arg);
-
+    double Norm (const SpectrumValue& x);
+    double Sum (const SpectrumValue& x);
+    double Prod (const SpectrumValue& x);
+    SpectrumValue Pow (const SpectrumValue& lhs, double rhs);
+    SpectrumValue Pow (double lhs, const SpectrumValue& rhs);
+    SpectrumValue Log10 (const SpectrumValue& arg);
+    SpectrumValue Log2 (const SpectrumValue& arg);
+    SpectrumValue Log (const SpectrumValue& arg);
+    double Integral (const SpectrumValue& arg);
 
 } // namespace ns3
 

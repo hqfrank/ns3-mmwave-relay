@@ -36,61 +36,60 @@ NS_LOG_COMPONENT_DEFINE ("MmWaveChunkProcessor");
 
 namespace ns3 {
 
-MmWaveChunkProcessor::MmWaveChunkProcessor ()
-{
-  NS_LOG_FUNCTION (this);
-}
-
-MmWaveChunkProcessor::~MmWaveChunkProcessor ()
-{
-  NS_LOG_FUNCTION (this);
-}
-
-void
-MmWaveChunkProcessor::AddCallback (MmWaveChunkProcessorCallback c)
-{
-  NS_LOG_FUNCTION (this);
-  m_MmWaveChunkProcessorCallbacks.push_back (c);
-}
-
-void
-MmWaveChunkProcessor::Start ()
-{
-  NS_LOG_FUNCTION (this);
-  m_sumValues = 0;
-  m_totDuration = MicroSeconds (0);
-}
-
-
-void
-MmWaveChunkProcessor::EvaluateChunk (const SpectrumValue& sinr, Time duration)
-{
-  NS_LOG_FUNCTION (this << sinr << duration);
-  if (m_sumValues == 0)
+    MmWaveChunkProcessor::MmWaveChunkProcessor ()
     {
-      m_sumValues = Create<SpectrumValue> (sinr.GetSpectrumModel ());
+        NS_LOG_FUNCTION (this);
     }
-  (*m_sumValues) += sinr * duration.GetSeconds ();
-  m_totDuration += duration;
-}
 
-void
-MmWaveChunkProcessor::End ()
-{
-  NS_LOG_FUNCTION (this);
-  if (m_totDuration.GetSeconds () > 0)
+    MmWaveChunkProcessor::~MmWaveChunkProcessor ()
     {
-      std::vector<MmWaveChunkProcessorCallback>::iterator it;
-      for (it = m_MmWaveChunkProcessorCallbacks.begin (); it != m_MmWaveChunkProcessorCallbacks.end (); it++)
+        NS_LOG_FUNCTION (this);
+    }
+
+    void
+    MmWaveChunkProcessor::AddCallback (MmWaveChunkProcessorCallback c)
+    {
+        NS_LOG_FUNCTION (this);
+        m_MmWaveChunkProcessorCallbacks.push_back (c);
+    }
+
+    void
+    MmWaveChunkProcessor::Start ()
+    {
+        NS_LOG_FUNCTION (this);
+        m_sumValues = 0;
+        m_totDuration = MicroSeconds (0);
+    }
+
+    void
+    MmWaveChunkProcessor::EvaluateChunk (const SpectrumValue& sinr, Time duration)
+    {
+        NS_LOG_FUNCTION (this << sinr << duration);
+        if (m_sumValues == 0)
         {
-          (*it)((*m_sumValues) / m_totDuration.GetSeconds ());
+            m_sumValues = Create<SpectrumValue> (sinr.GetSpectrumModel ());
+        }
+        (*m_sumValues) += sinr * duration.GetSeconds ();
+        m_totDuration += duration;
+    }
+
+    void
+    MmWaveChunkProcessor::End ()
+    {
+        NS_LOG_FUNCTION (this);
+        if (m_totDuration.GetSeconds () > 0)
+        {
+            std::vector<MmWaveChunkProcessorCallback>::iterator it;
+            for (it = m_MmWaveChunkProcessorCallbacks.begin (); it != m_MmWaveChunkProcessorCallbacks.end (); it++)
+            {
+                (*it)((*m_sumValues) / m_totDuration.GetSeconds ());  
+		// TODO: As the divider shows, it seems to calculate the average SINR during the whole processing time ("m_totDuration")
+            }
+        }
+        else
+        {
+            NS_LOG_WARN ("m_numSinr == 0");
         }
     }
-  else
-    {
-      NS_LOG_WARN ("m_numSinr == 0");
-    }
-}
-
 
 } // namespace ns3

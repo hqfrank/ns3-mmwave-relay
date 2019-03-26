@@ -36,30 +36,30 @@
 
 namespace ns3 {
 
-class SpectrumValue;
+    class SpectrumValue;
 
-typedef Callback< void, const SpectrumValue& > MmWaveChunkProcessorCallback;
+    typedef Callback< void, const SpectrumValue& > MmWaveChunkProcessorCallback;
 
-class MmWaveChunkProcessor : public SimpleRefCount<MmWaveChunkProcessor>
-{
-public:
-  MmWaveChunkProcessor ();
-  virtual ~MmWaveChunkProcessor ();
+    class MmWaveChunkProcessor : public SimpleRefCount<MmWaveChunkProcessor> 
+    {
+    public:
+        MmWaveChunkProcessor ();
+        virtual ~MmWaveChunkProcessor ();
 
-  virtual void AddCallback (MmWaveChunkProcessorCallback c);
+        virtual void AddCallback (MmWaveChunkProcessorCallback c);
 
-  virtual void Start ();
+        virtual void Start ();
 
-  virtual void EvaluateChunk (const SpectrumValue& sinr, Time duration);
+        virtual void EvaluateChunk (const SpectrumValue& sinr, Time duration);
 
-  virtual void End ();
+        virtual void End ();
 
-private:
-  Ptr<SpectrumValue> m_sumValues;
-  Time m_totDuration;
+    private:
+        Ptr<SpectrumValue> m_sumValues;
+        Time m_totDuration;
 
-  std::vector<MmWaveChunkProcessorCallback> m_MmWaveChunkProcessorCallbacks;
-};
+        std::vector<MmWaveChunkProcessorCallback> m_MmWaveChunkProcessorCallbacks;
+    };
 
 } // namespace ns3
 

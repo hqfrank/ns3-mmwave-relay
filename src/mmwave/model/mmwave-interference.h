@@ -40,38 +40,80 @@
 
 namespace ns3 {
 
-class mmWaveInterference : public Object
-{
-public:
-    mmWaveInterference ();
-    virtual ~mmWaveInterference ();
-    static TypeId GetTypeId (void);
-    virtual void DoDispose ();
-    void StartRx (Ptr<const SpectrumValue> rxPsd);
-    void EndRx ();
-    void AddSignal (Ptr<const SpectrumValue> spd, const Time duration);
-    void SetNoisePowerSpectralDensity (Ptr<const SpectrumValue> noisePsd);
-    void AddPowerChunkProcessor (Ptr<MmWaveChunkProcessor> p);
-    void AddSinrChunkProcessor (Ptr<MmWaveChunkProcessor> p);
+    class mmWaveInterference : public Object
+    {
+    public:
+        mmWaveInterference ();
+        virtual ~mmWaveInterference ();
+        static TypeId GetTypeId (void);
+        virtual void DoDispose ();
+        /**
+         * Notify that the PHY is starting a RX attempt
+         *
+         * @param rxPsd the power spectral density of the signal being RX
+         */
+        void StartRx (Ptr<const SpectrumValue> rxPsd);
+        /**
+         * Notify that the RX attempt has ended. 
+         */
+	void EndRx ();
+	/**
+         * Notify that a new signal is being perceived in the medium. This
+         * method is to be called for all incoming signal, regardless of
+         * whether they're useful signals or interferers.
+         *
+         * @param spd the power spectral density of the new signal
+         * @param duration the duration of the new signal
+         */
+        void AddSignal (Ptr<const SpectrumValue> spd, const Time duration);
+        /**
+         * Set the Noise Power Spectral Density
+         *
+         * @param noisePsd the Noise Power Spectral Density in power units
+         * (Watt, Pascal...) per Hz.
+         */
+	void SetNoisePowerSpectralDensity (Ptr<const SpectrumValue> noisePsd);
+        void AddPowerChunkProcessor (Ptr<MmWaveChunkProcessor> p);
+        void AddSinrChunkProcessor (Ptr<MmWaveChunkProcessor> p);
 
-private:
-    void ConditionallyEvaluateChunk ();
-    void DoAddSignal (Ptr<const SpectrumValue> spd);
-    void DoSubtractSignal  (Ptr<const SpectrumValue> spd, uint32_t signalId);
-    std::list<Ptr<MmWaveChunkProcessor> > m_PowerChunkProcessorList;
-    std::list<Ptr<MmWaveChunkProcessor> > m_sinrChunkProcessorList;
+    private:
+        /**
+         * Evaluate a Chunk, depending on the Rx status and the last update time
+         */
+	void ConditionallyEvaluateChunk ();
+        /**
+         * Adds a signal perceived in the medium.
+         * @param spd the power spectral density of the new signal
+         */
+	void DoAddSignal (Ptr<const SpectrumValue> spd);
+        /**
+         * Removes a signal perceived in the medium.
+         * 
+	 * @param spd the power spectral density of the new signal
+	 * @param signalId the id of the new signal
+         */
+	void DoSubtractSignal  (Ptr<const SpectrumValue> spd, uint32_t signalId);
+        
+	std::list<Ptr<MmWaveChunkProcessor> > m_PowerChunkProcessorList;
+        std::list<Ptr<MmWaveChunkProcessor> > m_sinrChunkProcessorList;
     
-    bool m_receiving;
+        bool m_receiving;  //!< True if in Rx status
+        /**
+         * Stores the power spectral density of the signal whose RX is being attempted
+         */
+        Ptr<SpectrumValue> m_rxSignal;
+        /**
+         * Stores the spectral power density of the sum of incoming signals;
+         * does not include noise, includes the SPD of the signal being RX
+         */
+	Ptr<SpectrumValue> m_allSignals;
+        Ptr<const SpectrumValue> m_noise;  //!< Noise spectral power density
 
-    Ptr<SpectrumValue> m_rxSignal;
-    Ptr<SpectrumValue> m_allSignals;
-    Ptr<const SpectrumValue> m_noise;
+        Time m_lastChangeTime;  //!< the time of the last change in m_TotalPower
 
-    Time m_lastChangeTime;
-
-    uint32_t m_lastSignalId;
-    uint32_t m_lastSignalIdBeforeReset;
-};
+        uint32_t m_lastSignalId;
+        uint32_t m_lastSignalIdBeforeReset;
+    };
 
 } // namespace ns3
 

@@ -79,25 +79,25 @@ MmWaveHarqPhy::GetAccumulatedMiDl (uint16_t rnti, uint8_t harqId)
   return (mi);
 }
 
-MmWaveHarqProcessInfoList_t
-MmWaveHarqPhy::GetHarqProcessInfoDl (uint16_t rnti, uint8_t harqProcId)
-{
+    MmWaveHarqProcessInfoList_t
+    MmWaveHarqPhy::GetHarqProcessInfoDl (uint16_t rnti, uint8_t harqProcId)
+    {
 	NS_LOG_FUNCTION (this << rnti << (uint16_t)harqProcId);
 	std::map <uint16_t, std::vector <MmWaveHarqProcessInfoList_t> >::iterator it;
 	it = m_miDlHarqProcessesInfoMap.find (rnti);
-	if (it==m_miDlHarqProcessesInfoMap.end ())
+	if (it == m_miDlHarqProcessesInfoMap.end ())
 	{
-		// new entry
-		std::vector <MmWaveHarqProcessInfoList_t> harqList;
-		harqList.resize (m_harqNum);
-		m_miDlHarqProcessesInfoMap.insert (std::pair <uint16_t, std::vector <MmWaveHarqProcessInfoList_t> > (rnti, harqList));
-		return (harqList.at (harqProcId));
+	    // new entry
+	    std::vector <MmWaveHarqProcessInfoList_t> harqList;
+	    harqList.resize (m_harqNum);
+	    m_miDlHarqProcessesInfoMap.insert (std::pair <uint16_t, std::vector <MmWaveHarqProcessInfoList_t> > (rnti, harqList));
+	    return (harqList.at (harqProcId));
 	}
 	else
 	{
-		return ((*it).second.at (harqProcId));
+	    return ((*it).second.at (harqProcId));
 	}
-}
+    }
 
 
 double

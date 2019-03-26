@@ -30,91 +30,90 @@
 
 namespace ns3 {
 
-class SpectrumPhy;
-class SpectrumValue;
-class AntennaModel;
+    class SpectrumPhy;
+    class SpectrumValue;
+    class AntennaModel;
 
-/**
- * \ingroup spectrum
- *
- * This struct provides the generic signal representation to be used by
- * all wireless technologies. Any specific wireless technology is
- * allowed to define additional signal parameters by inheriting from this
- * struct and providing additional member variables. This makes sure
- * that a minimum set of parameters (in particular, the ones needed
- * for interference calculation) is
- * common across all wireless technologies, while at the same time
- * allowing each technology to have its own specific signal parameters.
- *
- * Furthermore, since the signal parameters specific of every technology inherit
- * directly from this struct, each PHY can test (by using a dynamic
- * cast) if a signal being received belongs to a given technology or not.
- *
- * \note when inheriting from this class, make sure that the assignment operator and the copy constructor work properly, making deep copies if needed.
- */
-struct SpectrumSignalParameters : public SimpleRefCount<SpectrumSignalParameters>
-{
-  /**
-   * default constructor
-   */
-  SpectrumSignalParameters ();
+    /**
+     * \ingroup spectrum
+     *
+     * This struct provides the generic signal representation to be used by
+     * all wireless technologies. Any specific wireless technology is
+     * allowed to define additional signal parameters by inheriting from this
+     * struct and providing additional member variables. This makes sure
+     * that a minimum set of parameters (in particular, the ones needed
+     * for interference calculation) is common across all wireless technologies, 
+     * while at the same time allowing each technology to have its own specific 
+     * signal parameters.
+     *
+     * Furthermore, since the signal parameters specific of every technology inherit
+     * directly from this struct, each PHY can test (by using a dynamic
+     * cast) if a signal being received belongs to a given technology or not.
+     *
+     * \note when inheriting from this class, make sure that the assignment operator 
+     * and the copy constructor work properly, making deep copies if needed.
+     */
+    struct SpectrumSignalParameters : public SimpleRefCount<SpectrumSignalParameters>
+    {
+        /**
+         * default constructor
+         */
+        SpectrumSignalParameters ();
 
-  /**
-   * destructor
-   */
-  virtual ~SpectrumSignalParameters ();
+        /**
+         * destructor
+         */
+        virtual ~SpectrumSignalParameters ();
 
-  /**
-   * copy constructor
-   */
-  SpectrumSignalParameters (const SpectrumSignalParameters& p);
+        /**
+         * copy constructor
+         */
+        SpectrumSignalParameters (const SpectrumSignalParameters& p);
 
-  /**
-   * make a "virtual" copy of this class, where "virtual" refers to
-   * the fact that if the actual object is a derived class of
-   * SpectrumSignalParameters, then the copy is also a derived class
-   * of the same type.
-   * Each class inheriting from
-   * SpectrumSignalParameters should override this method and use it
-   * to call the copy constructor of the derived class.
-   *
-   * \return a copy of the (possibly derived) class
-   */
-  virtual Ptr<SpectrumSignalParameters> Copy ();
+        /**
+         * make a "virtual" copy of this class, where "virtual" refers to
+         * the fact that if the actual object is a derived class of
+         * SpectrumSignalParameters, then the copy is also a derived class
+         * of the same type.
+         * Each class inheriting from
+         * SpectrumSignalParameters should override this method and use it
+         * to call the copy constructor of the derived class.
+         *
+         * \return a copy of the (possibly derived) class
+         */
+        virtual Ptr<SpectrumSignalParameters> Copy ();
 
-  /**
-   * The Power Spectral Density of the
-   * waveform, in linear units. The exact unit will depend on the
-   * type of transmission medium involved: W for radio communications, Pa for
-   * underwater acoustic communications. Other transmission media to
-   * be defined.
-   *
-   * \note when SpectrumSignalParameters is copied, only the pointer to the PSD will be copied. This is because SpectrumChannel objects normally overwrite the psd anyway, so there is no point in making a copy.
-   */
-  Ptr <SpectrumValue> psd;
+        /**
+         * The Power Spectral Density of the waveform, in linear units. 
+	 * The exact unit will depend on the type of transmission medium involved: 
+	 * W for radio communications, Pa for underwater acoustic communications. 
+	 * Other transmission media to be defined.
+         *
+         * \note when SpectrumSignalParameters is copied, only the pointer to the PSD will be copied. 
+	 * This is because SpectrumChannel objects normally overwrite the psd anyway, 
+	 * so there is no point in making a copy.
+         */
+        Ptr <SpectrumValue> psd;
 
-  /**
-   * The duration of the packet transmission. It is
-   * assumed that the Power Spectral Density remains constant for the
-   * whole duration of the transmission. In other words, all waveform
-   * have a rect shape with respect to time.
-   */
-  Time duration;
+        /**
+         * The duration of the packet transmission. It is
+         * assumed that the Power Spectral Density remains constant for the
+         * whole duration of the transmission. In other words, all waveform
+         * have a rect shape with respect to time.
+         */
+        Time duration;
 
-  /**
-   * The SpectrumPhy instance that is making the transmission
-   */
-  Ptr<SpectrumPhy> txPhy;
+        /**
+         * The SpectrumPhy instance that is making the transmission
+         */
+        Ptr<SpectrumPhy> txPhy;
 
-  /**
-   * The AntennaModel instance that was used to transmit this signal.
-   */
-  Ptr<AntennaModel> txAntenna;
-};
-
-
+        /**
+         * The AntennaModel instance that was used to transmit this signal.
+         */
+        Ptr<AntennaModel> txAntenna;
+    };
 }
-
 
 
 

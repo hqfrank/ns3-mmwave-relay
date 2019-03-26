@@ -47,92 +47,88 @@ NS_LOG_COMPONENT_DEFINE ("MmWaveMiErrorModel");
 
 namespace ns3 {
 
-
-
-
-double 
-MmWaveMiErrorModel::Mib (const SpectrumValue& sinr, const std::vector<int>& map, uint8_t mcs)
-{
-  NS_LOG_FUNCTION (sinr << &map << (uint32_t) mcs);
-  
-  double MI;
-  double MIsum = 0.0;
-  SpectrumValue sinrCopy = sinr;
-  
-  for (uint32_t i = 0; i < map.size (); i++)
+    double 
+    MmWaveMiErrorModel::Mib (const SpectrumValue& sinr, const std::vector<int>& map, uint8_t mcs)
     {
-      double sinrLin = sinrCopy[map.at (i)];
-      if (mcs <= MMWAVE_MI_QPSK_MAX_ID) // QPSK
+        NS_LOG_FUNCTION (sinr << &map << (uint32_t) mcs);
+  
+        double MI;
+        double MIsum = 0.0;
+        SpectrumValue sinrCopy = sinr;
+  
+        for (uint32_t i = 0; i < map.size (); i++)
         {
-
-          if (sinrLin > MI_map_qpsk_axis[MMWAVE_MI_MAP_QPSK_SIZE-1])
+            double sinrLin = sinrCopy[map.at (i)];
+            if (mcs <= MMWAVE_MI_QPSK_MAX_ID) // QPSK
             {
-              MI = 1;
+		if (sinrLin > MI_map_qpsk_axis[MMWAVE_MI_MAP_QPSK_SIZE-1])
+                {
+                    MI = 1;
+                }
+                else 
+                { 
+                    // since the values in MI_map_qpsk_axis are uniformly spaced, we have
+                    // index = ((sinrLin - value[0]) / (value[SIZE-1] - value[0])) * (SIZE-1)
+                    // the scaling coefficient is always the same, so we use a static const
+                    // to speed up the calculation
+                    static const double scalingCoeffQpsk = 
+                        (MMWAVE_MI_MAP_QPSK_SIZE - 1) / (MI_map_qpsk_axis[MMWAVE_MI_MAP_QPSK_SIZE-1] - MI_map_qpsk_axis[0]);
+                    double sinrIndexDouble = (sinrLin -  MI_map_qpsk_axis[0]) * scalingCoeffQpsk + 1;
+                    uint32_t sinrIndex = std::max(0.0, std::floor (sinrIndexDouble));
+                    NS_ASSERT_MSG (sinrIndex < MMWAVE_MI_MAP_QPSK_SIZE, "MI map out of data");
+                    MI = MI_map_qpsk[sinrIndex];
+                }
             }
-          else 
-            { 
-              // since the values in MI_map_qpsk_axis are uniformly spaced, we have
-              // index = ((sinrLin - value[0]) / (value[SIZE-1] - value[0])) * (SIZE-1)
-              // the scaling coefficient is always the same, so we use a static const
-              // to speed up the calculation
-              static const double scalingCoeffQpsk = 
-                (MMWAVE_MI_MAP_QPSK_SIZE - 1) / (MI_map_qpsk_axis[MMWAVE_MI_MAP_QPSK_SIZE-1] - MI_map_qpsk_axis[0]);
-              double sinrIndexDouble = (sinrLin -  MI_map_qpsk_axis[0]) * scalingCoeffQpsk + 1;
-              uint32_t sinrIndex = std::max(0.0, std::floor (sinrIndexDouble));
-              NS_ASSERT_MSG (sinrIndex < MMWAVE_MI_MAP_QPSK_SIZE, "MI map out of data");
-              MI = MI_map_qpsk[sinrIndex];
+            else
+            {
+                if (mcs > MMWAVE_MI_QPSK_MAX_ID && mcs <= MMWAVE_MI_16QAM_MAX_ID )	// 16-QAM
+                {
+                    if (sinrLin > MI_map_16qam_axis[MMWAVE_MI_MAP_16QAM_SIZE-1])
+                    {
+                        MI = 1;
+                    }
+                    else 
+                    {
+                        // since the values in MI_map_16QAM_axis are uniformly spaced, we have
+                        // index = ((sinrLin - value[0]) / (value[SIZE-1] - value[0])) * (SIZE-1)
+                        // the scaling coefficient is always the same, so we use a static const
+                        // to speed up the calculation
+                        static const double scalingCoeff16qam = 
+                            (MMWAVE_MI_MAP_16QAM_SIZE - 1) / (MI_map_16qam_axis[MMWAVE_MI_MAP_16QAM_SIZE-1] - MI_map_16qam_axis[0]);
+                        double sinrIndexDouble = (sinrLin -  MI_map_16qam_axis[0]) * scalingCoeff16qam + 1;
+                        uint32_t sinrIndex = std::max(0.0, std::floor (sinrIndexDouble));
+                        NS_ASSERT_MSG (sinrIndex < MMWAVE_MI_MAP_16QAM_SIZE, "MI map out of data");
+                        MI = MI_map_16qam[sinrIndex];
+                    }
+                }
+                else // 64-QAM
+                {
+                    if (sinrLin > MI_map_64qam_axis[MMWAVE_MI_MAP_64QAM_SIZE-1])
+                    {
+                        MI = 1;
+                    }
+                    else
+                    {
+                        // since the values in MI_map_64QAM_axis are uniformly spaced, we have
+                        // index = ((sinrLin - value[0]) / (value[SIZE-1] - value[0])) * (SIZE-1)
+                        // the scaling coefficient is always the same, so we use a static const
+                        // to speed up the calculation
+                        static const double scalingCoeff64qam = 
+                            (MMWAVE_MI_MAP_64QAM_SIZE - 1) / (MI_map_64qam_axis[MMWAVE_MI_MAP_64QAM_SIZE-1] - MI_map_64qam_axis[0]);
+                        double sinrIndexDouble = (sinrLin -  MI_map_64qam_axis[0]) * scalingCoeff64qam + 1;
+                        uint32_t sinrIndex = std::max(0.0, std::floor (sinrIndexDouble));
+                        NS_ASSERT_MSG (sinrIndex < MMWAVE_MI_MAP_64QAM_SIZE, "MI map out of data");
+                        MI = MI_map_64qam[sinrIndex];
+                    }
+                }
             }
+            NS_LOG_LOGIC (" RB " << map.at (i) << "Minimum SNR = " << 10 * std::log10 (sinrLin) << " dB, " << sinrLin << " V, MCS = " << (uint16_t)mcs << ", MI = " << MI);
+            MIsum += MI;
         }
-      else
-        {
-          if (mcs > MMWAVE_MI_QPSK_MAX_ID && mcs <= MMWAVE_MI_16QAM_MAX_ID )	// 16-QAM
-            {
-              if (sinrLin > MI_map_16qam_axis[MMWAVE_MI_MAP_16QAM_SIZE-1])
-                {
-                  MI = 1;
-                }
-              else 
-                {
-                  // since the values in MI_map_16QAM_axis are uniformly spaced, we have
-                  // index = ((sinrLin - value[0]) / (value[SIZE-1] - value[0])) * (SIZE-1)
-                  // the scaling coefficient is always the same, so we use a static const
-                  // to speed up the calculation
-                  static const double scalingCoeff16qam = 
-                    (MMWAVE_MI_MAP_16QAM_SIZE - 1) / (MI_map_16qam_axis[MMWAVE_MI_MAP_16QAM_SIZE-1] - MI_map_16qam_axis[0]);
-                  double sinrIndexDouble = (sinrLin -  MI_map_16qam_axis[0]) * scalingCoeff16qam + 1;
-                  uint32_t sinrIndex = std::max(0.0, std::floor (sinrIndexDouble));
-                  NS_ASSERT_MSG (sinrIndex < MMWAVE_MI_MAP_16QAM_SIZE, "MI map out of data");
-                  MI = MI_map_16qam[sinrIndex];
-                }
-            }
-          else // 64-QAM
-            {
-              if (sinrLin > MI_map_64qam_axis[MMWAVE_MI_MAP_64QAM_SIZE-1])
-                {
-                  MI = 1;
-                }
-              else
-                {
-                  // since the values in MI_map_64QAM_axis are uniformly spaced, we have
-                  // index = ((sinrLin - value[0]) / (value[SIZE-1] - value[0])) * (SIZE-1)
-                  // the scaling coefficient is always the same, so we use a static const
-                  // to speed up the calculation
-                  static const double scalingCoeff64qam = 
-                    (MMWAVE_MI_MAP_64QAM_SIZE - 1) / (MI_map_64qam_axis[MMWAVE_MI_MAP_64QAM_SIZE-1] - MI_map_64qam_axis[0]);
-                  double sinrIndexDouble = (sinrLin -  MI_map_64qam_axis[0]) * scalingCoeff64qam + 1;
-                  uint32_t sinrIndex = std::max(0.0, std::floor (sinrIndexDouble));
-                  NS_ASSERT_MSG (sinrIndex < MMWAVE_MI_MAP_64QAM_SIZE, "MI map out of data");
-                  MI = MI_map_64qam[sinrIndex];
-                }
-            }
-        }
-      NS_LOG_LOGIC (" RB " << map.at (i) << "Minimum SNR = " << 10 * std::log10 (sinrLin) << " dB, " << sinrLin << " V, MCS = " << (uint16_t)mcs << ", MI = " << MI);
-      MIsum += MI;
+        MI = MIsum / map.size ();  // Assume a flat response within the RB, thus, the overall MI of a TB is the average MI evaluated per RB in the TB. 
+        NS_LOG_LOGIC (" MI = " << MI);
+        return MI;
     }
-  MI = MIsum / map.size ();
-  NS_LOG_LOGIC (" MI = " << MI);
-  return MI;
-}
 
 
 double 
@@ -179,77 +175,77 @@ MmWaveMiErrorModel::MappingMiBler (double mib, uint8_t ecrId, uint32_t cbSize)
   return bler;
 }
 
-MmWaveTbStats_t
-MmWaveMiErrorModel::GetTbDecodificationStats (const SpectrumValue& sinr, const std::vector<int>& map, uint32_t size, uint8_t mcs, MmWaveHarqProcessInfoList_t miHistory)
-{
-  NS_LOG_FUNCTION (sinr << &map << (uint32_t) size << (uint32_t) mcs);
-
-  double tbMi = Mib(sinr, map, mcs);
-  double MI = 0.0;
-  double Reff = 0.0;
-  NS_ASSERT (mcs < 29);
-  if (miHistory.size ()>0)
+    MmWaveTbStats_t
+    MmWaveMiErrorModel::GetTbDecodificationStats (const SpectrumValue& sinr, const std::vector<int>& map, uint32_t size, uint8_t mcs, MmWaveHarqProcessInfoList_t miHistory)
     {
-      // evaluate R_eff and MI_eff
-      uint32_t codeBitsSum = 0;
-      double miSum = 0.0;
-      for (uint16_t i = 0; i < miHistory.size (); i++)
+        NS_LOG_FUNCTION (sinr << &map << (uint32_t) size << (uint32_t) mcs);
+
+        double tbMi = Mib(sinr, map, mcs);
+        double MI = 0.0;
+        double Reff = 0.0;
+        NS_ASSERT (mcs < 29);
+        if (miHistory.size ()>0)
         {
-          NS_LOG_DEBUG (" Sum MI " << miHistory.at (i).m_mi << " Ci " << miHistory.at (i).m_codeBits);
-          codeBitsSum += miHistory.at (i).m_codeBits;
-          miSum += (miHistory.at (i).m_mi*miHistory.at (i).m_codeBits);
+            // evaluate R_eff and MI_eff
+            uint32_t codeBitsSum = 0;
+            double miSum = 0.0;
+            for (uint16_t i = 0; i < miHistory.size (); i++)
+            {
+                NS_LOG_DEBUG (" Sum MI " << miHistory.at (i).m_mi << " Ci " << miHistory.at (i).m_codeBits);
+                codeBitsSum += miHistory.at (i).m_codeBits;
+                miSum += (miHistory.at (i).m_mi * miHistory.at (i).m_codeBits);
+            }
+            codeBitsSum += (((double)size * 8.0) / McsEcrTable [mcs]);
+            miSum += (tbMi*(((double)size * 8.0) / McsEcrTable [mcs]));
+            Reff = miHistory.at (0).m_infoBits / (double) codeBitsSum; // information bits are the size of the first TB
+            MI = miSum / (double)codeBitsSum;
         }
-      codeBitsSum += (((double)size*8.0) / McsEcrTable [mcs]);
-      miSum += (tbMi*(((double)size*8.0) / McsEcrTable [mcs]));
-      Reff = miHistory.at (0).m_infoBits / (double)codeBitsSum; // information bits are the size of the first TB
-      MI = miSum / (double)codeBitsSum;
-    }
-  else
-    {
-      MI = tbMi;
-    }
-  NS_LOG_DEBUG (" MI " << MI << " Reff " << Reff << " HARQ " << miHistory.size ());
-  // estimate CB size (according to sec 5.1.2 of TS 36.212)
-  uint16_t Z = 6144; // max size of a codeblock (including CRC)
-  uint32_t B = size * 8;
-//   B = 1234;
-  uint32_t L = 0;
-  uint32_t C = 0; // no. of codeblocks
-  uint32_t Cplus = 0; // no. of codeblocks with size K+
-  uint32_t Kplus = 0; // no. of codeblocks with size K+
-  uint32_t Cminus = 0; // no. of codeblocks with size K+
-  uint32_t Kminus = 0; // no. of codeblocks with size K+
-  uint32_t B1 = 0;
-  uint32_t deltaK = 0;
-  if (B <= Z)
-    {
-      // only one codeblock
-      L = 0;
-      C = 1;
-      B1 = B;
-    }
-  else
-    {
-      L = 24;
-      C = ceil ((double)B / ((double)(Z-L)));
-      B1 = B + C * L;
-    }
-  // first segmentation: K+ = minimum K in table such that C * K >= B1
-//   uint i = 0;
-//   while (B1 > cbSizeTable[i] * C)
-//     {
-// //       NS_LOG_INFO (" K+ " << cbSizeTable[i] << " means " << cbSizeTable[i] * C);
-//       i++;
-//     }
-//   uint32_t KplusId = i;
-//   Kplus = cbSizeTable[i];
+        else
+        {
+            MI = tbMi;
+        }
+        NS_LOG_DEBUG (" MI " << MI << " Reff " << Reff << " HARQ " << miHistory.size ());
+        // estimate CB size (according to sec 5.1.2 of TS 36.212)
+        uint16_t Z = 6144; // max size of a codeblock (including CRC)
+        uint32_t B = size * 8;
+        //   B = 1234;
+        uint32_t L = 0;
+        uint32_t C = 0; // no. of codeblocks
+        uint32_t Cplus = 0; // no. of codeblocks with size K+
+        uint32_t Kplus = 0; // no. of codeblocks with size K+
+        uint32_t Cminus = 0; // no. of codeblocks with size K+
+        uint32_t Kminus = 0; // no. of codeblocks with size K+
+        uint32_t B1 = 0;
+        uint32_t deltaK = 0;
+        if (B <= Z)
+        {
+            // only one codeblock
+            L = 0;
+            C = 1;
+            B1 = B;
+        }
+        else
+        {
+            L = 24;
+            C = ceil ((double)B / ((double)(Z-L)));
+            B1 = B + C * L;
+        }
+        // first segmentation: K+ = minimum K in table such that C * K >= B1
+        //   uint i = 0;
+        //   while (B1 > cbSizeTable[i] * C)
+        //     {
+        // //       NS_LOG_INFO (" K+ " << cbSizeTable[i] << " means " << cbSizeTable[i] * C);
+        //       i++;
+        //     }
+        //   uint32_t KplusId = i;
+        //   Kplus = cbSizeTable[i];
 
-  // implement a modified binary search
-  int min = 0;
-  int max = 187;
-  int mid = 0;
-  do
-    {
+        // implement a modified binary search
+        int min = 0;
+        int max = 187;
+        int mid = 0;
+        do
+        {
       mid = (min+max) / 2;
       if (B1 > cbSizeTable[mid]*C)
         {
