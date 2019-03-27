@@ -547,9 +547,9 @@ MmWaveHelper::InstallIabDevice (NodeContainer c)
 	return devices;
 }
 
-Ptr<NetDevice>
-MmWaveHelper::InstallSingleIabDevice(Ptr<Node> n)
-{
+    Ptr<NetDevice>
+    MmWaveHelper::InstallSingleIabDevice(Ptr<Node> n)
+    {
 	NS_LOG_FUNCTION(this);
 
 	Ptr<MmWaveIabNetDevice> device = m_iabNetDeviceFactory.Create<MmWaveIabNetDevice>();

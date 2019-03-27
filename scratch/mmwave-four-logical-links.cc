@@ -227,8 +227,8 @@ main (int argc, char *argv[])
     bool rlcAm = true;                 // rlc is in acknowledge mode
     uint32_t numRelays = 12;            // # of IAB nodes
     uint32_t numLogicalLinks = 4;      // # of logical links in the network
-    uint32_t rlcBufSize = 1000;        // mega-bits, Mb
-    uint32_t interPacketInterval = 100; // micro-second, us
+    uint32_t rlcBufSize = 100000;        // mega-bits, Mb
+    uint32_t interPacketInterval = 12; // micro-second, us
     cmd.AddValue("run", "run for RNG (for generating different deterministic sequences for different drops)", run);
     cmd.AddValue("am", "RLC AM if true", rlcAm);
     cmd.AddValue("numRelay", "Number of relays", numRelays);
@@ -248,7 +248,8 @@ main (int argc, char *argv[])
     Config::SetDefault ("ns3::MmWaveHelper::RlcAmEnabled", BooleanValue(rlcAm));
     Config::SetDefault ("ns3::MmWaveFlexTtiMacScheduler::CqiTimerThreshold", UintegerValue(100));
     Config::SetDefault ("ns3::MmWave3gppPropagationLossModel::Scenario", StringValue("UMi-StreetCanyon"));
-    Config::SetDefault ("ns3::MmWaveSpectrumPhy::DataErrorModelEnabled", BooleanValue (false));
+    Config::SetDefault ("ns3::MmWaveSpectrumPhy::DataErrorModelEnabled", BooleanValue (true));
+    Config::SetDefault ("ns3::MmWaveUeNetDevice::AntennaNum", UintegerValue (64));
 
     RngSeedManager::SetSeed (1);
     RngSeedManager::SetRun (run);

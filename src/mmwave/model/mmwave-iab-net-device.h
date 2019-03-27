@@ -39,71 +39,70 @@
 
 namespace ns3 {
 
-class Packet;
-class PacketBurst;
-class Node;
-// class LteEnbNetDevice;
-// class MmWaveEnbNetDevice;
+    class Packet;
+    class PacketBurst;
+    class Node;
+    // class LteEnbNetDevice;
+    // class MmWaveEnbNetDevice;
 
-
-/**
-  * \ingroup mmWave
-  * This class represents an IAB NetDevice. It hosts both the functionalities
-  * of an UE and of a gNB, the first for the backhaul and the latter for the access
-  */
-class MmWaveIabNetDevice : public NetDevice
-{
-public: 
+    /**
+     * \ingroup mmWave
+     * This class represents an IAB NetDevice. It hosts both the functionalities
+     * of an UE and of a gNB, the first for the backhaul and the latter for the access
+     */
+    class MmWaveIabNetDevice : public NetDevice
+    {
+    public: 
 	// methods inherited from NetDevide. 
 	static TypeId GetTypeId (void);
 
 	MmWaveIabNetDevice ();
 	virtual ~MmWaveIabNetDevice ();
 
-    virtual void DoDispose (void);
+        virtual void DoDispose (void);
 
-    virtual void SetIfIndex (const uint32_t index);
-    virtual uint32_t GetIfIndex (void) const;
-    virtual Ptr<Channel> GetChannel (void) const;
-    virtual void SetAddress (Address address);
-    virtual Address GetAddress (void) const;
-    virtual bool SetMtu (const uint16_t mtu);
-    virtual uint16_t GetMtu (void) const;
-    virtual bool IsLinkUp (void) const;
-    virtual void AddLinkChangeCallback (Callback<void> callback);
-    virtual bool IsBroadcast (void) const;
-    virtual Address GetBroadcast (void) const;
-    virtual bool IsMulticast (void) const;
-    virtual Address GetMulticast (Ipv4Address multicastGroup) const;
-    virtual bool IsBridge (void) const;
-    virtual bool IsPointToPoint (void) const;
-    virtual bool SendFrom (Ptr<Packet> packet, const Address& source, const Address& dest, uint16_t protocolNumber);
-    virtual Ptr<Node> GetNode (void) const;
-    virtual void SetNode (Ptr<Node> node);
-    virtual bool NeedsArp (void) const;
-    virtual Address GetMulticast (Ipv6Address addr) const;
-    virtual void SetReceiveCallback (ReceiveCallback cb);
-    virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb);
-    virtual bool SupportsSendFrom (void) const;
-    virtual bool Send (Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber);
+        virtual void SetIfIndex (const uint32_t index);
+        virtual uint32_t GetIfIndex (void) const;
+        virtual Ptr<Channel> GetChannel (void) const;
+        virtual void SetAddress (Address address);
+        virtual Address GetAddress (void) const;
+        virtual bool SetMtu (const uint16_t mtu);
+        virtual uint16_t GetMtu (void) const;
+        virtual bool IsLinkUp (void) const;
+        virtual void AddLinkChangeCallback (Callback<void> callback);
+        virtual bool IsBroadcast (void) const;
+        virtual Address GetBroadcast (void) const;
+        virtual bool IsMulticast (void) const;
+        virtual Address GetMulticast (Ipv4Address multicastGroup) const;
+        virtual bool IsBridge (void) const;
+        virtual bool IsPointToPoint (void) const;
+        virtual bool SendFrom (Ptr<Packet> packet, const Address& source, const Address& dest, uint16_t protocolNumber);
+        virtual Ptr<Node> GetNode (void) const;
+        virtual void SetNode (Ptr<Node> node);
+        virtual bool NeedsArp (void) const;
+        virtual Address GetMulticast (Ipv6Address addr) const;
+        virtual void SetReceiveCallback (ReceiveCallback cb);
+        virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb);
+        virtual bool SupportsSendFrom (void) const;
+        virtual bool Send (Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber);
 
-    Ipv4Address GetPacketDestination (Ptr<Packet> packet);
+        Ipv4Address GetPacketDestination (Ptr<Packet> packet);
   
-    // not supported
-    void Receive (Ptr<Packet> p);
-    /** 
-     * receive a packet from the Access RRC layer in order to forward it to the EpcIabApplication layers
-     * 
-     * \param p the packet
-     */
-    void ReceiveAccess (Ptr<Packet> p);
+        // not supported
+        void Receive (Ptr<Packet> p);
+        /** 
+         * receive a packet from the Access RRC layer in order to forward it to the EpcIabApplication layers
+         * 
+         * \param p the packet
+         */
+        void ReceiveAccess (Ptr<Packet> p);
 
-    /** 
-     * receive a packet from the backhaul EpcUeNas layer in order to forward it to the EpcIabApplication layer
-     * 
-     * \param p the packet
-     */
-    void ReceiveBackhaul (Ptr<Packet> p);
+        /** 
+         * receive a packet from the backhaul EpcUeNas layer in order to forward it to the EpcIabApplication layer
+         * 
+         * \param p the packet
+         */
+        void ReceiveBackhaul (Ptr<Packet> p);
 
   	Ptr<EpcUeNas> GetNas (void) const;
 
@@ -115,7 +114,7 @@ public:
 	/**
 	 * Get the CellId associated with the gNB in the access link
 	 */
-    uint16_t GetCellId () const;
+        uint16_t GetCellId () const;
 
 	// ---------------------------- Backhaul methods ------------------------
 
@@ -129,25 +128,25 @@ public:
 
 	Ptr<NetDevice> GetBackhaulTargetEnb (void);
 
-  void SetBackhaulAntennaNum (uint16_t antennaNum);
+        void SetBackhaulAntennaNum (uint16_t antennaNum);
 
-  uint16_t GetBackhaulAntennaNum () const;
+        uint16_t GetBackhaulAntennaNum () const;
 
 	// ---------------------------- Access methods ------------------------
 
-  Ptr<MmWaveEnbPhy> GetAccessPhy (void) const;
+        Ptr<MmWaveEnbPhy> GetAccessPhy (void) const;
 
-  Ptr<MmWaveEnbMac> GetAccessMac (void) const;
+        Ptr<MmWaveEnbMac> GetAccessMac (void) const;
 
-  Ptr<LteEnbRrc> GetAccessRrc () const;
+        Ptr<LteEnbRrc> GetAccessRrc () const;
 
 	void SetAccessAntennaNum (uint16_t antennaNum);
 
-  uint16_t GetAccessAntennaNum () const;
+        uint16_t GetAccessAntennaNum () const;
 
-protected:
-    NetDevice::ReceiveCallback m_rxCallback;
-    virtual void DoInitialize (void);
+    protected:
+        NetDevice::ReceiveCallback m_rxCallback;
+        virtual void DoInitialize (void);
 	/**
 	* \brief Propagate attributes and configuration to sub-modules.
 	*
@@ -159,15 +158,14 @@ protected:
 	*/
 	void UpdateConfig ();
 
-private:
-	
-  Mac48Address m_macaddress;
-  Ptr<Node> m_node;
-  mutable uint16_t m_mtu;
-  bool m_linkUp;
-  uint32_t m_ifIndex;
+    private:	
+        Mac48Address m_macaddress;
+        Ptr<Node> m_node;
+        mutable uint16_t m_mtu;
+        bool m_linkUp;
+        uint32_t m_ifIndex;
 
-    // TODO this is probably not needed
+        // TODO this is probably not needed
 	bool DoSend (Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber);
 
 	// Backhaul
@@ -181,7 +179,7 @@ private:
 	Ptr<MmWaveEnbPhy> m_accessPhy;
 	Ptr<MmWaveEnbMac> m_accessMac;
 	Ptr<LteEnbRrc> m_accessRrc;
-  Ptr<MmWaveMacScheduler> m_scheduler;
+        Ptr<MmWaveMacScheduler> m_scheduler;
 	uint16_t m_accessAntennaNum;
 
 	bool m_isConstructed;
@@ -192,7 +190,7 @@ private:
 	uint64_t m_imsi; 
 	uint16_t m_cellId;
 	
-};
+    };
 
 } // namespace ns3
 

@@ -49,15 +49,15 @@
 
 namespace ns3{
 
-class PacketBurst;
-class mmwEnbPhy;
+    class PacketBurst;
+    class mmwEnbPhy;
 
-class MmWaveUePhy : public MmWavePhy
-{
+    class MmWaveUePhy : public MmWavePhy
+    {
 	friend class UeMemberLteUePhySapProvider;
 	friend class MemberLteUeCphySapProvider<MmWaveUePhy>;
 
-public:
+    public:
 	MmWaveUePhy ();
 
 	MmWaveUePhy (Ptr<MmWaveSpectrumPhy> ulPhy, Ptr<MmWaveSpectrumPhy> dlPhy);
@@ -137,7 +137,7 @@ public:
 	void UpdateSinrEstimate(uint16_t cellId, double sinr);
 
 
-private:
+    private:
 	void DoReset ();
 	void DoStartCellSearch (uint16_t dlEarfcn);
 	void DoSynchronizeWithEnb (uint16_t cellId);
@@ -213,7 +213,7 @@ private:
 	long double m_outageThreshold;
 	uint8_t m_n310;
 
-};
+    };
 
 
 }

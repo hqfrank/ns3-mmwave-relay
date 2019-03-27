@@ -442,17 +442,15 @@ MmWave3gppChannel::Initial(NetDeviceContainer ueDevices, NetDeviceContainer enbD
 
 }
 
-std::tuple<uint8_t, uint8_t, uint8_t, uint8_t, Ptr<AntennaArrayModel>, Ptr<AntennaArrayModel>, Vector,
-bool, bool, double>
-MmWave3gppChannel::GetTxRxInfo(Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const
-{
+    std::tuple<uint8_t, uint8_t, uint8_t, uint8_t, Ptr<AntennaArrayModel>, Ptr<AntennaArrayModel>, Vector,
+    bool, bool, double>
+    MmWave3gppChannel::GetTxRxInfo(Ptr<const MobilityModel> a, Ptr<const MobilityModel> b) const
+    {
 	Ptr<NetDevice> txDevice = a->GetObject<Node> ()->GetDevice (0);
 	Ptr<NetDevice> rxDevice = b->GetObject<Node> ()->GetDevice (0);
 
-	Ptr<MmWaveEnbNetDevice> txEnb =
-					DynamicCast<MmWaveEnbNetDevice> (txDevice);
-	Ptr<MmWaveEnbNetDevice> rxEnb = 
-					DynamicCast<MmWaveEnbNetDevice> (rxDevice);
+	Ptr<MmWaveEnbNetDevice> txEnb =	DynamicCast<MmWaveEnbNetDevice> (txDevice);
+	Ptr<MmWaveEnbNetDevice> rxEnb =	DynamicCast<MmWaveEnbNetDevice> (rxDevice);
 
 	uint8_t txAntennaNum[2];
 	uint8_t rxAntennaNum[2];
@@ -468,31 +466,29 @@ MmWave3gppChannel::GetTxRxInfo(Ptr<const MobilityModel> a, Ptr<const MobilityMod
 	// check if they are the same
 	if(txDevice == rxDevice)
 	{
-		return std::make_tuple(0,0,0,0,txAntennaArray,rxAntennaArray,locUT, false, true, 0);
+	    return std::make_tuple(0,0,0,0,txAntennaArray,rxAntennaArray,locUT, false, true, 0);
 	}
 
 	if(txEnb != 0 && rxEnb == 0)
 	{
-		// downlink tranmission from the eNB to something
-		Ptr<MmWaveUeNetDevice> ueDev = DynamicCast<MmWaveUeNetDevice>(rxDevice);
-		Ptr<MmWaveIabNetDevice> iabDev = DynamicCast<MmWaveIabNetDevice>(rxDevice); // backhaul
-		Ptr<McUeNetDevice> mcDev = DynamicCast<McUeNetDevice>(rxDevice);
+	    // downlink tranmission from the eNB to something
+	    Ptr<MmWaveUeNetDevice> ueDev = DynamicCast<MmWaveUeNetDevice>(rxDevice);
+	    Ptr<MmWaveIabNetDevice> iabDev = DynamicCast<MmWaveIabNetDevice>(rxDevice); // backhaul
+	    Ptr<McUeNetDevice> mcDev = DynamicCast<McUeNetDevice>(rxDevice);
 
-		if(ueDev != 0)
-		{
-			// eNB to UE, downlink
-			NS_LOG_INFO ("this is downlink case, a tx " << a->GetPosition() << " b rx " << b->GetPosition());
-			// downlink = true;
-			txAntennaNum[0] = sqrt (txEnb->GetAntennaNum ());
-			txAntennaNum[1] = sqrt (txEnb->GetAntennaNum ());
-			rxAntennaNum[0] = sqrt (ueDev->GetAntennaNum ());
-			rxAntennaNum[1] = sqrt (ueDev->GetAntennaNum ());
+	    if(ueDev != 0)
+	    {
+		// eNB to UE, downlink
+		NS_LOG_INFO ("this is downlink case, a tx " << a->GetPosition() << " b rx " << b->GetPosition());
+		// downlink = true;
+		txAntennaNum[0] = sqrt (txEnb->GetAntennaNum ());
+		txAntennaNum[1] = sqrt (txEnb->GetAntennaNum ());
+		rxAntennaNum[0] = sqrt (ueDev->GetAntennaNum ());
+		rxAntennaNum[1] = sqrt (ueDev->GetAntennaNum ());
 
-			txAntennaArray = DynamicCast<AntennaArrayModel> (
-						txEnb->GetPhy ()->GetDlSpectrumPhy ()->GetRxAntenna ());
-			rxAntennaArray = DynamicCast<AntennaArrayModel> (
-						ueDev->GetPhy ()->GetDlSpectrumPhy ()->GetRxAntenna ());
-			locUT = b->GetPosition();
+		txAntennaArray = DynamicCast<AntennaArrayModel> (txEnb->GetPhy ()->GetDlSpectrumPhy ()->GetRxAntenna ());
+		rxAntennaArray = DynamicCast<AntennaArrayModel> (ueDev->GetPhy ()->GetDlSpectrumPhy ()->GetRxAntenna ());
+		locUT = b->GetPosition();
 
 			// check if the devices are connected
 			if(txEnb == ueDev->GetTargetEnb() && txAntennaArray->GetCurrentDevice() == ueDev)

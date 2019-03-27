@@ -48,57 +48,48 @@
 
 namespace ns3{
 
-NS_LOG_COMPONENT_DEFINE ("MmWaveUeNetDevice");
+    NS_LOG_COMPONENT_DEFINE ("MmWaveUeNetDevice");
 
-NS_OBJECT_ENSURE_REGISTERED (MmWaveUeNetDevice);
+    NS_OBJECT_ENSURE_REGISTERED (MmWaveUeNetDevice);
 
-TypeId
-MmWaveUeNetDevice::GetTypeId (void)
-{
-	static TypeId
-	    tid =
-	    TypeId ("ns3::MmWaveUeNetDevice")
+    TypeId
+    MmWaveUeNetDevice::GetTypeId (void)
+    {
+	static TypeId tid = TypeId ("ns3::MmWaveUeNetDevice")
 	    .SetParent<MmWaveNetDevice> ()
 	    .AddConstructor<MmWaveUeNetDevice> ()
-		.AddAttribute ("EpcUeNas",
-		                   "The NAS associated to this UeNetDevice",
-		                   PointerValue (),
-		                   MakePointerAccessor (&MmWaveUeNetDevice::m_nas),
-		                   MakePointerChecker <EpcUeNas> ())
-		.AddAttribute ("mmWaveUeRrc",
-		                   "The RRC associated to this UeNetDevice",
-		                   PointerValue (),
-		                   MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
-		                   MakePointerChecker <LteUeRrc> ())
-		.AddAttribute ("MmWaveUePhy",
-						"The PHY associated to this UeNetDevice",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveUeNetDevice::m_phy),
-						MakePointerChecker <MmWaveUePhy> ())
-		.AddAttribute ("MmWaveUeMac",
-						"The MAC associated to this UeNetDevice",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveUeNetDevice::m_mac),
-						MakePointerChecker <MmWaveUeMac> ())
-		.AddAttribute ("Imsi",
-			 "International Mobile Subscriber Identity assigned to this UE",
-			 UintegerValue (0),
-			 MakeUintegerAccessor (&MmWaveUeNetDevice::m_imsi),
-			 MakeUintegerChecker<uint64_t> ())
-		.AddAttribute ("AntennaNum",
-					   "Antenna number of the device",
-					   UintegerValue (16),
-					   MakeUintegerAccessor (&MmWaveUeNetDevice::SetAntennaNum,
-											 &MmWaveUeNetDevice::GetAntennaNum),
-					   MakeUintegerChecker<uint8_t> ())
-		.AddAttribute ("LteUeRrc",
-						"The RRC layer associated with the ENB",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
-						MakePointerChecker <LteUeRrc> ())
+	    .AddAttribute ("EpcUeNas", "The NAS associated to this UeNetDevice",
+			    PointerValue (),
+			    MakePointerAccessor (&MmWaveUeNetDevice::m_nas),
+			    MakePointerChecker <EpcUeNas> ())
+	    .AddAttribute ("mmWaveUeRrc", "The RRC associated to this UeNetDevice",
+			    PointerValue (),
+			    MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
+			    MakePointerChecker <LteUeRrc> ())
+	    .AddAttribute ("MmWaveUePhy", "The PHY associated to this UeNetDevice",
+			    PointerValue (),
+			    MakePointerAccessor (&MmWaveUeNetDevice::m_phy),
+			    MakePointerChecker <MmWaveUePhy> ())
+	    .AddAttribute ("MmWaveUeMac", "The MAC associated to this UeNetDevice",
+			    PointerValue (),
+			    MakePointerAccessor (&MmWaveUeNetDevice::m_mac),
+			    MakePointerChecker <MmWaveUeMac> ())
+	    .AddAttribute ("Imsi", "International Mobile Subscriber Identity assigned to this UE",
+   			    UintegerValue (0),
+   			    MakeUintegerAccessor (&MmWaveUeNetDevice::m_imsi),
+   			    MakeUintegerChecker<uint64_t> ())
+	    .AddAttribute ("AntennaNum",
+			    "Antenna number of the device",
+			    UintegerValue (16),
+			    MakeUintegerAccessor (&MmWaveUeNetDevice::SetAntennaNum, &MmWaveUeNetDevice::GetAntennaNum),
+			    MakeUintegerChecker<uint8_t> ())
+	    .AddAttribute ("LteUeRrc", "The RRC layer associated with the ENB",
+			    PointerValue (),
+			    MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
+			    MakePointerChecker <LteUeRrc> ())
 	;
 	return tid;
-}
+    }
 
 MmWaveUeNetDevice::MmWaveUeNetDevice (void)
 	: m_isConstructed (false)

@@ -33,89 +33,75 @@
 
 namespace ns3 {
 
-NS_LOG_COMPONENT_DEFINE ("MmWaveIabNetDevice");
+    NS_LOG_COMPONENT_DEFINE ("MmWaveIabNetDevice");
 
-NS_OBJECT_ENSURE_REGISTERED (MmWaveIabNetDevice);
+    NS_OBJECT_ENSURE_REGISTERED (MmWaveIabNetDevice);
 
-TypeId MmWaveIabNetDevice::GetTypeId ()
-{
-	static TypeId
-	    tid =
-	    TypeId ("ns3::MmWaveIabNetDevice")
+    TypeId MmWaveIabNetDevice::GetTypeId ()
+    {
+	static TypeId tid = TypeId ("ns3::MmWaveIabNetDevice")
 	    .SetParent<NetDevice> ()
-    	.AddConstructor<MmWaveIabNetDevice> ()
-		.AddAttribute ("Mtu", "The MAC-level Maximum Transmission Unit",
-					   UintegerValue (30000),
-					   MakeUintegerAccessor (&MmWaveIabNetDevice::SetMtu,
-											 &MmWaveIabNetDevice::GetMtu),
-					   MakeUintegerChecker<uint16_t> ())
-		.AddAttribute ("AccessPhy",
-			           "The PHY associated to this IAB node in the access",
-			           PointerValue (),
-			           MakePointerAccessor (&MmWaveIabNetDevice::m_accessPhy),
-		               MakePointerChecker <MmWaveEnbPhy> ())
-		.AddAttribute ("AccessMac",
-			           "The MAC associated to this IAB node in the access",
-					   PointerValue (),
-					   MakePointerAccessor (&MmWaveIabNetDevice::m_accessMac),
-					   MakePointerChecker <MmWaveEnbMac> ())
-		.AddAttribute ("AccessRrc",
-						"The RRC layer associated to this IAB node in the access",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveIabNetDevice::m_accessRrc),
-						MakePointerChecker <LteEnbRrc> ())
-		.AddAttribute ("CellId",
-					   "Cell Identifier for the access",
-					   UintegerValue (0),
-					   MakeUintegerAccessor (&MmWaveIabNetDevice::m_cellId),
-					   MakeUintegerChecker<uint16_t> ())
-		.AddAttribute ("AccessAntennaNum",
-					   "Antenna number of the device in the access",
-					   UintegerValue (64),
-					   MakeUintegerAccessor (&MmWaveIabNetDevice::SetAccessAntennaNum,
-											 &MmWaveIabNetDevice::GetAccessAntennaNum),
-					   MakeUintegerChecker<uint16_t> ())
-		.AddAttribute ("BackhaulPhy",
-			           "The PHY associated to this IAB node in the backhaul",
-			           PointerValue (),
-			           MakePointerAccessor (&MmWaveIabNetDevice::m_backhaulPhy),
-		               MakePointerChecker <MmWaveUePhy> ())
-		.AddAttribute ("BackhaulMac",
-			           "The MAC associated to this IAB node in the backhaul",
-					   PointerValue (),
-					   MakePointerAccessor (&MmWaveIabNetDevice::m_backhaulMac),
-					   MakePointerChecker <MmWaveUeMac> ())
-		.AddAttribute ("BackhaulRrc",
-						"The RRC layer associated to this IAB node in the backhaul",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveIabNetDevice::m_backhaulRrc),
-						MakePointerChecker <LteUeRrc> ())
-		.AddAttribute ("EpcUeNas",
+    	    .AddConstructor<MmWaveIabNetDevice> ()
+	    .AddAttribute ("Mtu", "The MAC-level Maximum Transmission Unit",
+		           UintegerValue (30000),
+			   MakeUintegerAccessor (&MmWaveIabNetDevice::SetMtu, &MmWaveIabNetDevice::GetMtu),
+			   MakeUintegerChecker<uint16_t> ())
+	    .AddAttribute ("AccessPhy", "The PHY associated to this IAB node in the access",
+			   PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_accessPhy),
+		           MakePointerChecker <MmWaveEnbPhy> ())
+	    .AddAttribute ("AccessMac", "The MAC associated to this IAB node in the access",
+		           PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_accessMac),
+			   MakePointerChecker <MmWaveEnbMac> ())
+	    .AddAttribute ("AccessRrc", "The RRC layer associated to this IAB node in the access",
+			   PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_accessRrc),
+			   MakePointerChecker <LteEnbRrc> ())
+	    .AddAttribute ("CellId", "Cell Identifier for the access",
+			   UintegerValue (0),
+			   MakeUintegerAccessor (&MmWaveIabNetDevice::m_cellId),
+			   MakeUintegerChecker<uint16_t> ())
+	    .AddAttribute ("AccessAntennaNum",
+			   "Antenna number of the device in the access",
+			   UintegerValue (64),
+			   MakeUintegerAccessor (&MmWaveIabNetDevice::SetAccessAntennaNum, &MmWaveIabNetDevice::GetAccessAntennaNum),
+			   MakeUintegerChecker<uint16_t> ())
+	    .AddAttribute ("BackhaulPhy", "The PHY associated to this IAB node in the backhaul",
+			   PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_backhaulPhy),
+		           MakePointerChecker <MmWaveUePhy> ())
+	    .AddAttribute ("BackhaulMac", "The MAC associated to this IAB node in the backhaul",
+			   PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_backhaulMac),
+			   MakePointerChecker <MmWaveUeMac> ())
+	    .AddAttribute ("BackhaulRrc", "The RRC layer associated to this IAB node in the backhaul",
+			   PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_backhaulRrc),
+			   MakePointerChecker <LteUeRrc> ())
+	    .AddAttribute ("EpcUeNas",
 	                   "The NAS associated to this UeNetDevice",
 	                   PointerValue (),
 	                   MakePointerAccessor (&MmWaveIabNetDevice::m_nas),
 	                   MakePointerChecker <EpcUeNas> ())
-		.AddAttribute ("BackhaulAntennaNum",
-					   "Antenna number of the device in the backhaul",
-					   UintegerValue (64),
-					   MakeUintegerAccessor (&MmWaveIabNetDevice::SetBackhaulAntennaNum,
-											   &MmWaveIabNetDevice::GetBackhaulAntennaNum),
-					   MakeUintegerChecker<uint16_t> ())
-		.AddAttribute ("Imsi",
-						"International Mobile Subscriber Identity assigned to this UE",
-						UintegerValue (0),
-						MakeUintegerAccessor (&MmWaveIabNetDevice::m_imsi),
-						MakeUintegerChecker<uint64_t> ())
-		.AddAttribute ("Scheduler",
-						"The Scheduler associated with the MAC",
-						PointerValue (),
-					    MakePointerAccessor (&MmWaveIabNetDevice::m_scheduler),
-					    MakePointerChecker <MmWaveMacScheduler> ())
-	;
-;
+	    .AddAttribute ("BackhaulAntennaNum",
+			   "Antenna number of the device in the backhaul",
+			   UintegerValue (64),
+			   MakeUintegerAccessor (&MmWaveIabNetDevice::SetBackhaulAntennaNum, &MmWaveIabNetDevice::GetBackhaulAntennaNum),
+			   MakeUintegerChecker<uint16_t> ())
+	    .AddAttribute ("Imsi", "International Mobile Subscriber Identity assigned to this UE",
+			   UintegerValue (0),
+			   MakeUintegerAccessor (&MmWaveIabNetDevice::m_imsi),
+			   MakeUintegerChecker<uint64_t> ())
+	    .AddAttribute ("Scheduler", "The Scheduler associated with the MAC",
+			   PointerValue (),
+			   MakePointerAccessor (&MmWaveIabNetDevice::m_scheduler),
+			   MakePointerChecker <MmWaveMacScheduler> ())
+	    ;
+        //;
 
-	return tid;
-}
+        return tid;
+    }
 
 MmWaveIabNetDevice::MmWaveIabNetDevice (void)
 	: m_isConstructed (false),
@@ -327,34 +313,34 @@ MmWaveIabNetDevice::DoInitialize (void)
 	//TODO MAC?
 }
 
-void
-MmWaveIabNetDevice::UpdateConfig (void)
-{
-  NS_LOG_FUNCTION (this);
-
-  if (m_isConstructed)
+    void
+    MmWaveIabNetDevice::UpdateConfig (void)
     {
-      NS_LOG_LOGIC (this << " Updating configuration: IMSI " << m_imsi);
-      m_nas->SetImsi (m_imsi);
-      m_backhaulRrc->SetImsi (m_imsi);
+        NS_LOG_FUNCTION (this);
 
-      if (!m_isConfigured)
-		{
-			NS_LOG_LOGIC (this << " Configure cell " << m_cellId);
-			// we have to make sure that this function is called only once
-			// this method has no effect for the first 4 paramters, but starts the tx of SI
-			m_accessRrc->ConfigureCell (72, 72, 0, 0, m_cellId);
-			m_isConfigured = true;
-		}
+        if (m_isConstructed)
+        {
+            NS_LOG_LOGIC (this << " Updating configuration: IMSI " << m_imsi);
+            m_nas->SetImsi (m_imsi);
+            m_backhaulRrc->SetImsi (m_imsi);
+
+            if (!m_isConfigured)
+	    {
+		NS_LOG_LOGIC (this << " Configure cell " << m_cellId);
+		// we have to make sure that this function is called only once
+		// this method has no effect for the first 4 paramters, but starts the tx of SI
+		m_accessRrc->ConfigureCell (72, 72, 0, 0, m_cellId);
+		m_isConfigured = true;
+	    }
+        }
+        else
+        {
+            /*
+             * NAS and RRC instances are not be ready yet, so do nothing now and
+             * expect ``DoInitialize`` to re-invoke this function.
+             */
+        }
     }
-  else
-    {
-      /*
-       * NAS and RRC instances are not be ready yet, so do nothing now and
-       * expect ``DoInitialize`` to re-invoke this function.
-       */
-    }
-}
 
 
 // send from EpcIabApplication to the access or the backhaul

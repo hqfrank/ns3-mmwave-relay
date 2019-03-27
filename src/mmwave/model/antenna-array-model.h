@@ -31,10 +31,10 @@
 
 namespace ns3 {
 
-typedef std::vector< std::complex<double> > complexVector_t;
+    typedef std::vector< std::complex<double> > complexVector_t;
 
-class AntennaArrayModel: public AntennaModel {
-public:
+    class AntennaArrayModel: public AntennaModel {
+    public:
 	AntennaArrayModel();
 	virtual ~AntennaArrayModel();
 	static TypeId GetTypeId ();
@@ -53,7 +53,7 @@ public:
 	void SetSector (uint8_t sector, uint8_t *antennaNum, double elevation = 90);
 	Ptr<NetDevice> GetCurrentDevice();
 
-private:
+    private:
 	bool m_omniTx;
 	double m_minAngle;
 	double m_maxAngle;
@@ -65,7 +65,7 @@ private:
 
 	Ptr<NetDevice> m_currentDev;
 
-};
+    };
 
 } /* namespace ns3 */
 

@@ -45,32 +45,32 @@
 
 namespace ns3{
 
-NS_LOG_COMPONENT_DEFINE ("MmWaveUePhy");
+    NS_LOG_COMPONENT_DEFINE ("MmWaveUePhy");
 
-NS_OBJECT_ENSURE_REGISTERED (MmWaveUePhy);
+    NS_OBJECT_ENSURE_REGISTERED (MmWaveUePhy);
 
-MmWaveUePhy::MmWaveUePhy ()
-{
+    MmWaveUePhy::MmWaveUePhy ()
+    {
 	NS_LOG_FUNCTION (this);
 	NS_FATAL_ERROR ("This constructor should not be called");
-}
+    }
 
-MmWaveUePhy::MmWaveUePhy (Ptr<MmWaveSpectrumPhy> dlPhy, Ptr<MmWaveSpectrumPhy> ulPhy)
-: MmWavePhy(dlPhy, ulPhy),
-  m_prevSlot (0),
-  m_rnti (0)
-{
-	NS_LOG_FUNCTION (this);
+    MmWaveUePhy::MmWaveUePhy (Ptr<MmWaveSpectrumPhy> dlPhy, Ptr<MmWaveSpectrumPhy> ulPhy)
+        : MmWavePhy(dlPhy, ulPhy),
+          m_prevSlot (0),
+          m_rnti (0)
+    {
+        NS_LOG_FUNCTION (this);
 	m_wbCqiLast = Simulator::Now ();
 	m_cellSinrMap.clear();
 	m_ueCphySapProvider = new MemberLteUeCphySapProvider<MmWaveUePhy> (this);
 	Simulator::ScheduleNow (&MmWaveUePhy::SubframeIndication, this, 0, 0);
-}
+    }
 
-MmWaveUePhy::~MmWaveUePhy ()
-{
+    MmWaveUePhy::~MmWaveUePhy ()
+    {
 	NS_LOG_FUNCTION (this);
-}
+    }
 
 TypeId
 MmWaveUePhy::GetTypeId (void)
