@@ -41,24 +41,22 @@
 
 namespace ns3 {
 
-class MmWaveFlexTtiMacScheduler : public MmWaveMacScheduler
-{
-public:
+    class MmWaveFlexTtiMacScheduler : public MmWaveMacScheduler
+    {
+    public:
 	typedef std::vector < uint8_t > DlHarqProcessesStatus_t;
 	typedef std::vector < uint8_t > DlHarqProcessesTimer_t;
 	typedef std::vector < DciInfoElementTdma > DlHarqProcessesDciInfoList_t;
 	typedef std::vector < std::vector <struct RlcPduInfo> > DlHarqRlcPduList_t; // vector of the LCs per per UE HARQ process
 	//	typedef std::vector < RlcPduElement > DlHarqRlcPduList_t; // vector of the 8 HARQ processes per UE
-
 	typedef std::vector < uint8_t > UlHarqProcessesTimer_t;
 	typedef std::vector < DciInfoElementTdma > UlHarqProcessesDciInfoList_t;
 	typedef std::vector < uint8_t > UlHarqProcessesStatus_t;
 
-
 	MmWaveFlexTtiMacScheduler ();
-
 	virtual ~MmWaveFlexTtiMacScheduler ();
 	virtual void DoDispose (void);
+
 	static TypeId GetTypeId (void);
 
 	virtual void SetMacSchedSapUser (MmWaveMacSchedSapUser* sap);
@@ -87,35 +85,35 @@ public:
 	friend class MmWaveFlexTtiMacCschedSapProvider;
 	friend class MemberMmWaveUeMacCschedSapProvider<MmWaveFlexTtiMacScheduler>;
 
-private:
+    private:
 	struct UeSchedInfo
 	{
-		UeSchedInfo () :
-			m_dlMcs (0), m_ulMcs (0), m_maxDlBufSize (0),
-			m_maxUlBufSize (0), m_maxDlSymbols (0), m_maxUlSymbols (0),
-			m_dlSymbols (0), m_ulSymbols (0),
-			m_dlSymbolsRetx (0), m_ulSymbolsRetx (0),
-			m_dlTbSize (0), m_ulTbSize (0),
-			m_dlAllocDone (false), m_ulAllocDone (false), m_iab(false)
-		{
-		}
+	    UeSchedInfo () :
+		m_dlMcs (0), m_ulMcs (0), m_maxDlBufSize (0),
+		m_maxUlBufSize (0), m_maxDlSymbols (0), m_maxUlSymbols (0),
+		m_dlSymbols (0), m_ulSymbols (0),
+		m_dlSymbolsRetx (0), m_ulSymbolsRetx (0),
+		m_dlTbSize (0), m_ulTbSize (0),
+		m_dlAllocDone (false), m_ulAllocDone (false), m_iab(false)
+	    {
+	    }
 
-		uint8_t		m_dlMcs;
-		uint8_t		m_ulMcs;
-		uint32_t	m_maxDlBufSize;
-		uint32_t	m_maxUlBufSize;
-		uint8_t		m_maxDlSymbols;
-		uint8_t		m_maxUlSymbols;
-		uint8_t		m_dlSymbols;
-		uint8_t		m_ulSymbols;
-		uint8_t		m_dlSymbolsRetx;
-		uint8_t		m_ulSymbolsRetx;
-		uint32_t	m_dlTbSize;
-		uint32_t	m_ulTbSize;
-		std::vector <struct RlcPduInfo> m_rlcPduInfo;
-		bool			m_dlAllocDone;
-		bool			m_ulAllocDone;
-		bool 		m_iab;
+	    uint8_t	m_dlMcs;
+	    uint8_t	m_ulMcs;
+	    uint32_t	m_maxDlBufSize;
+	    uint32_t	m_maxUlBufSize;
+	    uint8_t	m_maxDlSymbols;
+	    uint8_t	m_maxUlSymbols;
+	    uint8_t	m_dlSymbols;
+	    uint8_t	m_ulSymbols;
+	    uint8_t	m_dlSymbolsRetx;
+	    uint8_t	m_ulSymbolsRetx;
+	    uint32_t	m_dlTbSize;
+	    uint32_t	m_ulTbSize;
+	    std::vector <struct RlcPduInfo> m_rlcPduInfo;
+	    bool	m_dlAllocDone;
+	    bool	m_ulAllocDone;
+	    bool	m_iab;
 	};
 
 	unsigned CalcMinTbSizeNumSym (unsigned mcs, unsigned bufSize, unsigned &tbSize);
@@ -301,7 +299,7 @@ private:
 	/**
 	 * m_harqOn when false inhibit te HARQ mechanisms (by default active)
 	 */
-	bool m_harqOn;
+	bool    m_harqOn;
 	uint8_t m_numHarqProcess;
 	uint8_t m_harqTimeout;
 
@@ -352,7 +350,12 @@ private:
 	SfIabAllocInfo m_busyResourcesSchedSubframe;
 	std::vector<SfIabAllocInfo> m_iabBusySubframeAllocation;  // vector with IAB allocation info. By default, 10 elements
 	                                                          // are stored in the vector corresponding to 10 subframes.
-};
+	/*
+	 * Out-of-band backhaul pre-computed optimal scheduling result.
+	 */
+	uint32_t m_symAvilStart;  // the first available symbol index in one subframe.  
+	uint32_t m_symAvilEnd;    // the last available symbol index in one subframe.
+    };
 
 }
 

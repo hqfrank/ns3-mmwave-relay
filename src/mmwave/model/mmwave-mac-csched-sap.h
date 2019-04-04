@@ -421,14 +421,12 @@ MemberMmWaveUeMacCschedSapProvider<C>::MemberMmWaveUeMacCschedSapProvider ()
 {
 }
 
-template <class C>
-void 
-MemberMmWaveUeMacCschedSapProvider<C>::IabBackhaulSchedNotify (const struct IabBackhaulSchedInfo& info)
-{
-  m_owner->DoIabBackhaulSchedNotify (info);
-}
-
-
+    template <class C>
+    void 
+    MemberMmWaveUeMacCschedSapProvider<C>::IabBackhaulSchedNotify (const struct IabBackhaulSchedInfo& info)
+    {
+        m_owner->DoIabBackhaulSchedNotify (info);
+    }
 
 } // end namespace ns3
 

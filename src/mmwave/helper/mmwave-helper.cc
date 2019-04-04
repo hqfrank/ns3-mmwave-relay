@@ -96,46 +96,44 @@ MmWaveHelper::~MmWaveHelper(void)
 	NS_LOG_FUNCTION(this);
 }
 
-TypeId
-MmWaveHelper::GetTypeId (void)
-{
-	static TypeId
-	    tid =
-	    TypeId ("ns3::MmWaveHelper")
+    TypeId
+    MmWaveHelper::GetTypeId (void)
+    {
+	static TypeId tid = TypeId ("ns3::MmWaveHelper")
 	    .SetParent<Object> ()
 	    .AddConstructor<MmWaveHelper> ()
-		.AddAttribute ("PathlossModel",
-					   "The type of path-loss model to be used. "
-					   "The allowed values for this attributes are the type names "
-					   "of any class inheriting from ns3::PropagationLossModel.",
-					   StringValue ("ns3::MmWave3gppPropagationLossModel"),
-					   MakeStringAccessor (&MmWaveHelper::SetPathlossModelType),
-					   MakeStringChecker ())
-		.AddAttribute ("ChannelModel",
-					   "The type of MIMO channel model to be used. "
-					   "The allowed values for this attributes are the type names "
-					   "of any class inheriting from ns3::SpectrumPropagationLossModel.",
-					   StringValue ("ns3::MmWave3gppChannel"),
-					   MakeStringAccessor (&MmWaveHelper::SetChannelModelType),
-					   MakeStringChecker ())
-		.AddAttribute ("Scheduler",
-				      "The type of scheduler to be used for MmWave eNBs. "
-				      "The allowed values for this attributes are the type names "
-				      "of any class inheriting from ns3::MmWaveMacScheduler.",
-				      StringValue ("ns3::MmWaveFlexTtiMacScheduler"),
-				      MakeStringAccessor (&MmWaveHelper::SetSchedulerType,
-				                          &MmWaveHelper::GetSchedulerType),
-				      MakeStringChecker ())
-	  .AddAttribute ("HarqEnabled",
-					"Enable Hybrid ARQ",
-					BooleanValue (true),
-					MakeBooleanAccessor (&MmWaveHelper::m_harqEnabled),
-					MakeBooleanChecker ())
-		.AddAttribute ("RlcAmEnabled",
-					"Enable RLC Acknowledged Mode",
-					BooleanValue (true),
-					MakeBooleanAccessor (&MmWaveHelper::m_rlcAmEnabled),
-					MakeBooleanChecker ())
+	    .AddAttribute ("PathlossModel",
+ 			    "The type of path-loss model to be used. "
+			    "The allowed values for this attributes are the type names "
+			    "of any class inheriting from ns3::PropagationLossModel.",
+			    StringValue ("ns3::MmWave3gppPropagationLossModel"),
+			    MakeStringAccessor (&MmWaveHelper::SetPathlossModelType),
+			    MakeStringChecker ())
+	    .AddAttribute ("ChannelModel",
+			    "The type of MIMO channel model to be used. "
+			    "The allowed values for this attributes are the type names "
+			    "of any class inheriting from ns3::SpectrumPropagationLossModel.",
+			    StringValue ("ns3::MmWave3gppChannel"),
+			    MakeStringAccessor (&MmWaveHelper::SetChannelModelType),
+			    MakeStringChecker ())
+	    .AddAttribute ("Scheduler",
+			    "The type of scheduler to be used for MmWave eNBs. "
+			    "The allowed values for this attributes are the type names "
+			    "of any class inheriting from ns3::MmWaveMacScheduler.",
+			    StringValue ("ns3::MmWaveFlexTtiMacScheduler"),
+			    MakeStringAccessor (&MmWaveHelper::SetSchedulerType,
+				    &MmWaveHelper::GetSchedulerType),
+			    MakeStringChecker ())
+  	    .AddAttribute ("HarqEnabled",
+			    "Enable Hybrid ARQ",
+			    BooleanValue (true),
+			    MakeBooleanAccessor (&MmWaveHelper::m_harqEnabled),
+			    MakeBooleanChecker ())
+	    .AddAttribute ("RlcAmEnabled",
+			    "Enable RLC Acknowledged Mode",
+			    BooleanValue (true),
+			    MakeBooleanAccessor (&MmWaveHelper::m_rlcAmEnabled),
+			    MakeBooleanChecker ())
 	    .AddAttribute ("LteScheduler",
 	                   "The type of scheduler to be used for LTE eNBs. "
 	                   "The allowed values for this attributes are the type names "
@@ -173,17 +171,17 @@ MmWaveHelper::GetTypeId (void)
 	                   BooleanValue (true),
 	                   MakeBooleanAccessor (&MmWaveHelper::m_usePdschForCqiGeneration),
 	                   MakeBooleanChecker ())
-		.AddAttribute ("AnrEnabled",
+	    .AddAttribute ("AnrEnabled",
 	                   "Activate or deactivate Automatic Neighbour Relation function",
 	                   BooleanValue (true),
 	                   MakeBooleanAccessor (&MmWaveHelper::m_isAnrEnabled),
 	                   MakeBooleanChecker ())
-		.AddAttribute ("UseIdealRrc",
+	    .AddAttribute ("UseIdealRrc",
 	                   "Use Ideal or Real RRC",
 	                   BooleanValue (false),
 	                   MakeBooleanAccessor (&MmWaveHelper::m_useIdealRrc),
 	                   MakeBooleanChecker ())
-		.AddAttribute ("BasicCellId",
+	    .AddAttribute ("BasicCellId",
                    "The next value will be the first cellId",
                    UintegerValue (0),
                    MakeUintegerAccessor (&MmWaveHelper::m_cellIdCounter),
@@ -762,7 +760,7 @@ MmWaveHelper::InstallIabDevice (NodeContainer c)
 	Ptr<MmWaveEnbMac> accessMac = CreateObject<MmWaveEnbMac> ();
 	accessMac->SetConfigurationParameters (m_phyMacCommon);
 	Ptr<MmWaveMacScheduler> sched = m_schedulerFactory.Create<MmWaveMacScheduler> ();
-	sched->SetIabScheduler(true);
+	sched->SetIabScheduler(true);  // The scheduler is an IAB one.
 
 	sched->ConfigureCommonParameters (m_phyMacCommon);
 	accessMac->SetMmWaveMacSchedSapProvider(sched->GetMacSchedSapProvider());
@@ -1501,9 +1499,9 @@ MmWaveHelper::InstallSingleUeDevice (Ptr<Node> n)
 	return device;
 }
 
-Ptr<NetDevice>
-MmWaveHelper::InstallSingleEnbDevice (Ptr<Node> n)
-{
+    Ptr<NetDevice>
+    MmWaveHelper::InstallSingleEnbDevice (Ptr<Node> n)
+    {
 	NS_ABORT_MSG_IF (m_cellIdCounter == 65535, "max num eNBs exceeded");
 	uint16_t cellId = ++m_cellIdCounter;
 
@@ -1521,8 +1519,8 @@ MmWaveHelper::InstallSingleEnbDevice (Ptr<Node> n)
 	Ptr<MmWaveChunkProcessor> pData = Create<MmWaveChunkProcessor> ();
 	if(!m_snrTest)
 	{
-		pData->AddCallback (MakeCallback (&MmWaveEnbPhy::GenerateDataCqiReport, phy));
-		pData->AddCallback (MakeCallback (&MmWaveSpectrumPhy::UpdateSinrPerceived, dlPhy));
+	    pData->AddCallback (MakeCallback (&MmWaveEnbPhy::GenerateDataCqiReport, phy));
+	    pData->AddCallback (MakeCallback (&MmWaveSpectrumPhy::UpdateSinrPerceived, dlPhy));
 	}
 	dlPhy->AddDataSinrChunkProcessor (pData);
 

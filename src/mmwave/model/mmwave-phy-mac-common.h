@@ -269,12 +269,12 @@ struct SlotAllocInfo
 
 
 
-struct BySymIndex {
+    struct BySymIndex {
 	bool operator()(SlotAllocInfo const &a, SlotAllocInfo &b) const 
 	{
 		return a.m_dci.m_symStart < b.m_dci.m_symStart;
 	}
-};
+    };
 
 
 struct SfAllocInfo
@@ -309,8 +309,8 @@ struct SfAllocInfo
     bool m_valid;
 };
 
-struct SfIabAllocInfo
-{
+    struct SfIabAllocInfo
+    {
 	SfIabAllocInfo () : m_sfnSf (SfnSf()), m_valid(true)
 	{
 
@@ -318,17 +318,17 @@ struct SfIabAllocInfo
 
 	SfIabAllocInfo (uint32_t size) : m_sfnSf (SfnSf()), m_valid(true)
 	{
-		m_symAllocationMask = std::vector<bool>(size, false);
+	    m_symAllocationMask = std::vector<bool>(size, false);
 	}
 
 	SfIabAllocInfo (SfnSf sfn, uint32_t size) : m_sfnSf (sfn), m_valid(true)
 	{
-		m_symAllocationMask = std::vector<bool>(size, false);
+	    m_symAllocationMask = std::vector<bool>(size, false);
 	}
 
 	SfIabAllocInfo (SfnSf sfn, bool valid, uint32_t size) : m_sfnSf (sfn), m_valid(valid)
 	{
-		m_symAllocationMask = std::vector<bool>(size, false);
+	    m_symAllocationMask = std::vector<bool>(size, false);
 	}
 
 	SfnSf m_sfnSf;
@@ -337,8 +337,8 @@ struct SfIabAllocInfo
 	// uint32_t m_ulSymStart;		  // start of UL IAB region
 	// uint32_t m_dlNumSymAlloc;              // number of allocated slots in the IAB downlink
 	// uint32_t m_dlSymStart;		  // start of DL IAB region
-	bool m_valid;                          // already used
-};
+	bool m_valid;                          // already used? "true", a new one, not used before.
+    };
 
 typedef std::vector<SlotAllocInfo::TddSlotType> TddSlotTypeList;
 

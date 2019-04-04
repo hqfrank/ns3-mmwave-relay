@@ -378,66 +378,66 @@ MmWaveUeMac::DoReportBufferStatus (LteMacSapProvider::ReportBufferStatusParamete
 }
 
 
-void
-MmWaveUeMac::SendReportBufferStatus (void)
-{
-  NS_LOG_FUNCTION (this);
-
-  if (m_rnti == 0)
+    void
+    MmWaveUeMac::SendReportBufferStatus (void)
     {
-      NS_LOG_INFO ("MAC not initialized, BSR deferred");
-      return;
-    }
+        NS_LOG_FUNCTION (this);
 
-  if (m_ulBsrReceived.size () == 0)
-    {
-      NS_LOG_INFO ("No BSR report to transmit");
-      return;
-    }
-  MacCeElement bsr{m_rnti, MacCeElement::BSR};
+        if (m_rnti == 0)
+        {
+            NS_LOG_INFO ("MAC not initialized, BSR deferred");
+            return;
+        }
+
+        if (m_ulBsrReceived.size () == 0)
+        {
+            NS_LOG_INFO ("No BSR report to transmit");
+            return;
+        }
+        MacCeElement bsr{m_rnti, MacCeElement::BSR};
   
-  bool send = true;
+        bool send = true;
 
-  // BSR is reported for each LCG
-  std::map <uint8_t, LteMacSapProvider::ReportBufferStatusParameters>::iterator it;
-  std::vector<uint32_t> queue (4, 0); // one value per each of the 4 LCGs, initialized to 0
-  for (it = m_ulBsrReceived.begin (); it != m_ulBsrReceived.end (); it++)
-    {
-      uint8_t lcid = it->first;
-      NS_LOG_INFO("MmWave lcid of BSR " << (uint16_t)lcid << " queue size " << (*it).second.txQueueSize);
+        // BSR is reported for each LCG
+        std::map <uint8_t, LteMacSapProvider::ReportBufferStatusParameters>::iterator it;
+        std::vector<uint32_t> queue (4, 0); // one value per each of the 4 LCGs, initialized to 0
+        for (it = m_ulBsrReceived.begin (); it != m_ulBsrReceived.end (); it++)
+        {
+            uint8_t lcid = it->first;
+            NS_LOG_INFO("MmWave lcid of BSR " << (uint16_t)lcid << " queue size " << (*it).second.txQueueSize);
 
-      std::map <uint8_t, LcInfo>::iterator lcInfoMapIt;
-      lcInfoMapIt = m_lcInfoMap.find (lcid);
-      if (lcInfoMapIt !=  m_lcInfoMap.end ())
-      {
-      	NS_ASSERT_MSG ((lcid != 0) || (((*it).second.txQueueSize == 0)
-                                     && ((*it).second.retxQueueSize == 0)
-                                     && ((*it).second.statusPduSize == 0)),
-                     "BSR should not be used for LCID 0");
-      	uint8_t lcg = lcInfoMapIt->second.lcConfig.logicalChannelGroup;
-      	queue.at (lcg) += ((*it).second.txQueueSize + (*it).second.retxQueueSize + (*it).second.statusPduSize);
-      }
-      else
-      {
-        NS_LOG_INFO("lcid not found");
-      	send = false;
-      }
+            std::map <uint8_t, LcInfo>::iterator lcInfoMapIt;
+            lcInfoMapIt = m_lcInfoMap.find (lcid);
+            if (lcInfoMapIt !=  m_lcInfoMap.end ())
+            {
+      	        NS_ASSERT_MSG ((lcid != 0) || (((*it).second.txQueueSize == 0)
+                                && ((*it).second.retxQueueSize == 0)
+                                && ((*it).second.statusPduSize == 0)),
+                                "BSR should not be used for LCID 0");
+      	        uint8_t lcg = lcInfoMapIt->second.lcConfig.logicalChannelGroup;
+      	        queue.at (lcg) += ((*it).second.txQueueSize + (*it).second.retxQueueSize + (*it).second.statusPduSize);
+            }
+            else
+            {
+                NS_LOG_INFO("lcid not found");
+      	        send = false;
+            }
+        }
+
+        // FF API says that all 4 LCGs are always present
+        bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (0)));
+        bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (1)));
+        bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (2)));
+        bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (3)));
+
+        // create the feedback to eNB
+        Ptr<MmWaveBsrMessage> msg = Create<MmWaveBsrMessage> ();
+        msg->SetBsr (bsr);
+        if(send)
+        {
+	    m_phySapProvider->SendControlMessage (msg);
+        }
     }
-
-  // FF API says that all 4 LCGs are always present
-  bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (0)));
-  bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (1)));
-  bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (2)));
-  bsr.m_macCeValue.m_bufferStatus.push_back (BufferSizeLevelBsr::BufferSize2BsrId (queue.at (3)));
-
-  // create the feedback to eNB
-  Ptr<MmWaveBsrMessage> msg = Create<MmWaveBsrMessage> ();
-  msg->SetBsr (bsr);
-  if(send)
-  {
-	m_phySapProvider->SendControlMessage (msg);
-  }
-}
 
 void
 MmWaveUeMac::SetUeCmacSapUser (LteUeCmacSapUser* s)
@@ -623,27 +623,27 @@ std::map<uint32_t, struct MacPduInfo>::iterator MmWaveUeMac::AddToMacPduMap (Dci
 	return it;
 }
 
-void
-MmWaveUeMac::DoReceiveControlMessage  (Ptr<MmWaveControlMessage> msg)
-{
+    void
+    MmWaveUeMac::DoReceiveControlMessage  (Ptr<MmWaveControlMessage> msg)
+    {
 	NS_LOG_FUNCTION (this << msg);
 
 	switch (msg->GetMessageType())
 	{
-	case (MmWaveControlMessage::DCI_TDMA):
-		{
+	    case (MmWaveControlMessage::DCI_TDMA):
+	    {
 		Ptr<MmWaveTdmaDciMessage> dciMsg = DynamicCast <MmWaveTdmaDciMessage> (msg);
 		DciInfoElementTdma dciInfoElem = dciMsg->GetDciInfoElement ();
 		SfnSf sfn = dciMsg->GetSfnSf ();
 
-		if(m_iabBackhaulSapProvider != 0)
+		if(m_iabBackhaulSapProvider != 0) // There is a "path" (i.e., SapProvider) to the IAB scheduler
 		{
-			NS_LOG_DEBUG("This is MmWaveUeMac of BACKHAUL link for UE rnti " << m_rnti);
-			MmWaveUeMacCschedSapProvider::IabBackhaulSchedInfo iabInfo;
-			iabInfo.m_dciInfoElementTdma = dciInfoElem;
-			// IAB do we need also the frame and subframe
-			iabInfo.m_sfnSf = sfn; // dciMsg->GetSfnSf();
-			m_iabBackhaulSapProvider->IabBackhaulSchedNotify(iabInfo);
+		    NS_LOG_DEBUG("This is MmWaveUeMac of BACKHAUL link for UE rnti " << m_rnti);
+		    MmWaveUeMacCschedSapProvider::IabBackhaulSchedInfo iabInfo;
+		    iabInfo.m_dciInfoElementTdma = dciInfoElem;
+		    // IAB do we need also the frame and subframe
+		    iabInfo.m_sfnSf = sfn; // dciMsg->GetSfnSf();
+		    m_iabBackhaulSapProvider->IabBackhaulSchedNotify(iabInfo); // Tell the current IAB node what the scheduling result in the previous hop.
 		}
 
 		if (dciInfoElem.m_format == DciInfoElementTdma::UL_dci)

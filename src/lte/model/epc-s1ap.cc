@@ -168,83 +168,83 @@ EpcS1apEnb::AddS1apInterface (uint16_t enbId, uint16_t mmeId, Ptr<Socket> localS
 }
 
 
-void 
-EpcS1apEnb::RecvFromS1apSocket (Ptr<Socket> socket)
-{
-  NS_LOG_FUNCTION (this << socket);
-
-  NS_LOG_LOGIC ("Recv S1ap message: S1AP eNB: from Socket at time " << Simulator::Now ().GetSeconds());
-  Ptr<Packet> packet = socket->Recv ();
-  NS_LOG_LOGIC ("packetLen = " << packet->GetSize ());
-
-  EpcS1APHeader s1apHeader;
-  packet->RemoveHeader (s1apHeader);
-
-  NS_LOG_LOGIC ("S1ap header: " << s1apHeader);
-
-  uint8_t procedureCode = s1apHeader.GetProcedureCode ();
-
-  if (procedureCode == EpcS1APHeader::InitialContextSetupRequest)
-  {
-    NS_LOG_LOGIC ("Recv S1ap message: INITIAL CONTEXT SETUP REQUEST");
-    EpcS1APInitialContextSetupRequestHeader reqHeader;
-    packet->RemoveHeader(reqHeader);
-
-    NS_LOG_INFO ("S1ap Initial Context Setup Request " << reqHeader);
-
-    uint64_t mmeUeS1apId = reqHeader.GetMmeUeS1Id();
-
-    if(m_remoteImsiRequestMap.find(mmeUeS1apId) != m_remoteImsiRequestMap.end())
+    void 
+    EpcS1apEnb::RecvFromS1apSocket (Ptr<Socket> socket)
     {
-      NS_LOG_LOGIC("This is a reply for a remote message");
-      packet->AddHeader(reqHeader);
-      packet->AddHeader(s1apHeader);
+        NS_LOG_FUNCTION (this << socket);
 
-      m_s1apSapUser->ForwardIabS1apReply(packet);
-      return;
-    }
+        NS_LOG_LOGIC ("Recv S1ap message: S1AP eNB: from Socket at time " << Simulator::Now ().GetSeconds());
+        Ptr<Packet> packet = socket->Recv ();
+        NS_LOG_LOGIC ("packetLen = " << packet->GetSize ());
 
-    uint16_t enbUeS1apId = reqHeader.GetEnbUeS1Id();
-    bool iab = reqHeader.GetIab();
-    std::list<EpcS1apSap::ErabToBeSetupItem> erabToBeSetup = reqHeader.GetErabToBeSetupItem ();
+        EpcS1APHeader s1apHeader;
+        packet->RemoveHeader (s1apHeader);
+
+        NS_LOG_LOGIC ("S1ap header: " << s1apHeader);
+
+        uint8_t procedureCode = s1apHeader.GetProcedureCode ();
+
+        if (procedureCode == EpcS1APHeader::InitialContextSetupRequest)
+        {
+            NS_LOG_LOGIC ("Recv S1ap message: INITIAL CONTEXT SETUP REQUEST");
+            EpcS1APInitialContextSetupRequestHeader reqHeader;
+            packet->RemoveHeader(reqHeader);
+
+            NS_LOG_INFO ("S1ap Initial Context Setup Request " << reqHeader);
+
+            uint64_t mmeUeS1apId = reqHeader.GetMmeUeS1Id();
+
+            if(m_remoteImsiRequestMap.find(mmeUeS1apId) != m_remoteImsiRequestMap.end())
+            {
+                NS_LOG_LOGIC("This is a reply for a remote message");
+                packet->AddHeader(reqHeader);
+                packet->AddHeader(s1apHeader);
+
+                m_s1apSapUser->ForwardIabS1apReply(packet);
+                return;
+            }
+
+            uint16_t enbUeS1apId = reqHeader.GetEnbUeS1Id();
+            bool iab = reqHeader.GetIab();
+            std::list<EpcS1apSap::ErabToBeSetupItem> erabToBeSetup = reqHeader.GetErabToBeSetupItem ();
     
-    NS_LOG_LOGIC ("mmeUeS1apId " << mmeUeS1apId);
-    NS_LOG_LOGIC ("enbUeS1apId " << enbUeS1apId);
+            NS_LOG_LOGIC ("mmeUeS1apId " << mmeUeS1apId);
+            NS_LOG_LOGIC ("enbUeS1apId " << enbUeS1apId);
 
-    m_s1apSapUser->InitialContextSetupRequest(mmeUeS1apId, enbUeS1apId, erabToBeSetup, iab);
-  } 
-  else if (procedureCode == EpcS1APHeader::PathSwitchRequestAck)
-  {
-    NS_LOG_LOGIC ("Recv S1ap message: PATH SWITCH REQUEST ACK");
-    EpcS1APPathSwitchRequestAcknowledgeHeader reqHeader;
-    packet->RemoveHeader(reqHeader);
+            m_s1apSapUser->InitialContextSetupRequest(mmeUeS1apId, enbUeS1apId, erabToBeSetup, iab);
+        } 
+        else if (procedureCode == EpcS1APHeader::PathSwitchRequestAck)
+        {
+            NS_LOG_LOGIC ("Recv S1ap message: PATH SWITCH REQUEST ACK");
+            EpcS1APPathSwitchRequestAcknowledgeHeader reqHeader;
+            packet->RemoveHeader(reqHeader);
 
-    NS_LOG_INFO ("S1ap Path Switch Request Acknowledge Header " << reqHeader);
+            NS_LOG_INFO ("S1ap Path Switch Request Acknowledge Header " << reqHeader);
 
-    uint64_t mmeUeS1apId = reqHeader.GetMmeUeS1Id();
+            uint64_t mmeUeS1apId = reqHeader.GetMmeUeS1Id();
 
-    if(m_remoteImsiRequestMap.find(mmeUeS1apId) != m_remoteImsiRequestMap.end())
-    {
-      NS_LOG_LOGIC("This is a reply for a remote message");
-      NS_FATAL_ERROR("TODO");
-      return;
-    }
+            if(m_remoteImsiRequestMap.find(mmeUeS1apId) != m_remoteImsiRequestMap.end())
+            {
+                NS_LOG_LOGIC("This is a reply for a remote message");
+                NS_FATAL_ERROR("TODO");
+                return;
+            }
 
-    uint16_t enbUeS1apId = reqHeader.GetEnbUeS1Id();
-    uint16_t ecgi = reqHeader.GetEcgi();
-    std::list<EpcS1apSap::ErabSwitchedInUplinkItem> pathErab = reqHeader.GetErabSwitchedInUplinkItemList ();
+            uint16_t enbUeS1apId = reqHeader.GetEnbUeS1Id();
+            uint16_t ecgi = reqHeader.GetEcgi();
+            std::list<EpcS1apSap::ErabSwitchedInUplinkItem> pathErab = reqHeader.GetErabSwitchedInUplinkItemList ();
     
-    NS_LOG_LOGIC ("mmeUeS1apId " << mmeUeS1apId);
-    NS_LOG_LOGIC ("enbUeS1apId " << enbUeS1apId);
-    NS_LOG_LOGIC ("ecgi " << ecgi);
+            NS_LOG_LOGIC ("mmeUeS1apId " << mmeUeS1apId);
+            NS_LOG_LOGIC ("enbUeS1apId " << enbUeS1apId);
+            NS_LOG_LOGIC ("ecgi " << ecgi);
 
-    m_s1apSapUser->PathSwitchRequestAcknowledge(enbUeS1apId, mmeUeS1apId, ecgi, pathErab);
-  }  
-  else
-  {
-    NS_ASSERT_MSG (false, "ProcedureCode NOT SUPPORTED!!!");
-  }
-}
+            m_s1apSapUser->PathSwitchRequestAcknowledge(enbUeS1apId, mmeUeS1apId, ecgi, pathErab);
+        }  
+        else
+        {
+            NS_ASSERT_MSG (false, "ProcedureCode NOT SUPPORTED!!!");
+        }
+    }
 
 
 //

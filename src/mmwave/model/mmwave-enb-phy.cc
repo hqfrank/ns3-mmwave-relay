@@ -1219,9 +1219,9 @@ MmWaveEnbPhy::StartSubFrame (void)
 	StartSlot();
 }
 
-void
-MmWaveEnbPhy::StartSlot (void)
-{
+    void
+    MmWaveEnbPhy::StartSlot (void)
+    {
 	//assume the control signal is omi
 	Ptr<AntennaArrayModel> antennaArray = DynamicCast<AntennaArrayModel> (GetDlSpectrumPhy ()->GetRxAntenna());
 	antennaArray->ChangeToOmniTx ();
@@ -1232,7 +1232,7 @@ MmWaveEnbPhy::StartSlot (void)
 	// end of the slot/subframe. In this implementation, we move the call to the
 	// MAC layer first, so that the SfAllocInfo for slot at distance m_schedulingDelay
 	// is put into the m_sfAllocInfo vector before the DCIs are sent. 
-	// TODOIAB check which are the operations that should be performed after the slot/subframe
+	// TODO: TODOIAB check which are the operations that should be performed after the slot/subframe
 	// and possibly split
 	m_phySapUser->SubframeIndication (SfnSf (m_frameNum, m_sfNum, m_slotNum));  // trigger MAC
 

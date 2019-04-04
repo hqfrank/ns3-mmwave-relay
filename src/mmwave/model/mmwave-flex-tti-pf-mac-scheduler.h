@@ -21,19 +21,18 @@
 
 namespace ns3 {
 
-class MmWaveFlexTtiPfMacScheduler : public MmWaveMacScheduler
-{
-public:
-	typedef std::vector < uint8_t > DlHarqProcessesStatus_t;
+    class MmWaveFlexTtiPfMacScheduler : public MmWaveMacScheduler
+    {
+    public:
+        typedef std::vector < uint8_t > DlHarqProcessesStatus_t;
 	typedef std::vector < uint8_t > DlHarqProcessesTimer_t;
 	typedef std::vector < DciInfoElementTdma > DlHarqProcessesDciInfoList_t;
 	typedef std::vector < std::vector <struct RlcPduInfo> > DlHarqRlcPduList_t; // vector of the LCs per per UE HARQ process
-	//	typedef std::vector < RlcPduElement > DlHarqRlcPduList_t; // vector of the 8 HARQ processes per UE
+	//typedef std::vector < RlcPduElement > DlHarqRlcPduList_t; // vector of the 8 HARQ processes per UE
 
 	typedef std::vector < uint8_t > UlHarqProcessesTimer_t;
 	typedef std::vector < DciInfoElementTdma > UlHarqProcessesDciInfoList_t;
 	typedef std::vector < uint8_t > UlHarqProcessesStatus_t;
-
 
 	MmWaveFlexTtiPfMacScheduler ();
 
@@ -67,126 +66,123 @@ public:
 	friend class MmWaveFlexTtiPfMacCschedSapProvider;
 	friend class MemberMmWaveUeMacCschedSapProvider<MmWaveFlexTtiPfMacScheduler>;
 
-private:
+    private:
 
 	struct UeSchedInfo;
-
 	struct FlowStats
-		{
-			/*FlowStats () :
-				m_isUplink (false), m_ueSchedInfo (0),
-				m_lcid (0), m_arrivalRate (0.0), m_grantedRate(0.0),
-				m_qci (0), m_txQueueHolDelay (0), m_reTxQueueHolDelay (0), m_probErr (0.0),
-				m_deadlineUs (0)
-			{
-			}*/
+	{
+	    /*
+	    FlowStats () :
+	    m_isUplink (false), m_ueSchedInfo (0),
+	    m_lcid (0), m_arrivalRate (0.0), m_grantedRate(0.0),
+	    m_qci (0), m_txQueueHolDelay (0), m_reTxQueueHolDelay (0), m_probErr (0.0),
+	    m_deadlineUs (0)
+	    {}*/
+	    FlowStats (bool uplink, UeSchedInfo* ueSchedInfo, uint8_t lcid) :
+			m_isUplink (uplink), m_ueSchedInfo (ueSchedInfo),
+			m_lcid (lcid), m_arrivalRate (0.0), m_grantedRate(0.0),
+			m_qci (0), m_txQueueHolDelay (0), m_reTxQueueHolDelay (0), m_probErr (0.0),
+			m_deadlineUs (0), m_totalBufSize (0), m_totalSchedSize(0),
+			m_rlcStatusPduSize(0)
+	    {
+		NS_ASSERT (ueSchedInfo != 0);
+	    }
 
-			FlowStats (bool uplink, UeSchedInfo* ueSchedInfo, uint8_t lcid) :
-				m_isUplink (uplink), m_ueSchedInfo (ueSchedInfo),
-				m_lcid (lcid), m_arrivalRate (0.0), m_grantedRate(0.0),
-				m_qci (0), m_txQueueHolDelay (0), m_reTxQueueHolDelay (0), m_probErr (0.0),
-				m_deadlineUs (0), m_totalBufSize (0), m_totalSchedSize(0),
-				m_rlcStatusPduSize(0)
-			{
-				NS_ASSERT (ueSchedInfo != 0);
-			}
+	    bool m_isUplink;		// is uplink?
+	    UeSchedInfo* m_ueSchedInfo;	// pointer to parent UE Info
+	    uint8_t m_lcid;		// LCID (for DL) or LC Group ID (for UL)
+	    double m_arrivalRate;	// Mbps
+	    double m_grantedRate;	// Mbps
+	    uint8_t m_qci;		// We interpret QCI 69 as delay critical
+	    //uint32_t m_deliveryDebt;
+	    double m_txQueueHolDelay;
+	    uint32_t m_reTxQueueHolDelay;
+	    double m_probErr;		// expected probability of each HARQ TX/reTX failure (i.e. 1/E[num TX to success])
+	    double m_deadlineUs;	// relative deadline
+	    std::list<uint32_t> m_txPacketSizes; // estimated packet sizes from consecutive BSRs
+	    uint32_t m_totalBufSize;
+	    std::list<uint32_t> m_retxPacketSizes;
+	    std::list<double> m_txPacketDelays;	 // estimated delays for each packet
+	    std::list<double> m_retxPacketDelays;
 
-			bool			m_isUplink;					// is uplink?
-			UeSchedInfo* m_ueSchedInfo;	// pointer to parent UE Info
-			uint8_t		m_lcid;						// LCID (for DL) or LC Group ID (for UL)
-			double 		m_arrivalRate;		// Mbps
-			double 		m_grantedRate;		// Mbps
-			uint8_t		m_qci;						// We interpret QCI 69 as delay critical
-			//uint32_t	m_deliveryDebt;
-			double	m_txQueueHolDelay;
-			uint32_t	m_reTxQueueHolDelay;
-			double		m_probErr;				// expected probability of each HARQ TX/reTX failure (i.e. 1/E[num TX to success])
-			double	m_deadlineUs;			// relative deadline
-			std::list<uint32_t> m_txPacketSizes;		// estimated packet sizes from consecutive BSRs
-			uint32_t	m_totalBufSize;
-			std::list<uint32_t> m_retxPacketSizes;
-			std::list<double> m_txPacketDelays;		// estimated delays for each packet
-			std::list<double> m_retxPacketDelays;
-
-			// We maintain a queue of PDU sizes scheduled in the last M subframes.
-			// M = delay between scheduling and transmission (default DL = 1, UL = 2)
-			// The sum of these M elements is subtracted from the BSR to account for
-			// data that has been scheduled but not yet extracted from the DL or UL queue.
-			std::list<uint32_t> m_schedPacketSizes;
-			uint32_t 	m_totalSchedSize;		// total of last M elements in list
-			uint32_t 	m_rlcStatusPduSize;
-		};
+	    // We maintain a queue of PDU sizes scheduled in the last M subframes.
+	    // M = delay between scheduling and transmission (default DL = 1, UL = 2)
+	    // The sum of these M elements is subtracted from the BSR to account for
+	    // data that has been scheduled but not yet extracted from the DL or UL queue.
+	    std::list<uint32_t> m_schedPacketSizes;
+	    uint32_t m_totalSchedSize;		// total of last M elements in list
+	    uint32_t m_rlcStatusPduSize;
+	};
 
 	struct UeSchedInfo
-		{
-			UeSchedInfo () :
-				m_rnti (0), m_dlMcs (0), m_ulMcs (0), m_maxDlBufSize (0),
-				m_maxUlBufSize (0), m_maxDlSymbols (0), m_maxUlSymbols (0),
-				m_dlSymbols (0), m_ulSymbols (0),
-				m_dlSymbolsRetx (0), m_ulSymbolsRetx (0),
-				m_dlTbSize (0), m_ulTbSize (0),
-				m_dlAllocDone (false), m_ulAllocDone (false),
-				m_avgTputDl (0.0), m_avgTputUl (0.0),
-				m_lastAvgTputDl (0.0), m_lastAvgTputUl (0.0),
-				m_currTputDl (0.0), m_currTputUl (0.0),
-				m_totBufDl (0), m_totBufUl (0),
-				m_allocUlLast (false),
-				m_iab(false)
-			{
-			}
+	{
+	    UeSchedInfo () :
+	        m_rnti (0), m_dlMcs (0), m_ulMcs (0), m_maxDlBufSize (0),
+		m_maxUlBufSize (0), m_maxDlSymbols (0), m_maxUlSymbols (0),
+		m_dlSymbols (0), m_ulSymbols (0),
+		m_dlSymbolsRetx (0), m_ulSymbolsRetx (0),
+		m_dlTbSize (0), m_ulTbSize (0),
+		m_dlAllocDone (false), m_ulAllocDone (false),
+		m_avgTputDl (0.0), m_avgTputUl (0.0),
+		m_lastAvgTputDl (0.0), m_lastAvgTputUl (0.0),
+		m_currTputDl (0.0), m_currTputUl (0.0),
+		m_totBufDl (0), m_totBufUl (0),
+		m_allocUlLast (false),
+		m_iab(false)
+	    {
+	    }
 
-			UeSchedInfo (uint16_t rnti) :
-				m_rnti (rnti), m_dlMcs (0), m_ulMcs (0), m_maxDlBufSize (0),
-				m_maxUlBufSize (0), m_maxDlSymbols (0), m_maxUlSymbols (0),
-				m_dlSymbols (0), m_ulSymbols (0),
-				m_dlSymbolsRetx (0), m_ulSymbolsRetx (0),
-				m_dlTbSize (0), m_ulTbSize (0),
-				m_dlAllocDone (false), m_ulAllocDone (false),
-				m_avgTputDl (0.0), m_avgTputUl (0.0),
-				m_lastAvgTputDl (0.0), m_lastAvgTputUl (0.0),
-				m_currTputDl (0.0), m_currTputUl (0.0),
-				m_totBufDl (0), m_totBufUl (0),
-				m_allocUlLast (false),
-				m_iab(false)
-			{
-			}
+	    UeSchedInfo (uint16_t rnti) :
+		m_rnti (rnti), m_dlMcs (0), m_ulMcs (0), m_maxDlBufSize (0),
+		m_maxUlBufSize (0), m_maxDlSymbols (0), m_maxUlSymbols (0),
+		m_dlSymbols (0), m_ulSymbols (0),
+		m_dlSymbolsRetx (0), m_ulSymbolsRetx (0),
+		m_dlTbSize (0), m_ulTbSize (0),
+		m_dlAllocDone (false), m_ulAllocDone (false),
+		m_avgTputDl (0.0), m_avgTputUl (0.0),
+		m_lastAvgTputDl (0.0), m_lastAvgTputUl (0.0),
+		m_currTputDl (0.0), m_currTputUl (0.0),
+		m_totBufDl (0), m_totBufUl (0),
+		m_allocUlLast (false),
+		m_iab(false)
+	    {
+	    }
 
-			uint16_t	m_rnti;
-			uint8_t		m_dlMcs;
-			uint8_t		m_ulMcs;
-			uint32_t	m_maxDlBufSize;
-			uint32_t	m_maxUlBufSize;
-			uint8_t		m_maxDlSymbols;
-			uint8_t		m_maxUlSymbols;
-			uint8_t		m_dlSymbols;
-			uint8_t		m_ulSymbols;
-			uint8_t		m_dlSymbolsRetx;
-			uint8_t		m_ulSymbolsRetx;
-			uint32_t	m_dlTbSize;
-			uint32_t	m_ulTbSize;
-			std::vector <struct RlcPduInfo> m_rlcPduInfo;
-			bool			m_dlAllocDone;
-			bool			m_ulAllocDone;
-			std::vector<FlowStats> m_flowStatsDl;		// for each LC
-			std::vector<FlowStats> m_flowStatsUl;
-			double 		m_avgTputDl;
-			double 		m_avgTputUl;
-			double 		m_lastAvgTputDl;
-			double 		m_lastAvgTputUl;
-			double 		m_currTputDl;
-			double 		m_currTputUl;
-			uint32_t	m_totBufDl;
-			uint32_t	m_totBufUl;
-			bool 			m_allocUlLast;
-			bool 		m_iab;
-
-		};
+	    uint16_t m_rnti;
+	    uint8_t m_dlMcs;
+	    uint8_t m_ulMcs;
+	    uint32_t m_maxDlBufSize;
+	    uint32_t m_maxUlBufSize;
+	    uint8_t m_maxDlSymbols;
+	    uint8_t m_maxUlSymbols;
+	    uint8_t m_dlSymbols;
+	    uint8_t m_ulSymbols;
+	    uint8_t m_dlSymbolsRetx;
+	    uint8_t m_ulSymbolsRetx;
+	    uint32_t m_dlTbSize;
+	    uint32_t m_ulTbSize;
+	    std::vector <struct RlcPduInfo> m_rlcPduInfo;
+	    bool m_dlAllocDone;
+	    bool m_ulAllocDone;
+	    std::vector<FlowStats> m_flowStatsDl;		// for each LC
+	    std::vector<FlowStats> m_flowStatsUl;
+	    double m_avgTputDl;
+	    double m_avgTputUl;
+	    double m_lastAvgTputDl;
+	    double m_lastAvgTputUl;
+	    double m_currTputDl;
+	    double m_currTputUl;
+	    uint32_t m_totBufDl;
+	    uint32_t m_totBufUl;
+	    bool m_allocUlLast;
+	    bool m_iab;
+	};
 
 	static bool CompareUeWeightsPf(UeSchedInfo* lue, UeSchedInfo* rue)
 	{
-		double lPfMetric = std::max(lue->m_currTputDl,lue->m_currTputUl) / std::max(1E-9,(lue->m_avgTputDl + lue->m_avgTputDl));
-		double rPfMetric = std::max(rue->m_currTputDl,rue->m_currTputUl) / std::max(1E-9,(rue->m_avgTputDl + rue->m_avgTputDl));
-		return (lPfMetric > rPfMetric);
+	    double lPfMetric = std::max(lue->m_currTputDl,lue->m_currTputUl) / std::max(1E-9,(lue->m_avgTputDl + lue->m_avgTputDl));
+	    double rPfMetric = std::max(rue->m_currTputDl,rue->m_currTputUl) / std::max(1E-9,(rue->m_avgTputDl + rue->m_avgTputDl));
+	    return (lPfMetric > rPfMetric);
 	}
 
 	unsigned CalcMinTbSizeNumSym (unsigned mcs, unsigned bufSize, unsigned &tbSize);
@@ -201,21 +197,21 @@ private:
 	uint8_t
 	BufferSize2BsrId (uint32_t val)
 	{
-	  int index = 0;
-	  if (BufferSizeLevelBsrTable[63] < val)
+	    int index = 0;
+	    if (BufferSizeLevelBsrTable[63] < val)
 	    {
-	      index = 63;
+	        index = 63;
 	    }
-	  else
+	    else
 	    {
-	      while (BufferSizeLevelBsrTable[index] < val)
+	        while (BufferSizeLevelBsrTable[index] < val)
 	        {
-	          NS_ASSERT (index < 64);
-	          index++;
+	            NS_ASSERT (index < 64);
+	            index++;
 	        }
 	    }
 
-	  return (index);
+	    return (index);
 	}
 
 	uint8_t UpdateDlHarqProcessId (uint16_t rnti);
@@ -413,7 +409,6 @@ private:
 	bool m_dlOnly;
 	bool m_ulOnly;
 
-
 	//typedef std::priority_queue <FlowStats, std::vector<FlowStats*>, CompareWeightDesc> flowQueue_t;
 	//flowQueue_t m_flowQueue;
 
@@ -428,16 +423,13 @@ private:
 	std::vector <FlowStats*> m_flowHeap;
 	std::vector <UeSchedInfo*> m_ueStatHeap;
 
-
 	std::map <uint16_t, IabInfo_t> m_rntiIabInfoMap;
 	uint32_t m_maxSchedulingDelay; // scheduling delay (replaces MmWavePhyMacCommon GetUlSchedDelay) 
 	bool m_iabScheduler;
 	bool m_split;
 	SfIabAllocInfo m_busyResourcesSchedSubframe;
 	std::vector<SfIabAllocInfo> m_iabBusySubframeAllocation; // vector with IAB allocation info
-
-};
-
+    };
 }
 
 

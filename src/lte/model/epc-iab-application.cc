@@ -508,93 +508,105 @@ EpcIabApplication::RecvFromLteSocket (Ptr<Socket> socket) // receive a packet fr
 }
 
 
-void
-EpcIabApplication::DoForwardIabS1apReply (Ptr<Packet> packet)
-{
-  EpcS1APHeader s1apHeader;
-  packet->RemoveHeader (s1apHeader);
-
-  NS_LOG_LOGIC ("S1ap header: " << s1apHeader);
-
-  uint8_t procedureCode = s1apHeader.GetProcedureCode ();
-
-  EpsFlowId_t localRbid;
-
-  if (procedureCode == EpcS1APHeader::InitialContextSetupRequest)
-  {
-    // this message carries the setup information for the bearers of the remote UE
-    // use this to update the map with the remote TEIDs and the local RNTI/BID
-    NS_LOG_LOGIC ("Forward INITIAL CONTEXT SETUP REQUEST");
-    EpcS1APInitialContextSetupRequestHeader reqHeader;
-    packet->RemoveHeader(reqHeader);
-
-    uint64_t mmeUeS1apId = reqHeader.GetMmeUeS1Id(); // this is the IMSI of the remote user
-    // uint16_t enbUeS1apId = reqHeader.GetEnbUeS1Id(); // this is the remote RNTI
-    bool iab = reqHeader.GetIab();
-    std::list<EpcS1apSap::ErabToBeSetupItem> erabToBeSetupList = reqHeader.GetErabToBeSetupItem ();
-
-    NS_LOG_INFO ("EpcIabApplication::DoForwardIabS1apReply S1ap Initial Context Setup Request " << reqHeader << " imsi " << mmeUeS1apId << " iab " << iab);
-
-    // find the LOCAL rnti associated to this imsi
-    auto localRntiIt = m_imsiRntiMap.find(mmeUeS1apId);
-    auto localRbidIt = m_imsiLocalRbidMap.find(mmeUeS1apId);
-    NS_ASSERT_MSG(localRntiIt != m_imsiRntiMap.end() && localRbidIt != m_imsiLocalRbidMap.end(), "IMSI not found");
-
-    localRbid = localRbidIt->second;
-
-    m_imsiIabMap[mmeUeS1apId] = iab;
-
-    // prune the non-IAB node from the list of children of this local RNTI
-    auto rntiChildrenIter = m_rntiImsiChildrenMap.find(localRntiIt->second);
-    NS_ASSERT_MSG(rntiChildrenIter != m_rntiImsiChildrenMap.end(), "RNTI not found");
-    if(!iab)
+    /*
+     * ==========================================
+     * S1-AP is the interface between Enb and MME
+     * ==========================================
+     */
+    void
+    EpcIabApplication::DoForwardIabS1apReply (Ptr<Packet> packet)
     {
-      auto imsiChildEntry = std::find(rntiChildrenIter->second.begin(), rntiChildrenIter->second.end(), mmeUeS1apId);
-      if(imsiChildEntry != rntiChildrenIter->second.end())
-      {
-        rntiChildrenIter->second.erase(imsiChildEntry);
-      }
+        EpcS1APHeader s1apHeader;
+        packet->RemoveHeader (s1apHeader);
+
+        NS_LOG_LOGIC ("S1ap header: " << s1apHeader);
+
+        uint8_t procedureCode = s1apHeader.GetProcedureCode ();
+
+        EpsFlowId_t localRbid;
+
+        if (procedureCode == EpcS1APHeader::InitialContextSetupRequest)
+        {
+            // this message carries the setup information for the bearers of the remote UE
+            // use this to update the map with the remote TEIDs and the local RNTI/BID
+            NS_LOG_LOGIC ("Forward INITIAL CONTEXT SETUP REQUEST");
+            EpcS1APInitialContextSetupRequestHeader reqHeader;
+            packet->RemoveHeader(reqHeader);  // The removed header is stored in the "reqHeader".
+
+            uint64_t mmeUeS1apId = reqHeader.GetMmeUeS1Id(); // this is the IMSI of the remote user
+            // uint16_t enbUeS1apId = reqHeader.GetEnbUeS1Id(); // this is the remote RNTI
+            bool iab = reqHeader.GetIab();
+            std::list<EpcS1apSap::ErabToBeSetupItem> erabToBeSetupList = reqHeader.GetErabToBeSetupItem ();
+	    /*
+	     * An E-RAB (E-UTRAN Radio Access Bearer) refers to the concatenation of an S1 bearer and the corresponding radio bearer. 
+	     * When an E-RAB exists, there is a one-to-one mapping between this E-RAB and an EPS bearer of the Non Access Stratum. 
+	     * Each E-RAB is defined by the following parameters: E-RAB ID – this element is used to identify the E-RAB on the S1 interface. 
+	     * E-RAB QoS – this element describes the QCI (Quality Class Identifier) that defines QoS parameters such as end to end delay, 
+	     * bit error rates etc. Also included are allocation and retention priorities as well as GBR (Guaranteed Bit Rate) parameters 
+	     * if real time services are to be supported over the E-RAB.
+	     */
+
+            NS_LOG_INFO ("EpcIabApplication::DoForwardIabS1apReply S1ap Initial Context Setup Request " << reqHeader << " imsi " << mmeUeS1apId << " iab " << iab);
+
+            // find the LOCAL rnti associated to this imsi
+            auto localRntiIt = m_imsiRntiMap.find(mmeUeS1apId);
+            auto localRbidIt = m_imsiLocalRbidMap.find(mmeUeS1apId);
+            NS_ASSERT_MSG(localRntiIt != m_imsiRntiMap.end() && localRbidIt != m_imsiLocalRbidMap.end(), "IMSI not found");
+
+            localRbid = localRbidIt->second;
+
+            m_imsiIabMap[mmeUeS1apId] = iab;
+
+            // prune the non-IAB node from the list of children of this local RNTI
+            auto rntiChildrenIter = m_rntiImsiChildrenMap.find(localRntiIt->second);
+            NS_ASSERT_MSG(rntiChildrenIter != m_rntiImsiChildrenMap.end(), "RNTI not found");
+            if(!iab)
+            {
+                auto imsiChildEntry = std::find(rntiChildrenIter->second.begin(), rntiChildrenIter->second.end(), mmeUeS1apId);
+                if(imsiChildEntry != rntiChildrenIter->second.end())
+                {
+                    rntiChildrenIter->second.erase(imsiChildEntry);
+                }
+            }
+            NS_LOG_INFO("EpcIabApplication IMSI " << m_imsi << " RNTI " << localRntiIt->second << " has " << rntiChildrenIter->second.size() << " IAB children");
+            // notify the scheduler
+            EpcEnbS1SapUser::NotifyNumIabPerRntiParameters params;
+            params.rnti = localRntiIt->second;
+            params.numIab = rntiChildrenIter->second.size();
+            params.iab = true;  // The current node is an IAB node.
+            m_s1SapUser->NotifyNumIabPerRnti (params);
+
+            for (std::list<EpcS1apSapEnb::ErabToBeSetupItem>::iterator erabIt = erabToBeSetupList.begin ();
+                erabIt != erabToBeSetupList.end ();
+                ++erabIt)
+            {
+                // store the TEID information
+                m_teidRbidMap[erabIt->sgwTeid] = localRbid;
+                m_teidRemoteMap[erabIt->sgwTeid] = true;
+            }
+            packet->AddHeader(reqHeader);
+        }
+        else if (procedureCode == EpcS1APHeader::PathSwitchRequestAck)
+        {
+            NS_FATAL_ERROR("Not implemented");
+        }
+        else
+        {
+            NS_ASSERT_MSG (false, "ProcedureCode NOT SUPPORTED!!!");
+        }
+
+        packet->AddHeader(s1apHeader);
+
+        // send to the LTE socket to the RNTI associated to this imsi
+        // add a GTP header to carry the correct TEID
+        // it is needed because the RecvFromS1uSocket on the other end will remove this header
+        GtpuHeader gtpHeader;
+        gtpHeader.SetTeid(0xFFFFFFFF);
+        gtpHeader.SetMessageType(GtpuHeader::S1AP);
+        packet->AddHeader(gtpHeader);
+
+        SendToLteSocket(packet, localRbid.m_rnti, localRbid.m_bid);
     }
-    NS_LOG_INFO("EpcIabApplication IMSI " << m_imsi << " RNTI " << localRntiIt->second << " has " << rntiChildrenIter->second.size() 
-      << " IAB children");
-    // notify the scheduler
-    EpcEnbS1SapUser::NotifyNumIabPerRntiParameters params;
-    params.rnti = localRntiIt->second;
-    params.numIab = rntiChildrenIter->second.size();
-    params.iab = true;
-    m_s1SapUser->NotifyNumIabPerRnti (params);
-
-    for (std::list<EpcS1apSapEnb::ErabToBeSetupItem>::iterator erabIt = erabToBeSetupList.begin ();
-           erabIt != erabToBeSetupList.end ();
-           ++erabIt)
-      {
-        // store the TEID information
-        m_teidRbidMap[erabIt->sgwTeid] = localRbid;
-        m_teidRemoteMap[erabIt->sgwTeid] = true;
-      }
-      packet->AddHeader(reqHeader);
-  }
-  else if (procedureCode == EpcS1APHeader::PathSwitchRequestAck)
-  {
-    NS_FATAL_ERROR("Not implemented");
-  }
-  else
-  {
-    NS_ASSERT_MSG (false, "ProcedureCode NOT SUPPORTED!!!");
-  }
-
-  packet->AddHeader(s1apHeader);
-
-  // send to the LTE socket to the RNTI associated to this imsi
-  // add a GTP header to carry the correct TEID
-  // it is needed because the RecvFromS1uSocket on the other end will remove this header
-  GtpuHeader gtpHeader;
-  gtpHeader.SetTeid(0xFFFFFFFF);
-  gtpHeader.SetMessageType(GtpuHeader::S1AP);
-  packet->AddHeader(gtpHeader);
-
-  SendToLteSocket(packet, localRbid.m_rnti, localRbid.m_bid);
-}
 
 void 
 EpcIabApplication::RecvFromS1uSocket (Ptr<Socket> socket) // receive a packet from the BACKHAUL interface

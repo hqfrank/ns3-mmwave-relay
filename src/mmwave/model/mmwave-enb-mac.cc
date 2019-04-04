@@ -435,56 +435,61 @@ MmWaveEnbMac::SetEnbCmacSapUser (LteEnbCmacSapUser* s)
   m_cmacSapUser = s;
 }
 
-void
-MmWaveEnbMac::DoSubframeIndication (SfnSf sfnSf)
-{
+    /*
+     * ==========================
+     * Indication of a subframe.
+     * ==========================
+     */
+    void
+    MmWaveEnbMac::DoSubframeIndication (SfnSf sfnSf)
+    {
 	m_frameNum = sfnSf.m_frameNum;
 	m_sfNum = sfnSf.m_sfNum;
 	m_slotNum = sfnSf.m_slotNum;
 
 	// --- DOWNLINK ---
-	// Send Dl-CQI info to the scheduler	if(m_dlCqiReceived.size () > 0)
+	// Send Dl-CQI info to the scheduler TODO: why?? if(m_dlCqiReceived.size () > 0)
 	{
-		MmWaveMacSchedSapProvider::SchedDlCqiInfoReqParameters dlCqiInfoReq;
-		dlCqiInfoReq.m_sfnsf = sfnSf;
+	    MmWaveMacSchedSapProvider::SchedDlCqiInfoReqParameters dlCqiInfoReq;
+	    dlCqiInfoReq.m_sfnsf = sfnSf;
 
-		dlCqiInfoReq.m_cqiList.insert (dlCqiInfoReq.m_cqiList.begin (), m_dlCqiReceived.begin (), m_dlCqiReceived.end ());
-		m_dlCqiReceived.erase (m_dlCqiReceived.begin (), m_dlCqiReceived.end ());
+	    dlCqiInfoReq.m_cqiList.insert (dlCqiInfoReq.m_cqiList.begin (), m_dlCqiReceived.begin (), m_dlCqiReceived.end ());
+	    m_dlCqiReceived.erase (m_dlCqiReceived.begin (), m_dlCqiReceived.end ());
 
-		m_macSchedSapProvider->SchedDlCqiInfoReq (dlCqiInfoReq);
+	    m_macSchedSapProvider->SchedDlCqiInfoReq (dlCqiInfoReq);
 	}
 
 	if (!m_receivedRachPreambleCount.empty ())
 	{
-    	// process received RACH preambles and notify the scheduler
-		Ptr<MmWaveRarMessage> rarMsg = Create<MmWaveRarMessage> ();
+    	    // process received RACH preambles and notify the scheduler
+	    Ptr<MmWaveRarMessage> rarMsg = Create<MmWaveRarMessage> ();
 
-		for (std::map<uint8_t, uint32_t>::const_iterator it = m_receivedRachPreambleCount.begin ();
-				it != m_receivedRachPreambleCount.end ();
-				++it)
+	    for (std::map<uint8_t, uint32_t>::const_iterator it = m_receivedRachPreambleCount.begin ();
+		it != m_receivedRachPreambleCount.end ();
+		++it)
+	    {
+		uint16_t rnti;
+		std::map<uint8_t, NcRaPreambleInfo>::iterator jt = m_allocatedNcRaPreambleMap.find (it->first);
+		NS_LOG_LOGIC("received RapId " << (uint16_t)it->first);
+		if (jt != m_allocatedNcRaPreambleMap.end ())
 		{
-			uint16_t rnti;
-			std::map<uint8_t, NcRaPreambleInfo>::iterator jt = m_allocatedNcRaPreambleMap.find (it->first);
-			NS_LOG_LOGIC("received RapId " << (uint16_t)it->first);
-			if (jt != m_allocatedNcRaPreambleMap.end ())
-			{
-			  rnti = jt->second.rnti;
-			  NS_LOG_INFO ("preambleId previously allocated for NC based RA, RNTI =" << (uint32_t) rnti << ", sending RAR");
-			  m_allocatedNcRaPreambleMap.erase(jt);
-			}
-			else
-			{
-			  rnti = m_cmacSapUser->AllocateTemporaryCellRnti ();
-			  NS_LOG_INFO ("preambleId " << (uint32_t) it->first << ": allocated T-C-RNTI " << (uint32_t) rnti << ", sending RAR");
-			}
-			MmWaveRarMessage::Rar rar;
-			rar.rapId = (*it).first;
-			rar.rarPayload.m_rnti = rnti;
-			rarMsg->AddRar (rar);
-			//NS_ASSERT_MSG((*it).second ==1, "Two user send the same Rach ID, collision detected");
+		    rnti = jt->second.rnti;
+		    NS_LOG_INFO ("preambleId previously allocated for NC based RA, RNTI =" << (uint32_t) rnti << ", sending RAR");
+		    m_allocatedNcRaPreambleMap.erase(jt);
 		}
-		m_phySapProvider->SendControlMessage (rarMsg);
-		m_receivedRachPreambleCount.clear ();
+		else
+		{
+		    rnti = m_cmacSapUser->AllocateTemporaryCellRnti ();
+		    NS_LOG_INFO ("preambleId " << (uint32_t) it->first << ": allocated T-C-RNTI " << (uint32_t) rnti << ", sending RAR");
+		}
+		MmWaveRarMessage::Rar rar;
+		rar.rapId = (*it).first;
+		rar.rarPayload.m_rnti = rnti;
+		rarMsg->AddRar (rar);
+		//NS_ASSERT_MSG((*it).second ==1, "Two user send the same Rach ID, collision detected");
+	    }
+	    m_phySapProvider->SendControlMessage (rarMsg);
+	    m_receivedRachPreambleCount.clear ();
 	}
 
 	// --- UPLINK ---
@@ -492,8 +497,8 @@ MmWaveEnbMac::DoSubframeIndication (SfnSf sfnSf)
 	std::vector <MmWaveMacSchedSapProvider::SchedUlCqiInfoReqParameters>::iterator itCqi;
 	for (uint16_t i = 0; i < m_ulCqiReceived.size (); i++)
 	{
-		//m_ulCqiReceived.at (i).m_sfnSf = ((0x3FF & frameNum) << 16) | ((0xFF & subframeNum) << 8) | (0xFF & slotNum);
-		m_macSchedSapProvider->SchedUlCqiInfoReq (m_ulCqiReceived.at (i));
+	    //m_ulCqiReceived.at (i).m_sfnSf = ((0x3FF & frameNum) << 16) | ((0xFF & subframeNum) << 8) | (0xFF & slotNum);
+	    m_macSchedSapProvider->SchedUlCqiInfoReq (m_ulCqiReceived.at (i));
 	}
 	m_ulCqiReceived.clear ();
 
@@ -510,44 +515,44 @@ MmWaveEnbMac::DoSubframeIndication (SfnSf sfnSf)
 
 	if (m_slotNum == 0)
 	{
-		// trigger scheduler
-		uint32_t dlSchedframeNum = m_frameNum;
-		uint32_t dlSchedSubframeNum = m_sfNum;
+	    // trigger scheduler
+	    uint32_t dlSchedframeNum = m_frameNum;
+	    uint32_t dlSchedSubframeNum = m_sfNum;
 
-		if (dlSchedSubframeNum + m_phyMacConfig->GetL1L2CtrlLatency () >= m_phyMacConfig->GetSubframesPerFrame ())
-		{
-		  dlSchedframeNum++;
-		  dlSchedSubframeNum = (dlSchedSubframeNum + m_phyMacConfig->GetL1L2CtrlLatency()) - m_phyMacConfig->GetSubframesPerFrame();
-		}
-		else
-		{
-		  dlSchedSubframeNum = dlSchedSubframeNum + m_phyMacConfig->GetL1L2CtrlLatency();
-		}
+	    if (dlSchedSubframeNum + m_phyMacConfig->GetL1L2CtrlLatency () >= m_phyMacConfig->GetSubframesPerFrame ())
+	    {
+		dlSchedframeNum++;
+		dlSchedSubframeNum = (dlSchedSubframeNum + m_phyMacConfig->GetL1L2CtrlLatency()) - m_phyMacConfig->GetSubframesPerFrame();
+	    }
+	    else
+	    {
+	        dlSchedSubframeNum = dlSchedSubframeNum + m_phyMacConfig->GetL1L2CtrlLatency();
+	    }
 
-		MmWaveMacSchedSapProvider::SchedTriggerReqParameters params;
-		SfnSf schedSfn (dlSchedframeNum, dlSchedSubframeNum, 0);
-		params.m_sfnSf = schedSfn;
+	    MmWaveMacSchedSapProvider::SchedTriggerReqParameters params;
+	    SfnSf schedSfn (dlSchedframeNum, dlSchedSubframeNum, 0);
+	    params.m_sfnSf = schedSfn;
 
-		// Forward DL HARQ feebacks collected during last subframe TTI
-		if (m_dlHarqInfoReceived.size () > 0)
-		{
-			params.m_dlHarqInfoList = m_dlHarqInfoReceived;
-			// empty local buffer
-			m_dlHarqInfoReceived.clear ();
-		}
+	    // Forward DL HARQ feebacks collected during last subframe TTI
+	    if (m_dlHarqInfoReceived.size () > 0)
+	    {
+		params.m_dlHarqInfoList = m_dlHarqInfoReceived;
+		// empty local buffer
+		m_dlHarqInfoReceived.clear ();
+	    }
 
-		// Forward UL HARQ feebacks collected during last TTI
-		if (m_ulHarqInfoReceived.size () > 0)
-		{
-			params.m_ulHarqInfoList = m_ulHarqInfoReceived;
-			// empty local buffer
-			m_ulHarqInfoReceived.clear ();
-		}
+	    // Forward UL HARQ feebacks collected during last TTI
+	    if (m_ulHarqInfoReceived.size () > 0)
+	    {
+		params.m_ulHarqInfoList = m_ulHarqInfoReceived;
+		// empty local buffer
+		m_ulHarqInfoReceived.clear ();
+	    }
 
-		params.m_ueList = m_associatedUe;
-		m_macSchedSapProvider->SchedTriggerReq (params);
-	}
-}
+	    params.m_ueList = m_associatedUe;
+	    m_macSchedSapProvider->SchedTriggerReq (params);
+        }
+    }
 
 void 
 MmWaveEnbMac::SetCellId (uint16_t cellId)
@@ -715,30 +720,30 @@ MmWaveEnbMac::DoUlHarqFeedback (UlHarqInfo params)
   m_ulHarqInfoReceived.push_back (params);
 }
 
-/*
- * ===========================================
- * Complete the Downlink Harq buffer updating.
- * ===========================================
- */
-void
-MmWaveEnbMac::DoDlHarqFeedback (DlHarqInfo params)
-{
-    NS_LOG_FUNCTION (this);
-    // Update HARQ buffer
-    std::map <uint16_t, MmWaveDlHarqProcessesBuffer_t>::iterator it =  m_miDlHarqProcessesPackets.find (params.m_rnti);
-  NS_ASSERT (it!=m_miDlHarqProcessesPackets.end ());
+    /*
+     * ===========================================
+     * Complete the Downlink Harq buffer updating.
+     * ===========================================
+     */
+    void
+    MmWaveEnbMac::DoDlHarqFeedback (DlHarqInfo params)
+    {
+        NS_LOG_FUNCTION (this);
+        // Update HARQ buffer
+        std::map <uint16_t, MmWaveDlHarqProcessesBuffer_t>::iterator it =  m_miDlHarqProcessesPackets.find (params.m_rnti);
+        NS_ASSERT (it != m_miDlHarqProcessesPackets.end ());
 
-  if (params.m_harqStatus == DlHarqInfo::ACK)
-  {
-  	// discard buffer
-  	Ptr<PacketBurst> emptyBuf = CreateObject <PacketBurst> ();
-  	(*it).second.at (params.m_harqProcessId).m_pktBurst = emptyBuf;
-  	NS_LOG_DEBUG (this << " HARQ-ACK UE " << params.m_rnti << " harqId " << (uint16_t)params.m_harqProcessId);
-  }
-  else if (params.m_harqStatus == DlHarqInfo::NACK)
-  {
-  	/*if (params.m_numRetx == 3)
-  	{
+        if (params.m_harqStatus == DlHarqInfo::ACK)
+        {
+  	    // discard buffer
+  	    Ptr<PacketBurst> emptyBuf = CreateObject <PacketBurst> ();
+  	    (*it).second.at (params.m_harqProcessId).m_pktBurst = emptyBuf;
+  	    NS_LOG_DEBUG (this << " HARQ-ACK UE " << params.m_rnti << " harqId " << (uint16_t)params.m_harqProcessId);
+        }
+        else if (params.m_harqStatus == DlHarqInfo::NACK)
+        {
+  	    /*if (params.m_numRetx == 3)
+  	    {
   		std::map <uint16_t, std::map<uint8_t, LteMacSapUser*> >::iterator rntiIt = m_rlcAttached.find (params.m_rnti);
   		for (unsigned i = 0; i < (*it).second.at (params.m_harqProcessId).m_lcidList.size (); i++)
   		{
@@ -747,46 +752,46 @@ MmWaveEnbMac::DoDlHarqFeedback (DlHarqInfo params)
 				NS_ASSERT (lcidIt != rntiIt->second.end ());
 				lcidIt->second->NotifyDlHarqDeliveryFailure (params.m_harqProcessId);
   		}
-  	}*/
-  	NS_LOG_DEBUG (this << " HARQ-NACK UE " << params.m_rnti << " harqId " << (uint16_t)params.m_harqProcessId);
-  }
-  else
-  {
-  	NS_FATAL_ERROR (" HARQ functionality not implemented");
-  }
+  	    }*/
+  	    NS_LOG_DEBUG (this << " HARQ-NACK UE " << params.m_rnti << " harqId " << (uint16_t)params.m_harqProcessId);
+        }
+        else
+        {
+  	    NS_FATAL_ERROR (" HARQ functionality not implemented");
+        }
 
-  m_dlHarqInfoReceived.push_back (params);
-}
+        m_dlHarqInfoReceived.push_back (params);
+    }
 
-/*
- * =====================
- * Report buffer status.
- * =====================
- */
-void
-MmWaveEnbMac::DoReportBufferStatus (LteMacSapProvider::ReportBufferStatusParameters params)
-{
-    NS_LOG_FUNCTION (this);
-    MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters schedParams;  // Different type from the input "params".
-    schedParams.m_logicalChannelIdentity = params.lcid;
-    schedParams.m_rlcRetransmissionHolDelay = params.retxQueueHolDelay;
-    schedParams.m_rlcRetransmissionQueueSize = params.retxQueueSize;
-    // In LTE model, "statusPduSize" is "the current size of the pending STATUS RLC PDU message in bytes".
-    schedParams.m_rlcStatusPduSize = params.statusPduSize;  
-    schedParams.m_rlcTransmissionQueueHolDelay = params.txQueueHolDelay;
-    schedParams.m_rlcTransmissionQueueSize = params.txQueueSize;
-    schedParams.m_rnti = params.rnti;
+    /*
+     * =====================
+     * Report buffer status.
+     * =====================
+     */
+    void
+    MmWaveEnbMac::DoReportBufferStatus (LteMacSapProvider::ReportBufferStatusParameters params)
+    {
+        NS_LOG_FUNCTION (this);
+        MmWaveMacSchedSapProvider::SchedDlRlcBufferReqParameters schedParams;  // Different type from the input "params".
+        schedParams.m_logicalChannelIdentity = params.lcid;
+        schedParams.m_rlcRetransmissionHolDelay = params.retxQueueHolDelay;
+        schedParams.m_rlcRetransmissionQueueSize = params.retxQueueSize;
+        // In LTE model, "statusPduSize" is "the current size of the pending STATUS RLC PDU message in bytes".
+        schedParams.m_rlcStatusPduSize = params.statusPduSize;  
+        schedParams.m_rlcTransmissionQueueHolDelay = params.txQueueHolDelay;
+        schedParams.m_rlcTransmissionQueueSize = params.txQueueSize;
+        schedParams.m_rnti = params.rnti;
 
-    schedParams.m_txPacketSizes = params.txPacketSizes;
-    schedParams.m_txPacketDelays = params.txPacketDelays;
-    schedParams.m_retxPacketSizes = params.retxPacketSizes;
-    schedParams.m_retxPacketDelays = params.retxPacketDelays;
-    schedParams.m_arrivalRate = params.arrivalRate;
+        schedParams.m_txPacketSizes = params.txPacketSizes;
+        schedParams.m_txPacketDelays = params.txPacketDelays;
+        schedParams.m_retxPacketSizes = params.retxPacketSizes;
+        schedParams.m_retxPacketDelays = params.retxPacketDelays;
+        schedParams.m_arrivalRate = params.arrivalRate;
 
-    NS_LOG_LOGIC("ReportBufferStatus for lcid " << (uint16_t)params.lcid << " rnti " << params.rnti << " txPacketSizes " << params.txPacketSizes.size());
+        NS_LOG_LOGIC("ReportBufferStatus for lcid " << (uint16_t)params.lcid << " rnti " << params.rnti << " txPacketSizes " << params.txPacketSizes.size());
 
-    m_macSchedSapProvider->SchedDlRlcBufferReq (schedParams);
-}
+        m_macSchedSapProvider->SchedDlRlcBufferReq (schedParams);
+    }
 
 // forwarded from LteMacSapProvider
 void
@@ -1076,20 +1081,20 @@ MmWaveEnbMac::DoReleaseLc (uint16_t rnti, uint8_t lcid)
 	m_macCschedSapProvider->CschedLcReleaseReq (params);
 }
 
-void
-MmWaveEnbMac::UeUpdateConfigurationReq (LteEnbCmacSapProvider::UeConfig params)
-{
-  NS_LOG_FUNCTION (this);
-  // propagates to scheduler
-  MmWaveMacCschedSapProvider::CschedUeConfigReqParameters req;
-  req.m_rnti = params.m_rnti;
-  req.m_transmissionMode = params.m_transmissionMode;
-  req.m_ueCapabilities.m_iab = params.m_iab;
-  req.m_ueCapabilities.m_numIabDevsPerRnti = params.m_numIabDevsPerRnti;
-  req.m_reconfigureFlag = true;
+    void
+    MmWaveEnbMac::UeUpdateConfigurationReq (LteEnbCmacSapProvider::UeConfig params)
+    {
+        NS_LOG_FUNCTION (this);
+        // propagates to scheduler
+        MmWaveMacCschedSapProvider::CschedUeConfigReqParameters req;
+        req.m_rnti = params.m_rnti;
+        req.m_transmissionMode = params.m_transmissionMode;
+        req.m_ueCapabilities.m_iab = params.m_iab;
+        req.m_ueCapabilities.m_numIabDevsPerRnti = params.m_numIabDevsPerRnti;
+        req.m_reconfigureFlag = true;
 
-  m_macCschedSapProvider->CschedUeConfigReq (req);
-}
+        m_macCschedSapProvider->CschedUeConfigReq (req);
+    }
 
 LteEnbCmacSapProvider::RachConfig
 MmWaveEnbMac::DoGetRachConfig ()

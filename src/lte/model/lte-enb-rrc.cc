@@ -1217,17 +1217,22 @@ UeManager::SendUeContextRelease ()
     }
 }
 
-void
-UeManager::NotifyNumIabPerRnti (EpcEnbS1SapUser::NotifyNumIabPerRntiParameters params)
-{
-  // configure MAC (and scheduler) with number of IABs
-  LteEnbCmacSapProvider::UeConfig req;
-  req.m_rnti = m_rnti;
-  req.m_transmissionMode = m_physicalConfigDedicated.antennaInfo.transmissionMode;
-  req.m_iab = params.iab;
-  req.m_numIabDevsPerRnti = params.numIab;
-  m_rrc->m_cmacSapProvider->UeUpdateConfigurationReq (req); 
-}
+    /*
+     * ==================
+     * IAB Method:
+     * =================
+     */
+    void
+    UeManager::NotifyNumIabPerRnti (EpcEnbS1SapUser::NotifyNumIabPerRntiParameters params)
+    {
+        // configure MAC (and scheduler) with number of IABs
+        LteEnbCmacSapProvider::UeConfig req;
+        req.m_rnti = m_rnti;
+        req.m_transmissionMode = m_physicalConfigDedicated.antennaInfo.transmissionMode;
+        req.m_iab = params.iab;
+        req.m_numIabDevsPerRnti = params.numIab;
+        m_rrc->m_cmacSapProvider->UeUpdateConfigurationReq (req); 
+    }
 
 
 void 
@@ -4011,12 +4016,13 @@ LteEnbRrc::DoPathSwitchRequestAcknowledge (EpcEnbS1SapUser::PathSwitchRequestAck
   ueManager->SendUeContextRelease ();
 }
 
-void
-LteEnbRrc::DoNotifyNumIabPerRnti (EpcEnbS1SapUser::NotifyNumIabPerRntiParameters params)
-{
-  Ptr<UeManager> ueManager = GetUeManager(params.rnti);
-  ueManager->NotifyNumIabPerRnti(params);
-}
+    
+    void
+    LteEnbRrc::DoNotifyNumIabPerRnti (EpcEnbS1SapUser::NotifyNumIabPerRntiParameters params)
+    {
+        Ptr<UeManager> ueManager = GetUeManager(params.rnti);
+        ueManager->NotifyNumIabPerRnti(params);
+    }
 
 
 void

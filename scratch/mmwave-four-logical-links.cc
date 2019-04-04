@@ -217,6 +217,7 @@ main (int argc, char *argv[])
     // LogComponentEnable("MmWaveEnbPhy", LOG_LEVEL_DEBUG);
     // LogComponentEnable("MmWaveUeMac", LOG_LEVEL_DEBUG);
     // LogComponentEnable("MmWaveEnbMac", LOG_LEVEL_DEBUG);
+    LogComponentEnable("MmWaveFlexTtiMacScheduler", LOG_DEBUG);
     /* 
      * ===============================
      *   Setup simulation parameters
