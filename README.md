@@ -1,7 +1,13 @@
 # Out of band backhaul feature for the ns-3 mmWave module #
-Out of band mmWave backhaul for 5G cellular network is a potential solution to the several backhaul challenge introduced by the dense small-cell deployment
-in urban environment. The backhaul and access tiers of the network use different frequency bands. 
+Out of band mmWave backhaul for 5G cellular network is a potential solution to the severe backhaul challenge introduced by the dense small-cell deployment in urban environment. 
 
+In the mmWave out-of-band backhaul, the backhaul and access tiers of the network use different frequency bands to transmit their data. The whole time resource could be allocated to both backhaul and access.
+
+In this module, we modify and extend the current IAB module to enable the simulation of out-of-band backhaul. It can currently simulate some simple scenarios as depicted in the scripts. We are still working on some other features of this module.
+
+Note that, we will develop a dedicated out-of-band backhaul module based on the 5G NR module developed by CTTC later.
+
+If you have any questions related to this module, please email us at qianghu@gatech.edu or hqfrank@gmail.com.
 
 
 
